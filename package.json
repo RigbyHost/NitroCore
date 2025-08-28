@@ -6,7 +6,14 @@
     "dev": "nitro dev"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.4",
     "h3": "^1.15.4",
-    "nitropack": "^2.12.4"
+    "nitropack": "^2.12.4",
+    "tsx": "^4.20.5"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.44.5",
+    "mysql2": "^3.14.3"
   }
 }
