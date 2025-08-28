@@ -14,6 +14,7 @@
   "dependencies": {
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.44.5",
-    "mysql2": "^3.14.3"
+    "mysql2": "^3.14.3",
+    "zod": "^4.1.5"
   }
 }
