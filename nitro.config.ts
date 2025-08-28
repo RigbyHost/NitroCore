@@ -4,6 +4,8 @@ import {defineNitroConfig} from "nitropack/config"
 export default defineNitroConfig({
     compatibilityDate: "latest",
     srcDir: "server",
-    imports: false,
+    routeRules: {
+        "/**": {cors: true}
+    },
     experimental: {},
 });
