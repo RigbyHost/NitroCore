@@ -1,0 +1,9 @@
+node_modules
+dist
+.idea
+.data
+.nitro
+.cache
+.output
+.env
+.env.local
