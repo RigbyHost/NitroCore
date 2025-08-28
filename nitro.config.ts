@@ -1,5 +1,3 @@
-import {defineNitroConfig} from "nitropack/config"
-
 // https://nitro.build/config
 export default defineNitroConfig({
     compatibilityDate: "latest",
@@ -7,5 +5,21 @@ export default defineNitroConfig({
     routeRules: {
         "/**": {cors: true}
     },
-    experimental: {},
+    experimental: {
+        asyncContext: true,
+        database: true,
+        tasks: true,
+    },
+    storage: {}, // TODO: Add redis storage,
+    database: {
+        default: {
+            connector: "mysql2",
+            options: {
+                user: "noone",
+                password: "noone",
+                host: "gayhost",
+                port: "gayport"
+            }
+        }
+    }
 });
