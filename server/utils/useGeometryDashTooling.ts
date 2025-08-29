@@ -1,6 +1,6 @@
 
 
-const escapeHtml = unsafe => {
+const escapeHtml = (unsafe: string) => {
     return unsafe
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
@@ -73,6 +73,27 @@ const doGJP2 = (password: string) => {
     return useCrypto().sha1(password+"mI29fmAnxgTs")
 }
 
+const getGDVersionFromBody = async (postData?: FormData) => {
+    const post = postData || await readFormData(useEvent())
+    let version = 21
+    if (post.has("gameVersion")) {
+        const parsed = post.get("gameVersion") as string
+        if (!isNaN(Number(parsed)))
+            version = Number(parsed)
+    }
+
+    if (post.has("binaryVersion")) {
+        // NaN is not greater or less than any number
+        if (version === 20 && Number(post.get("binaryVersion")) > 27)
+            version++
+
+        if (version === 21 && Number(post.get("binaryVersion")) > 36)
+            version++
+    }
+
+    return version
+}
+
 export const useGeometryDashTooling = () => ({
     clearGDRequest,
     doXOR,
@@ -83,4 +104,5 @@ export const useGeometryDashTooling = () => ({
     hashSolo4,
     doGJP,
     doGJP2,
+    getGDVersionFromBody
 })

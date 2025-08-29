@@ -9,7 +9,7 @@
     "drizzle-kit": "^0.31.4",
     "h3": "^1.15.4",
     "nitropack": "^2.12.4",
-    "tsx": "^4.20.5"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "deep-equal": "^2.2.3",

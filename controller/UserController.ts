@@ -3,6 +3,8 @@ import {usersTable} from "~~/drizzle";
 import {User} from "~~/controller/User";
 import {sql} from "drizzle-orm";
 import {union} from "drizzle-orm/mysql-core";
+import {z} from "zod";
+import type {MaybeUndefined, Nullable} from "~/utils/types";
 
 export class UserController {
     private readonly db: Database
@@ -18,7 +20,7 @@ export class UserController {
     countUsers = async () => this.db.$count(usersTable)
 
     searchUsers = async (search: string) => {
-        const searchId = parseInt(search) || 0
+        const searchId = Number(search) || 0
         if (!searchId && search.length < 3) return []
         const results = await this.db.query.usersTable
             .findMany({
@@ -39,8 +41,8 @@ export class UserController {
     getOneUser = async (
         {uid, username, email}: { uid?: number, username?: string, email?: string },
         withRole = false,
-    ) => {
-        let user: typeof usersTable.$inferSelect = null
+    ): Promise<Nullable<User>> => {
+        let user: MaybeUndefined<typeof usersTable.$inferSelect>
         if (uid)
             user = await this.db.query.usersTable
                 .findFirst({
@@ -83,13 +85,13 @@ export class UserController {
         return users.map(user => new User(this, user))
     }
 
-    getUidByUsername = async (username: string) => {
+    getUidByUsername = async (username: string): Promise<Nullable<number>> => {
         const user = await this.db.query.usersTable
             .findFirst({
                 columns: {uid: true},
                 where: (user, {eq}) => eq(user.username, username)
             })
-        return user?.uid
+        return user?.uid || null
     }
 
     getLeaderboard = async <T extends "stars" | "cpoints" | "global" | "friends">(
@@ -141,15 +143,8 @@ export class UserController {
                         username: usersTable.username,
                     })
                     .from(usersTable)
-                    .where(sql`${usersTable.stars}
-                    >
-                    ${globalStars}
-                    AND
-                    ${usersTable.isBanned}
-                    =
-                    0`)
-                    .orderBy(sql`${usersTable.stars}
-                    DESC`)
+                    .where(sql`${usersTable.stars}>${globalStars} AND ${usersTable.isBanned}=0`)
+                    .orderBy(sql`${usersTable.stars} DESC`)
                     .limit(50)
                 const leaderboardWorse = this.db
                     .select({
@@ -158,23 +153,11 @@ export class UserController {
                         username: usersTable.username,
                     })
                     .from(usersTable)
-                    .where(sql`${usersTable.stars}
-                    >0 AND
-                    ${usersTable.stars}
-                    <=
-                    ${globalStars}
-                    AND
-                    ${usersTable.isBanned}
-                    =
-                    0`)
-                    .orderBy(sql`${usersTable.stars}
-                    DESC`)
+                    .where(sql`${usersTable.stars}>0 AND ${usersTable.stars}<=${globalStars} AND ${usersTable.isBanned}=0`)
+                    .orderBy(sql`${usersTable.stars} DESC`)
                     .limit(50)
                 uids = await union(leaderboardBetter, leaderboardWorse)
-                    .orderBy(sql`${usersTable.stars}
-                    DESC,
-                    ${usersTable.username}
-                    ASC`)
+                    .orderBy(sql`${usersTable.stars} DESC, ${usersTable.username} ASC`)
                     .then(users => users.map(user => user.uid))
                 break
             case "friends":
@@ -202,11 +185,16 @@ export class UserController {
         username: string,
         password: string,
         ip: string,
-        uid?: number
+        uid?: number,
+        userInject?: User
     ): Promise<{ code: number }> => {
-        const user = uid
-            ? await this.getOneUser({uid})
-            : await this.getOneUser({username})
+        let user: Nullable<User>
+        if (userInject)
+            user = userInject
+        else
+            user = uid
+                ? await this.getOneUser({uid})
+                : await this.getOneUser({username})
         if (!user)
             return {code: -1}
         if (user.$.isBanned)
@@ -237,6 +225,96 @@ export class UserController {
         user.$.lastIP = ip
         return {code: user.$.uid}
     }
+
+    register = async (
+        data: z.infer<typeof registerValidators>,
+        ip: string,
+        autoVerify = false
+    ): Promise<{ code: number }> => {
+        const parsed = registerValidators.safeParse(data)
+        if (!parsed.success)
+            return {code: Number(parsed.error!.issues[0].message) || -1}
+
+        let user = await this.getOneUser({username: parsed.data.username})
+        if (user)
+            return {code: -2}
+        user = await this.getOneUser({email: parsed.data.email})
+        if (user)
+            return {code: -3}
+
+        const crypto = useCrypto()
+        const passwordHash = crypto.sha256(crypto.sha512(parsed.data.password) + "SaltyTruth:sob:")
+
+        const res = await this.db.insert(usersTable)
+            .values({
+                username: parsed.data.username,
+                passwordHash,
+                gjpHash: useGeometryDashTooling().doGJP2(parsed.data.password),
+                email: parsed.data.email,
+                isBanned: autoVerify ? 0 : 1,
+                lastIP: ip,
+            })
+            .$returningId()
+
+        return {code: res[0].uid}
+    }
+
+    private verifySession = async (
+        uid: number,
+        ip: string,
+        gjp: string,
+        is22: boolean
+    ): Promise<Nullable<User>> => {
+
+        const user = await this.getOneUser({uid})
+        if (!user || user.$.isBanned > 0)
+            return null
+
+        if (is22) {
+            if (user.$.gjpHash !== gjp) return null
+            user.$.lastIP = ip
+            return user
+        } else {
+            gjp = gjp.replaceAll("_", "/").replaceAll("-", "+")
+            const block = Buffer.from(gjp, "base64").toString("binary")
+            const password = useGeometryDashTooling().doXOR(block, "37526")
+            const loginResult = await this.logIn(user.$.username, password, ip, user.$.uid, user)
+            if (loginResult.code > 0)
+                return user
+            return null
+        }
+    }
+
+    performGJPAuth = async (): Promise<Nullable<User>> => {
+        const event = useEvent()
+        const ip = event.context.clientAddress!
+        const post = await readFormData(event)
+        const tooling = useGeometryDashTooling()
+
+        if (await tooling.getGDVersionFromBody(post) === 22)
+            return this.verifySession(
+                Number(post.get("accountID")) || 0,
+                ip,
+                tooling.clearGDRequest(post.get("gjp2")?.toString() || ""),
+                true
+            )
+        else
+            return this.verifySession(
+                Number(post.get("accountID")) || 0,
+                ip,
+                tooling.clearGDRequest(post.get("gjp")?.toString() || ""),
+                false
+            )
+    }
 }
+
+const registerValidators = z.object({
+    username: z.string("-1")
+        .min(3, "-9")
+        .max(20, "-4")
+        .regex(/^[a-zA-Z0-9_]+$/g, "-1"),
+    password: z.string("-1").min(6, "-5"),
+    email: z.email("-6")
+})
 
 // TODO: fabric and commit on beforeResponse
