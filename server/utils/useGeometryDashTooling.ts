@@ -9,6 +9,11 @@ const escapeHtml = (unsafe: string) => {
         .replaceAll("'", "&#039;");
 };
 
+
+/**
+ * Clears a Geometry Dash request
+ * @author Cvolton
+ */
 const clearGDRequest = (request: string) => {
     return escapeHtml(request)
         .trim()
@@ -20,6 +25,9 @@ const clearGDRequest = (request: string) => {
         .trim()
 }
 
+/**
+ * XORs 2 strings to perform GD shenanigans
+ */
 const doXOR = (data: string, key: string) => {
     let result = "";
     for (let i = 0; i < data.length; i++) {
@@ -28,6 +36,10 @@ const doXOR = (data: string, key: string) => {
     return result;
 }
 
+/**
+ * Used to mark comments as "X hours ago" or "X days ago" instead of unix timestamp
+ * @returns String representing the time difference. Example: "2 hours" [ago]
+ */
 const getDateAgo = (date: number) => {
     const diff = Date.now()/1000 - date;
     if (diff < 60) return `${diff} seconds`;
@@ -73,6 +85,11 @@ const doGJP2 = (password: string) => {
     return useCrypto().sha1(password+"mI29fmAnxgTs")
 }
 
+/**
+ * Gets the Geometry Dash version from the {@link H3Event} body or `postData` param
+ *
+ * @returns The Geometry Dash version: "1.9","2.0", "2.1", "2.2"
+ */
 const getGDVersionFromBody = async (postData?: FormData) => {
     const post = postData || await readFormData(useEvent())
     let version = 21
@@ -94,6 +111,9 @@ const getGDVersionFromBody = async (postData?: FormData) => {
     return version
 }
 
+/**
+ * Geometry-dash specific tooling like GJP and Solo hashing
+ */
 export const useGeometryDashTooling = () => ({
     clearGDRequest,
     doXOR,

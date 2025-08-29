@@ -3,6 +3,7 @@ import {UserController} from "~~/controller/UserController";
 
 export const gdAuthMiddleware = defineEventHandler({
     onRequest: [getDrizzleMiddleware],
+    onBeforeResponse: [],
 
     handler: async event => {
         const userCtx = new UserController(event.context.drizzle!)

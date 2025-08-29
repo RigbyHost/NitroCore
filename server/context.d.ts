@@ -2,7 +2,8 @@
 declare module 'h3' {
     interface H3EventContext {
         drizzle?: Database
-        user?: User
+        user?: User,
+        commitable?: Array<Commitable>
     }
 }
 

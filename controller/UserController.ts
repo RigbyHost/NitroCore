@@ -6,9 +6,19 @@ import {union} from "drizzle-orm/mysql-core";
 import {z} from "zod";
 import type {MaybeUndefined, Nullable} from "~/utils/types";
 
+/**
+ * Controller for user management
+ *
+ * Responsible for user management and authentication
+ *
+ * @class UserController
+ */
 export class UserController {
     private readonly db: Database
 
+    /**
+     * @param db Drizzle database instance created via `useDrizzle()` or `getDrizzleMiddleware`
+     */
     constructor(db: Database) {
         this.db = db
     }
@@ -19,7 +29,12 @@ export class UserController {
 
     countUsers = async () => this.db.$count(usersTable)
 
-    searchUsers = async (search: string) => {
+    /**
+     * Searches users by username or uid
+     * @param search Should be number or string with length >= 3
+     * @returns Array of user ids
+     */
+    searchUsers = async (search: string): Promise<number[]> => {
         const searchId = Number(search) || 0
         if (!searchId && search.length < 3) return []
         const results = await this.db.query.usersTable
@@ -38,6 +53,14 @@ export class UserController {
         return results.map(r => r.uid)
     }
 
+    /**
+     * Gets a user by uid, username or email
+     * @param uid
+     * @param username
+     * @param email
+     * @param withRole Whether to include nested role in the result
+     * @returns User instance if found or null otherwise
+     */
     getOneUser = async (
         {uid, username, email}: { uid?: number, username?: string, email?: string },
         withRole = false,
@@ -71,6 +94,11 @@ export class UserController {
         return new User(this, user)
     }
 
+    /**
+     * Resolves array of user ids to User instances
+     * @param ids List of user ids
+     * @param withRole Whether to include nested role in the result
+     */
     getManyUsers = async (
         ids: number[],
         withRole = false,
@@ -85,6 +113,11 @@ export class UserController {
         return users.map(user => new User(this, user))
     }
 
+    /**
+     * Gets user id by username
+     *
+     * @internal Do not use this method directly
+     */
     getUidByUsername = async (username: string): Promise<Nullable<number>> => {
         const user = await this.db.query.usersTable
             .findFirst({
@@ -94,12 +127,21 @@ export class UserController {
         return user?.uid || null
     }
 
+    /**
+     * Gets leaderboard user ids
+     *
+     * @param type Select type: stars, creator points, global (you +100 users around your rank) or friends leaderboard
+     * @param friendsIds Your friends ids. Only for friends leaderboard.
+     * @param globalStars Your stars amount. Only for global leaderboard.
+     * @param limit How many users to return, usually a setting for specific GDPS.
+     * Only for stars and creator points leaderboards.
+     */
     getLeaderboard = async <T extends "stars" | "cpoints" | "global" | "friends">(
         type: T,
         friendsIds: T extends "friends" ? number[] : never,
         globalStars: T extends "global" ? number : never,
         limit: T extends "stars" | "cpoints" ? number : never
-    ) => {
+    ): Promise<number[]> => {
         let uids: number[] = []
 
         switch (type) {
@@ -181,6 +223,9 @@ export class UserController {
         return uids
     }
 
+    /**
+     * Used in `/db/accounts/*` routes
+     */
     logIn = async (
         username: string,
         password: string,
@@ -207,6 +252,9 @@ export class UserController {
         return {code: user.$.uid}
     }
 
+    /**
+     * Used in `/db/accounts/*` routes
+     */
     logIn22 = async (
         username: string,
         gjp2: string,
@@ -226,6 +274,9 @@ export class UserController {
         return {code: user.$.uid}
     }
 
+    /**
+     * Used in `/db/accounts/*` routes
+     */
     register = async (
         data: z.infer<typeof registerValidators>,
         ip: string,
@@ -259,6 +310,9 @@ export class UserController {
         return {code: res[0].uid}
     }
 
+    /**
+     * Universal session verification for pre 2.2 and 2.2 alike
+     */
     private verifySession = async (
         uid: number,
         ip: string,
@@ -285,6 +339,9 @@ export class UserController {
         }
     }
 
+    /**
+     * Performs GJP authentication, determining the version and credentials from {@link H3Event}. Used in middleware
+     */
     performGJPAuth = async (): Promise<Nullable<User>> => {
         const event = useEvent()
         const ip = event.context.clientAddress!

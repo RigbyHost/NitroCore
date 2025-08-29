@@ -1,15 +1,20 @@
 
+/**
+ * Gets the server config for a specific server from {@link H3Event} router param `srvid`
+ *
+ * @returns `[ServerConfig, setServerConfig]`
+ */
 export const useServerConfig = async (): Promise<
-    [UseServerConfig|null, (config: UseServerConfig) => void]
+    [Nullable<ServerConfig>, (config: ServerConfig) => void]
 > => {
     const srvid = getRouterParam(useEvent(), "srvid")!
-    const storage = useStorage<UseServerConfig>()
+    const storage = useStorage<ServerConfig>()
     const value = await storage.getItem(srvid)
-    const setValue = (config: UseServerConfig) => storage.setItem(srvid, config)
+    const setValue = (config: ServerConfig) => storage.setItem(srvid, config)
     return [value, setValue]
 }
 
-type UseServerConfig = {
+type ServerConfig = {
     ChestConfig: {
         ChestSmallOrbsMin: number,
         ChestSmallOrbsMax: number,

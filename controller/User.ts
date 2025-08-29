@@ -4,12 +4,22 @@ import {diff} from "deep-object-diff";
 import {and, eq, gte, sql} from "drizzle-orm";
 import {UserController} from "~~/controller/UserController";
 
+/**
+ * User CRUD wrapper
+ *
+ * @class User
+ */
 export class User {
     private readonly controller: UserController
     private readonly db: Database
     private readonly original: typeof usersTable.$inferSelect
     $: typeof usersTable.$inferSelect
 
+    /**
+     * @internal Should be always created thorugh {@link UserController}
+     * @param controller UserController instance
+     * @param user Drizzle User data
+     */
     constructor(controller: UserController, user: typeof this.$) {
         this.db = controller.$db
         this.controller = controller
@@ -17,6 +27,9 @@ export class User {
         this.$ = user
     }
 
+    /**
+     * Saves all changes to the database, should always be called after modifying the user
+     */
     commit = async () => {
         const deltas = diff(this.original, this.$) as typeof usersTable.$inferSelect
         if (deltas.extraData)
