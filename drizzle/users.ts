@@ -1,6 +1,10 @@
 import {mysqlTable, int, text, datetime, json, boolean} from "drizzle-orm/mysql-core";
-import {sql} from "drizzle-orm";
+import {relations, sql} from "drizzle-orm";
 import {commaSeparated} from "./custom_types";
+import {rolesTable} from "~~/drizzle/roles";
+import {accountCommentsTable} from "~~/drizzle/account_comments";
+import {commentsTable} from "~~/drizzle/comments";
+import {levelsTable} from "~~/drizzle/levels";
 
 export const usersTable = mysqlTable("users", {
     // Primary
@@ -83,7 +87,7 @@ export const usersTable = mysqlTable("users", {
 
 
     // Relationships
-    isBanned: boolean("isBanned").notNull().default(false),
+    isBanned: int("isBanned").notNull().default(1),
     blacklistedUsers: commaSeparated("blacklist").notNull().default([]),
     friendsCount: int("friends_cnt").notNull().default(0),
     friendshipIds: commaSeparated("friendship_ids").notNull().default([]),
@@ -132,4 +136,14 @@ export const usersTable = mysqlTable("users", {
             twitter: ""
         })
 })
+
+export const usersRelation = relations(usersTable, ({one, many}) => ({
+    role: one(rolesTable, {
+        fields: [usersTable.roleId],
+        references: [rolesTable.id]
+    }),
+    accountComments: many(accountCommentsTable),
+    comments: many(commentsTable),
+    levels: many(levelsTable),
+}))
 

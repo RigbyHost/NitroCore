@@ -1,0 +1,102 @@
+import {Database} from "~/utils/useDrizzle";
+import {usersTable} from "~~/drizzle";
+import {diff} from "deep-object-diff";
+import {and, eq, gte, sql} from "drizzle-orm";
+import {UserController} from "~~/controller/UserController";
+
+export class User {
+    private readonly controller: UserController
+    private readonly db: Database
+    private readonly original: typeof usersTable.$inferSelect
+    $: typeof usersTable.$inferSelect
+
+    constructor(controller: UserController, user: typeof this.$) {
+        this.db = controller.$db
+        this.controller = controller
+        this.original = user
+        this.$ = user
+    }
+
+    commit = async () => {
+        const deltas = diff(this.original, this.$) as typeof usersTable.$inferSelect
+        if (deltas.extraData)
+            deltas.extraData = this.$.extraData
+        if (deltas.protectMeta)
+            deltas.protectMeta = this.$.protectMeta
+        if (deltas.vessels)
+            deltas.vessels = this.$.vessels
+        if (deltas.chests)
+            deltas.chests = this.$.chests
+        if (deltas.settings)
+            deltas.settings = this.$.settings
+        await this.db.update(usersTable)
+            .set({
+                ...deltas,
+                accessDate: sql`CURRENT_TIMESTAMP`
+            })
+            .where(eq(usersTable.uid, this.$.uid))
+    }
+
+    blacklist = {
+        add: (uid: number) => {
+            if (!this.$.blacklistedUsers.includes(uid))
+                this.$.blacklistedUsers.push(uid)
+        },
+        remove: (uid: number) => {
+            this.$.blacklistedUsers = this.$.blacklistedUsers.filter(uid => uid !== uid)
+        }
+    }
+
+    friends = {
+        add: (friendshipId: number) => {
+            if (!this.$.friendshipIds.includes(friendshipId)) {
+                this.$.friendshipIds.push(friendshipId)
+                this.$.friendsCount++
+            }
+        },
+        remove: (friendshipId: number) => {
+            if (this.$.friendshipIds.includes(friendshipId)) {
+                this.$.friendshipIds = this.$.friendshipIds.filter(fid => fid !== friendshipId)
+                this.$.friendsCount--
+            }
+        }
+    }
+
+    bans = {
+        banUser: () => {
+            this.$.isBanned = 2
+        },
+        unbanUser: () => {
+            this.$.isBanned = 0
+        }
+    }
+
+    getShownIcon = () => {
+        switch (this.$.iconType) {
+            case 1:
+                return this.$.vessels.ship
+            case 2:
+                return this.$.vessels.ball
+            case 3:
+                return this.$.vessels.ufo
+            case 4:
+                return this.$.vessels.wave
+            case 5:
+                return this.$.vessels.robot
+            case 6:
+                return this.$.vessels.spider
+            case 7:
+                return this.$.vessels.swing
+            default:
+                return this.$.vessels.cube
+        }
+    }
+
+    getLeaderboardRank = async () => this.db.$count(
+        usersTable,
+        and(
+            gte(usersTable.stars, this.$.stars),
+            eq(usersTable.isBanned, 0)
+        )
+    )
+}
