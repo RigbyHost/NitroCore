@@ -20,6 +20,45 @@ export const usersTable = mysqlTable("users", {
     creatorPoints: int("cpoints").notNull().default(0),
     orbs: int("orbs").notNull().default(0),
     moons: int("moons").notNull().default(0),
+    extraData: json("extraData")
+        .$type<{
+        DemonStats: {
+            Standard: {
+                Easy: number,
+                Medium: number,
+                Hard: number,
+                Insane: number,
+                Extreme: number
+            },
+            Platformer: {
+                Easy: number,
+                Medium: number,
+                Hard: number,
+                Insane: number,
+                Extreme: number
+            },
+            Weeklies: number,
+            Gauntlets: number
+        },
+            StandardStats: {
+                Auto: number,
+                Easy: number,
+                Normal: number,
+                Hard: number,
+                Harder: number,
+                Insane: number,
+                Daily: number,
+                Gauntlet: number
+            },
+            PlatformerStats: {
+                Auto: number,
+                Easy: number,
+                Normal: number,
+                Hard: number,
+                Harder: number,
+                Insane: number
+            }
+        }>(),
 
     // Technical
     registerDate: datetime("regDate").notNull().default(sql`CURRENT_TIMESTAMP`),
