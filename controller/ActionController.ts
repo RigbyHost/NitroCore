@@ -2,9 +2,19 @@ import {ActionData, actionsTable, ActionVariant} from "~~/drizzle";
 import {UserController} from "~~/controller/UserController";
 import {and, eq} from "drizzle-orm";
 
+/**
+ * Controller for action logging
+ *
+ * Responsible for logging actions performed by users and keep track of likes
+ *
+ * @class ActionController
+ */
 export class ActionController {
     private readonly db: Database
 
+    /**
+     * @param db Drizzle database instance created via {@link useDrizzle} or {@link getDrizzleMiddleware}
+     */
     constructor(db: Database) {
         this.db = db
     }
@@ -13,6 +23,9 @@ export class ActionController {
         return this.db
     }
 
+    /**
+     * Register a new action. Used internally by routes and controllers
+     */
     registerAction = async (
         action: AvailableActions,
         uid: number,
@@ -89,6 +102,13 @@ export class ActionController {
         })
     }
 
+    /**
+     * Check if a user has liked an item (level, comment, account comment, 2.2 list)
+     *
+     * @param itemType
+     * @param uid
+     * @param targetId
+     */
     isItemLiked = async (
         itemType: ItemType,
         uid: number,

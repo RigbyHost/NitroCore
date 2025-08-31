@@ -3,6 +3,13 @@ import {accountCommentsTable, commentsTable} from "~~/drizzle";
 import {and, eq, sql} from "drizzle-orm";
 import {ActionController} from "~~/controller/ActionController";
 
+/**
+ * Controller for comment management
+ *
+ * Responsible for comment management for users and levels
+ *
+ * @class CommentController
+ */
 export class CommentController {
     private readonly db: Database
 
@@ -26,6 +33,11 @@ export class CommentController {
     countCommentHistory = async (uid: number) =>
         this.db.$count(commentsTable, eq(commentsTable.uid, uid))
 
+    /**
+     * Get a single level comment by ID
+     *
+     * @param id
+     */
     getOneLevelComment = async (id: number) => {
         const comment = await this.db.query.commentsTable.findFirst({
             where: (comment, {eq}) => eq(comment.id, id)
@@ -33,6 +45,11 @@ export class CommentController {
         return comment || null
     }
 
+    /**
+     * Get a single account comment by ID
+     *
+     * @param id
+     */
     getOneAccountComment = async (id: number) => {
         const comment = await this.db.query.accountCommentsTable.findFirst({
             where: (comment, {eq}) => eq(comment.id, id)
@@ -40,6 +57,12 @@ export class CommentController {
         return comment || null
     }
 
+    /**
+     * Get all account comments for specific user
+     *
+     * @param uid
+     * @param page
+     */
     getAllAccountComments = async (uid: number, page = 0) =>
         this.db.query.accountCommentsTable.findMany({
             where: (comment, {eq}) => eq(comment.uid, uid),
@@ -48,6 +71,13 @@ export class CommentController {
             offset: page * 10
         })
 
+    /**
+     * Get all level comments for specific level
+     *
+     * @param levelId
+     * @param sortBy
+     * @param page
+     */
     getAllLevelComments = async (
         levelId: number,
         sortBy: "likes" | "postedTime" = "postedTime",
@@ -60,6 +90,13 @@ export class CommentController {
             offset: page * 10
         })
 
+    /**
+     * Get all level comments that specified user ever posted
+     *
+     * @param uid
+     * @param sortBy
+     * @param page
+     */
     getCommentHistory = async (
         uid: number,
         sortBy: "likes" | "postedTime" = "postedTime",
@@ -72,6 +109,14 @@ export class CommentController {
             offset: page * 10
         })
 
+    /**
+     * Post new level comment with optional completion percentage
+     *
+     * @param uid
+     * @param levelId
+     * @param content
+     * @param completionPercentage
+     */
     postLevelComment = async (
         uid: number,
         levelId: number,
@@ -86,6 +131,12 @@ export class CommentController {
         })
     }
 
+    /**
+     * Post new account comment
+     *
+     * @param uid
+     * @param content
+     */
     postAccountComment = async (
         uid: number,
         content: string
@@ -96,30 +147,30 @@ export class CommentController {
         })
     }
 
-    deleteLevelComment = async (id: number, uid: number) => {
+    deleteLevelComment = async (commentId: number, uid: number) => {
         await this.db.delete(commentsTable).where(and(
-            eq(commentsTable.id, id),
+            eq(commentsTable.id, commentId),
             eq(commentsTable.uid, uid)
         ))
     }
 
-    deleteAccountComment = async (id: number, uid: number) => {
+    deleteAccountComment = async (commentId: number, uid: number) => {
         await this.db.delete(accountCommentsTable).where(and(
-            eq(accountCommentsTable.id, id),
+            eq(accountCommentsTable.id, commentId),
             eq(accountCommentsTable.uid, uid)
         ))
     }
 
-    deleteLevelCommentByOwner = async (id: number, levelId: number) => {
+    deleteLevelCommentByOwner = async (commentId: number, levelId: number) => {
         await this.db.delete(commentsTable).where(and(
-            eq(commentsTable.id, id),
+            eq(commentsTable.id, commentId),
             eq(commentsTable.levelId, levelId)
         ))
     }
 
-    likeAccountComment = async (id: number, uid: number, action: "like" | "dislike") => {
+    likeAccountComment = async (commentId: number, uid: number, action: "like" | "dislike") => {
         const actionController = new ActionController(this.db)
-        if (await actionController.isItemLiked("account_comment", uid, id))
+        if (await actionController.isItemLiked("account_comment", uid, commentId))
             return false
 
         await this.db.update(accountCommentsTable)
@@ -128,19 +179,19 @@ export class CommentController {
                     ? sql`${accountCommentsTable.likes} + 1`
                     : sql`${accountCommentsTable.likes} - 1`
             })
-            .where(eq(accountCommentsTable.id, id))
+            .where(eq(accountCommentsTable.id, commentId))
 
         await actionController.registerAction(
             "like_account_comment",
             uid,
-            id,
+            commentId,
             {action: action[0].toUpperCase() + action.slice(1)}
         )
     }
 
-    likeLevelComment = async (id: number, uid: number, action: "like" | "dislike") => {
+    likeLevelComment = async (commentId: number, uid: number, action: "like" | "dislike") => {
         const actionController = new ActionController(this.db)
-        if (await actionController.isItemLiked("comment", uid, id))
+        if (await actionController.isItemLiked("comment", uid, commentId))
             return false
 
         await this.db.update(commentsTable)
@@ -149,12 +200,12 @@ export class CommentController {
                     ? sql`${commentsTable.likes} + 1`
                     : sql`${commentsTable.likes} - 1`
             })
-            .where(eq(commentsTable.id, id))
+            .where(eq(commentsTable.id, commentId))
 
         await actionController.registerAction(
             "like_comment",
             uid,
-            id,
+            commentId,
             {action: action[0].toUpperCase() + action.slice(1)}
         )
     }

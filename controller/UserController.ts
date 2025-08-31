@@ -59,7 +59,7 @@ export class UserController {
      * @param username
      * @param email
      * @param withRole Whether to include nested role in the result
-     * @returns User instance if found or null otherwise
+     * @returns {@link User} instance if found or null otherwise
      */
     getOneUser = async (
         {uid, username, email}: { uid?: number, username?: string, email?: string },
