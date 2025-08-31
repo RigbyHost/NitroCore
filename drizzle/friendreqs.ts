@@ -1,5 +1,5 @@
 import {boolean, int, mysqlTable, text} from "drizzle-orm/mysql-core";
-import {relations} from "drizzle-orm";
+import {relations, sql} from "drizzle-orm";
 import {usersTable} from "./users";
 
 
@@ -7,7 +7,7 @@ export const friendRequestsTable = mysqlTable("friendreqs", {
     id: int("id").autoincrement().primaryKey(),
     uidSrc: int("uid_src").notNull(),
     uidDest: int("uid_dest").notNull(),
-    uploadDate: int("uploadDate").notNull(),
+    uploadDate: int("uploadDate").notNull().default(sql`CURRENT_TIMESTAMP`),
     comment: text("comment").notNull().default(""),
     isNew: boolean("isNew").notNull().default(true),
 })

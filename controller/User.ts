@@ -60,7 +60,7 @@ export class User {
         }
     }
 
-    friends = {
+    friendships = {
         add: (friendshipId: number) => {
             if (!this.$.friendshipIds.includes(friendshipId)) {
                 this.$.friendshipIds.push(friendshipId)

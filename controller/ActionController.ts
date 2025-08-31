@@ -93,13 +93,15 @@ export class ActionController {
 
         const isMod = user.$.roleId > 0
 
-        await this.db.insert(actionsTable).values({
-            uid: uid,
-            actionType: type,
-            targetId: targetId,
-            isMod: isMod,
-            data: data,
-        })
+        await useCommitFabric(makeCommitable(async () => {
+            await this.db.insert(actionsTable).values({
+                uid: uid,
+                actionType: type,
+                targetId: targetId,
+                isMod: isMod,
+                data: data,
+            })
+        }))
     }
 
     /**

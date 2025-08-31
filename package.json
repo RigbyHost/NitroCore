@@ -2,6 +2,7 @@
   "name": "nitro-app",
   "private": true,
   "scripts": {
+    "prepare": "nitro prepare",
     "build": "nitro build",
     "dev": "nitro dev"
   },
