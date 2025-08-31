@@ -2,17 +2,20 @@ import {boolean, customType, datetime, int, json, mysqlTable} from "drizzle-orm/
 import {sql} from "drizzle-orm";
 
 const actionsVariants = [
-    "register", "login", "delete_user", "ban_event", "level_event", "panel_event",
+    "register_user", "login_user", "delete_user", "ban_event", "level_event", "panel_event",
     "level_like", "account_comment_like", "comment_like", "list_like", "unknown"
 ]
 
+export type ActionVariant = "register_user" | "login_user" | "delete_user" | "ban_event" | "level_event" | "panel_event" |
+    "level_like" | "account_comment_like" | "comment_like" | "list_like" | "unknown"
+
 const actionType = customType<{
-    data:  typeof actionsVariants[number]
+    data:  ActionVariant
 }>({
     dataType: () => "number",
     fromDriver: (value) => {
         if (typeof value !== "number") return "unknown"
-        return actionsVariants[value] as typeof actionsVariants[number]
+        return actionsVariants[value] as ActionVariant
     },
     toDriver: (value) => {
         return actionsVariants.indexOf(value)
@@ -25,7 +28,8 @@ type ActionAuth = {
 }
 
 type ActionBan = {
-    type: string
+    type: string,
+    uname: string,
 }
 
 type ActionLevelBase = {
@@ -47,9 +51,9 @@ type ActionLevelDelete = {
     uname: string
 } & ActionLevelBase
 
-type ActionData = {
+export type ActionData = {
     action: string
-} & (ActionAuth | ActionBan | ActionMisc | ActionLevelUpload | ActionLevelDelete)
+} & Partial<ActionAuth & ActionBan & ActionMisc & ActionLevelUpload & ActionLevelDelete>
 
 export const actionsTable = mysqlTable("actions", {
     id: int("id").autoincrement().primaryKey(),

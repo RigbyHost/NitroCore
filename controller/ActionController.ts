@@ -1,0 +1,128 @@
+import {ActionData, actionsTable, ActionVariant} from "~~/drizzle";
+import {UserController} from "~~/controller/UserController";
+import {and, eq} from "drizzle-orm";
+
+export class ActionController {
+    private readonly db: Database
+
+    constructor(db: Database) {
+        this.db = db
+    }
+
+    get $db() {
+        return this.db
+    }
+
+    registerAction = async (
+        action: AvailableActions,
+        uid: number,
+        targetId: number,
+        data: ActionData,
+    ) => {
+        const userController = new UserController(this.db)
+        const user = (await userController.getOneUser({uid: targetId}))!
+
+        let type: ActionVariant
+        switch (action) {
+            case "register_user":
+                type = "register_user"
+                data.action = "Register"
+                break
+            case "login_user":
+                type = "login_user"
+                data.action = "Login"
+                break
+            case "delete_user":
+                type = "delete_user"
+                data.action = "Delete"
+                break
+            case "ban_user":
+            case "unban_user":
+                type = "ban_event"
+                data.action = action === "ban_user" ? "Ban" : "Unban"
+                data.uname = user.$.username || ""
+                break
+            case "level_upload":
+                type = "level_event"
+                data.action = "Upload"
+                break
+            case "level_update":
+                type = "level_event"
+                data.action = "Update"
+                break
+            case "level_delete":
+                type = "level_event"
+                data.action = "Delete"
+                break
+            case "level_rate":
+                type = "level_event"
+                data.action = "Rate"
+                break
+            case "like_level":
+                type = "level_like"
+                data.action = "LikeLevel"
+                break
+            case "like_comment":
+                type = "comment_like"
+                data.action = "LikeComment"
+                break
+            case "like_account_comment":
+                type = "account_comment_like"
+                data.action = "LikeAcccomment"
+                break
+            case "like_list":
+                type = "list_like"
+                data.action = "LikeList"
+                break
+            default:
+                return
+        }
+
+        const isMod = user.$.roleId > 0
+
+        await this.db.insert(actionsTable).values({
+            uid: uid,
+            actionType: type,
+            targetId: targetId,
+            isMod: isMod,
+            data: data,
+        })
+    }
+
+    isItemLiked = async (
+        itemType: ItemType,
+        uid: number,
+        targetId: number
+    ): Promise<boolean> => {
+        let type : ActionVariant
+        switch (itemType) {
+            case "level":
+                type = "level_like"
+                break
+            case "comment":
+                type = "comment_like"
+                break
+            case "account_comment":
+                type = "account_comment_like"
+                break
+            case "list":
+                type = "list_like"
+                break
+            default:
+                return true
+        }
+
+        const count = await this.db.$count(actionsTable, and(
+            eq(actionsTable.uid, uid),
+            eq(actionsTable.actionType, type),
+            eq(actionsTable.targetId, targetId),
+        ))
+        return count > 0
+    }
+}
+
+type AvailableActions = "register_user" | "login_user" | "delete_user" | "ban_user" | "unban_user" |
+    "level_upload" | "level_delete" | "level_update" | "level_rate" |
+    "like_level" | "like_comment" | "like_account_comment" | "like_list"
+
+type ItemType = "level" | "comment" | "account_comment" | "list"

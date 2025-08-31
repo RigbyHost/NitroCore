@@ -4,7 +4,17 @@ let commitableFabric: EventEmitter<{
     commit: (commitable: Commitable) => void
 }>
 
-export const useCommitFabric = (commitable: Commitable) => {
+/**
+ * Uses Fabric to asynchronously commit a commitable object.
+ *
+ * You need to use {@link setupCommitListener} first.
+ */
+export const useCommitFabric = async (
+    commitable: Commitable,
+    immediate = false
+) => {
+    if (immediate)
+        return commitable.commit()
     if (!commitableFabric)
         commitableFabric = useFabric() as typeof commitableFabric
     commitableFabric.emit("commit", commitable)
