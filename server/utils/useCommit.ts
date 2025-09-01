@@ -2,8 +2,11 @@
 /**
  * Used to commit data to the database using {@link useCommitMiddleware}
  * @param commitable - Any object that has a commit method
+ * @param immediate - If true, commits the data immediately
  */
-export const useCommit = (commitable: Commitable) => {
+export const useCommit = async (commitable: Commitable, immediate = false) => {
+    if (immediate)
+        return commitable.commit()
     const evt = useEvent()
     if (!evt.context.commitable)
         evt.context.commitable = new Array<Commitable>()
@@ -31,3 +34,5 @@ export const useCommitMiddleware = defineEventHandler(async event => {
 export interface Commitable {
     commit: () => Promise<void>
 }
+
+export const makeCommitable = (fn: () => Promise<void>): Commitable => ({commit: fn})

@@ -1,5 +1,5 @@
 import {friendRequestsTable, friendshipsTable} from "~~/drizzle";
-import {and, eq, or} from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
 import {UserController} from "~~/controller/UserController";
 
 
@@ -67,8 +67,8 @@ export class FriendshipController {
         if (!u1 || !u2) return
         u1.friendships.remove(friendship.id)
         u2.friendships.remove(friendship.id)
-        await useCommitFabric(u1)
-        await useCommitFabric(u2)
+        await u1.commit()
+        await u2.commit()
         await this.db.delete(friendshipsTable).where(eq(friendshipsTable.id, friendship.id))
     }
 
@@ -88,16 +88,14 @@ export class FriendshipController {
     }
 
     readFriendRequest = async (uid: number, reqestId: number) =>
-        useCommitFabric(makeCommitable(async () => {
-            await this.db.update(friendRequestsTable)
-                .set({
-                    isNew: false
-                })
-                .where(and(
-                    eq(friendRequestsTable.id, reqestId),
-                    eq(friendRequestsTable.uidDest, uid)
-                ))
-        }))
+        await this.db.update(friendRequestsTable)
+            .set({
+                isNew: false
+            })
+            .where(and(
+                eq(friendRequestsTable.id, reqestId),
+                eq(friendRequestsTable.uidDest, uid)
+            ))
 
     createFriendRequest = async (uid: number, targetId: number, comment: string) => {
         if (
@@ -111,13 +109,11 @@ export class FriendshipController {
         if (!user || user.$.settings.frS > 0) return false
         if (user.$.blacklistedUsers.includes(uid)) return false
 
-        await useCommitFabric(makeCommitable(async () => {
-            await this.db.insert(friendRequestsTable).values({
-                uidSrc: uid,
-                uidDest: targetId,
-                comment,
-            })
-        }))
+        await this.db.insert(friendRequestsTable).values({
+            uidSrc: uid,
+            uidDest: targetId,
+            comment,
+        })
 
         return true
     }
@@ -137,9 +133,7 @@ export class FriendshipController {
 
         const userController = new UserController(this.db)
 
-        await useCommitFabric(makeCommitable(async () => {
-            await this.db.delete(friendRequestsTable).where(eq(friendRequestsTable.id, requestId))
-        }))
+        await this.db.delete(friendRequestsTable).where(eq(friendRequestsTable.id, requestId))
 
         const user1 = await userController.getOneUser({uid: request.uidSrc})
         const user2 = await userController.getOneUser({uid: request.uidDest})
@@ -148,8 +142,8 @@ export class FriendshipController {
         user1.friendships.add(friendshipId[0].id)
         user2.friendships.add(friendshipId[0].id)
 
-        await useCommitFabric(user1)
-        await useCommitFabric(user2)
+        await user1.commit()
+        await user2.commit()
 
         return true
     }
@@ -165,9 +159,7 @@ export class FriendshipController {
         if (!request || request.uidSrc === request.uidDest || uid !== request.uidDest)
             return false
 
-        await useCommitFabric(makeCommitable(async () => {
-            await this.db.delete(friendRequestsTable).where(eq(friendRequestsTable.id, request.id))
-        }))
+        await this.db.delete(friendRequestsTable).where(eq(friendRequestsTable.id, request.id))
 
         return true
     }

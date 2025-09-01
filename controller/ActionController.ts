@@ -30,7 +30,7 @@ export class ActionController {
         action: AvailableActions,
         uid: number,
         targetId: number,
-        data: ActionData,
+        data: Omit<ActionData, "action"> & Partial<Pick<ActionData, "action">>,
     ) => {
         const userController = new UserController(this.db)
         const user = (await userController.getOneUser({uid: targetId}))!
@@ -93,15 +93,13 @@ export class ActionController {
 
         const isMod = user.$.roleId > 0
 
-        await useCommitFabric(makeCommitable(async () => {
-            await this.db.insert(actionsTable).values({
-                uid: uid,
-                actionType: type,
-                targetId: targetId,
-                isMod: isMod,
-                data: data,
-            })
-        }))
+        await this.db.insert(actionsTable).values({
+            uid: uid,
+            actionType: type,
+            targetId: targetId,
+            isMod: isMod,
+            data: data as ActionData,
+        })
     }
 
     /**

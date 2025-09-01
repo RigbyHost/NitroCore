@@ -25,5 +25,3 @@ export const setupCommitListener = () => {
         await commitable.commit()
     })
 }
-
-export const makeCommitable = (fn: () => Promise<void>): Commitable => ({commit: fn})

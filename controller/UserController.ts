@@ -249,7 +249,7 @@ export class UserController {
         if (passwordHash !== user.$.passwordHash)
             return {code: -1}
         user.$.lastIP = ip
-        await useCommitFabric(user)
+        await user.commit()
         return {code: user.$.uid}
     }
 
@@ -272,7 +272,7 @@ export class UserController {
         if (gjp2 !== user.$.gjpHash)
             return {code: -1}
         user.$.lastIP = ip
-        await useCommitFabric(user)
+        await user.commit()
         return {code: user.$.uid}
     }
 
@@ -329,7 +329,7 @@ export class UserController {
         if (is22) {
             if (user.$.gjpHash !== gjp) return null
             user.$.lastIP = ip
-            await useCommitFabric(user)
+            await user.commit()
             return user
         } else {
             gjp = gjp.replaceAll("_", "/").replaceAll("-", "+")
