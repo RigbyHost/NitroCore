@@ -1,17 +1,16 @@
 
 /**
  * Gets the server config for a specific server from {@link H3Event} router param `srvid`
- *
- * @returns `[ServerConfig, setServerConfig]`
  */
-export const useServerConfig = async (): Promise<
-    [Nullable<ServerConfig>, (config: ServerConfig) => void]
-> => {
+export const useServerConfig = async (): Promise<{
+    config: Nullable<ServerConfig>,
+    setConfig: (config: ServerConfig) => void
+}> => {
     const srvid = getRouterParam(useEvent(), "srvid")!
-    const storage = useStorage<ServerConfig>()
-    const value = await storage.getItem(srvid)
-    const setValue = (config: ServerConfig) => storage.setItem(srvid, config)
-    return [value, setValue]
+    const storage = useStorage<ServerConfig>("config")
+    const config = await storage.getItem(srvid)
+    const setConfig = (config: ServerConfig) => storage.setItem(srvid, config)
+    return {config, setConfig}
 }
 
 type ServerConfig = {

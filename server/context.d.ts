@@ -1,9 +1,11 @@
 
 declare module 'h3' {
     interface H3EventContext {
-        drizzle?: Database
+        wantsGDPS: boolean,
+        config: Awaited<ReturnType<typeof useServerConfig>>
+        drizzle: Database
         user?: User,
-        commitable?: Array<Commitable>
+        commitable?: Array<Commitable>,
     }
 }
 

@@ -44,10 +44,7 @@ export const useDrizzlePoolManager = () => {
        await pools.get(srvid)?.end()
     }
 
-    return {
-        closeAll,
-        closeOne
-    }
+    return {closeAll, closeOne}
 }
 
 export type Database = Awaited<ReturnType<typeof useDrizzle>>
