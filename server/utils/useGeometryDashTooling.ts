@@ -41,7 +41,7 @@ const doXOR = (data: string, key: string) => {
  * @returns String representing the time difference. Example: "2 hours" [ago]
  */
 const getDateAgo = (date: number) => {
-    const diff = Date.now()/1000 - date;
+    const diff = (Date.now() - date)/1000;
     if (diff < 60) return `${diff} seconds`;
     if (diff < 3600) return `${Math.floor(diff/60)} minutes`;
     if (diff < 86400) return `${Math.floor(diff/3600)} hours`;

@@ -12,21 +12,24 @@ export default defineEventHandler({
         const {data, success} = requestSchema.safeParse(post)
 
         if(!success)
-            return "-1"
+            return await event.context.connector.error(-1, "Bad request")
 
         const userController = new UserController(event.context.drizzle)
 
-        let uid = 0
+        let uid: number
         if (data.gjp2)
             uid = await userController.logIn22(data.userName, data.gjp2, ip).then(c=>c.code)
         else
             uid = await userController.logIn(data.userName, data.password!, ip).then(c=>c.code)
 
-        if (uid > 0)
+        if (uid > 0) {
+            await event.context.connector.account.login(uid)
             await new ActionController(event.context.drizzle)
                 .registerAction("login_user", 0, uid, {uname: data.userName})
 
-        return uid
+        } else {
+            return await event.context.connector.error(uid, "Invalid credentials")
+        }
     }
 })
 

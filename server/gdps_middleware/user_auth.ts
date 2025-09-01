@@ -6,7 +6,7 @@ export const authMiddleware = defineEventHandler(async event => {
     const userCtx = new UserController(event.context.drizzle!)
     const user = await userCtx.performGJPAuth()
     if (!user)
-        return "-2"
+        return await event.context.connector.error(-2, "Invalid credentials")
     event.context.user = user
 })
 
@@ -16,7 +16,7 @@ export const authLoginMiddleware = defineEventHandler(async event => {
     const {data, success} = authRequestSchema.safeParse(post)
 
     if (!success)
-        return "-2"
+        return await event.context.connector.error(-1, "Bad request")
 
     let user: Nullable<User> = null
 
@@ -33,7 +33,7 @@ export const authLoginMiddleware = defineEventHandler(async event => {
     }
 
     if (!user)
-        return "-2"
+        return await event.context.connector.error(-2, "Invalid credentials")
 
     event.context.user = user
 })

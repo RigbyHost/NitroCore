@@ -16,7 +16,7 @@ export const commentsTable = mysqlTable("comments", {
 })
 
 export const commentRelations = relations(commentsTable, ({one}) => ({
-    user: one(usersTable, {
+    author: one(usersTable, {
         fields: [commentsTable.uid],
         references: [usersTable.uid]
     }),

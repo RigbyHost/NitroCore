@@ -86,6 +86,11 @@ export class CommentController {
         this.db.query.commentsTable.findMany({
             where: (comment, {eq}) => eq(comment.levelId, levelId),
             orderBy: (comment, {desc}) => [desc(sortBy === "likes" ? comment.likes : comment.postedTime)],
+            with: {
+                author: {
+                    with: {role: true}
+                }
+            },
             limit: 10,
             offset: page * 10
         })

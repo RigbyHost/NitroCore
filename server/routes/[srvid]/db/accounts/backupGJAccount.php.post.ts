@@ -12,37 +12,44 @@ export default defineEventHandler({
         const path = `/gdps_savedata/${event.context.config.config!.ServerConfig.SrvID}/${user.$.uid}.nsv`
 
         const data = usePostObject<{
-            saveData: string
+            saveData: string,
+            gameVersion: string,
+            binaryVersion: string,
         }>(await readFormData(event))
 
         data.saveData = useGeometryDashTooling().clearGDRequest(data.saveData)
+        data.saveData += `;${data.gameVersion||21};${data.binaryVersion||30}`
 
-        await s3.setItem(path, data.saveData)
+        try {
+            await s3.setItem(path, data.saveData)
 
+            const saveData = await ungzip(
+                Buffer.from(
+                    data.saveData
+                        .split(";")[0]
+                        .replace("_", "/")
+                        .replace("-", "+"),
+                    "base64"
+                ).toString("utf-8")
+            ).then(r=>r.toString("utf-8"))
 
-        const saveData = await ungzip(
-            Buffer.from(
-                data.saveData
-                    .split(";")[0]
-                    .replace("_", "/")
-                    .replace("-", "+"),
-                "base64"
-            ).toString("utf-8")
-        ).then(r=>r.toString("utf-8"))
+            user.$.orbs = Number(
+                saveData.split("</s><k>14</k><s>")[1]
+                    .split("</s>")[0]
+            ) || 0
+            /// strconv.Atoi(strings.Split(strings.Split(strings.Split(saveData, "<k>GS_value</k>")[1], "</s><k>4</k><s>")[1], "</s>")[0])
+            user.$.levelsCompleted = Number(
+                saveData.split("<k>GS_value</k>")[1]
+                    .split("</s><k>4</k><s>")[1]
+                    .split("</s>")[0]
+            ) || 0
 
-        user.$.orbs = Number(
-            saveData.split("</s><k>14</k><s>")[1]
-                .split("</s>")[0]
-        ) || 0
-        /// strconv.Atoi(strings.Split(strings.Split(strings.Split(saveData, "<k>GS_value</k>")[1], "</s><k>4</k><s>")[1], "</s>")[0])
-        user.$.levelsCompleted = Number(
-            saveData.split("<k>GS_value</k>")[1]
-                .split("</s><k>4</k><s>")[1]
-                .split("</s>")[0]
-        ) || 0
+            await user.commit()
+        } catch (e) {
+            console.error(e)
+            return await event.context.connector.error(-1, "Failed to backup account")
+        }
 
-        await user.commit()
-
-        return "1"
+        return await event.context.connector.success("Backup successful")
     }
 })

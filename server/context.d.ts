@@ -1,4 +1,5 @@
 import type {User} from "~~/controller/User";
+import {IConnector} from "~/connectors/IConnector";
 
 declare module 'h3' {
     interface H3EventContext {
@@ -6,6 +7,7 @@ declare module 'h3' {
         drizzle: Database
         user?: User,
         commitable?: Array<Commitable>,
+        connector: IConnector
     }
 }
 

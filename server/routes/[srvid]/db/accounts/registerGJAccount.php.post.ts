@@ -12,7 +12,7 @@ export default defineEventHandler({
         const {data, success} = requestSchema.safeParse(post)
 
         if(!success)
-            return "-1"
+            return await event.context.connector.error(-1, "Bad request")
 
         const userController = new UserController(event.context.drizzle)
         const {code} = await userController.register({
@@ -21,11 +21,13 @@ export default defineEventHandler({
             email: data.email
         }, ip)
 
-        if (code > 0)
+        if (code > 0) {
+            await event.context.connector.success("User registered successfully")
             await new ActionController(event.context.drizzle)
                 .registerAction("register_user", 0, code, {uname: data.userName, email: data.email})
-
-        return code
+        } else {
+            await event.context.connector.error(code, "Failed to register user")
+        }
     }
 })
 
