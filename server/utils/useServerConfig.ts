@@ -52,3 +52,16 @@ type ServerConfig = {
         BannedIPs: string[]
     }
 }
+
+useStorage<ServerConfig>("config").setItem("0000", {
+    ChestConfig: {} as ServerConfig["ChestConfig"],
+    ServerConfig: {
+        SrvID: "0000",
+    } as ServerConfig["ServerConfig"],
+    SecurityConfig: {
+        DisableProtection: false,
+        NoLevelLimits: false,
+        AutoActivate: false,
+        BannedIPs: []
+    }
+})
