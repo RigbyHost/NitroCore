@@ -1,6 +1,7 @@
 import {ActionData, actionsTable, ActionVariant} from "~~/drizzle";
 import {UserController} from "~~/controller/UserController";
 import {and, eq} from "drizzle-orm";
+import {MakeOptional} from "~/utils/types";
 
 /**
  * Controller for action logging
@@ -30,7 +31,7 @@ export class ActionController {
         action: AvailableActions,
         uid: number,
         targetId: number,
-        data: Omit<ActionData, "action"> & Partial<Pick<ActionData, "action">>,
+        data: MakeOptional<ActionData, "action">,
     ) => {
         const userController = new UserController(this.db)
         const user = (await userController.getOneUser({uid: targetId}))!

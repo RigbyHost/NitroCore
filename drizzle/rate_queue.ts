@@ -9,7 +9,7 @@ export const rateQueueTable = mysqlTable("rateQueue", {
     levelId: int("lvl_id").notNull(),
     name: text("name").notNull().default("Unnamed"),
     uid: int("uid").notNull(),
-    mod_uid: int("mod_uid").notNull(),
+    modUid: int("mod_uid").notNull(),
     stars: int("stars").notNull().default(0),
     isFeatured: boolean("isFeatured").notNull().default(false),
 })
@@ -24,7 +24,7 @@ export const rateQueueRelations = relations(rateQueueTable, ({one}) => ({
         references: [usersTable.uid]
     }),
     moderator: one(usersTable, {
-        fields: [rateQueueTable.mod_uid],
+        fields: [rateQueueTable.modUid],
         references: [usersTable.uid]
     })
 }))

@@ -1,4 +1,4 @@
-import {boolean, datetime, float, int, mysqlTable, text} from "drizzle-orm/mysql-core";
+import {boolean, datetime, float, int, json, mysqlTable, text} from "drizzle-orm/mysql-core";
 import {relations, sql} from "drizzle-orm";
 import {usersTable} from "./users";
 
@@ -9,7 +9,7 @@ export const levelsTable = mysqlTable("levels", {
     id: int("id").autoincrement().primaryKey(),
     name: text("name").notNull().default("Unnamed"),
     description: text("description").notNull().default(""),
-    uid: int("uid").notNull(),
+    ownerUid: int("uid").notNull(),
     password: text("password").notNull().default(""),
     version: int("version").notNull().default(1),
 
@@ -25,15 +25,18 @@ export const levelsTable = mysqlTable("levels", {
     songId: int("song_id").notNull().default(0),
     versionGame: int("versionGame").notNull(),
     versionBinary: int("versionBinary").notNull(),
-    stringExtra: text("stringExtra").notNull().default(""),
+    expandableStore: json("stringExtra").$type<{
+        extra_string: string,
+        ts: number,
+    }>(),
     stringSettings: text("stringSettings").notNull().default(""),
     stringLevel: text("stringLevel").notNull(),
     stringLevelInfo: text("stringLevelInfo").notNull().default(""),
-    orignialId: int("original_id").notNull().default(0),
+    originalId: int("original_id").notNull().default(0),
 
     // Stats
     objects: int("objects").notNull().default(0),
-    starsRequired: int("starsRequired").notNull().default(0),
+    starsRequested: int("starsRequested").notNull().default(0),
     starsGot: int("starsGot").notNull().default(0),
     userCoins: int("ucoins").notNull().default(0),
     coins: int("coins").notNull().default(0),
@@ -50,7 +53,7 @@ export const levelsTable = mysqlTable("levels", {
     isVerified: boolean("isVerified").notNull().default(false),
     isFeatured: boolean("isFeatured").notNull().default(false),
     isHallOfFame: boolean("isHall").notNull().default(false),
-    isEpic: boolean("isEpic").notNull().default(false),
+    epicness: int("isEpic").notNull().default(0),
     isUnlisted: boolean("isUnlisted").notNull().default(false),
     isLDM: boolean("isLDM").notNull().default(false),
 
@@ -61,7 +64,7 @@ export const levelsTable = mysqlTable("levels", {
 
 export const levelUserRelations = relations(levelsTable, ({one})=> ({
     author: one(usersTable, {
-        fields: [levelsTable.uid],
+        fields: [levelsTable.ownerUid],
         references: [usersTable.uid]
     })
 }))
