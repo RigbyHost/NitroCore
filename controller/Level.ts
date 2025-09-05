@@ -1,5 +1,5 @@
 import {LevelController} from "~~/controller/LevelController";
-import {levelsTable, rateQueueTable} from "~~/drizzle";
+import {commentsTable, levelsTable, rateQueueTable} from "~~/drizzle";
 import {diff} from "deep-object-diff";
 import {and, eq} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
@@ -157,6 +157,16 @@ export class Level<T extends LevelType = LevelType> {
         await this.db.update(levelsTable)
             .set(deltas)
             .where(eq(levelsTable.id, this.$.id))
+    }
+
+    delete = async () => {
+        // TODO: Implement relations for CASCADE delete, but imported databases don't support it, so...
+        await this.db.delete(levelsTable)
+            .where(eq(levelsTable.id, this.$.id))
+        await this.db.delete(rateQueueTable)
+            .where(eq(rateQueueTable.levelId, this.$.id))
+        await this.db.delete(commentsTable)
+            .where(eq(commentsTable.levelId, this.$.id))
     }
 }
 
