@@ -54,7 +54,7 @@ export const levelsTable = mysqlTable("levels", {
     isFeatured: boolean("isFeatured").notNull().default(false),
     isHallOfFame: boolean("isHall").notNull().default(false),
     epicness: int("isEpic").notNull().default(0),
-    isUnlisted: boolean("isUnlisted").notNull().default(false),
+    unlistedType: int("isUnlisted").notNull().default(0),
     isLDM: boolean("isLDM").notNull().default(false),
 
     // Dates

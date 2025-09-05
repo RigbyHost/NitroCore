@@ -119,6 +119,7 @@ export class Level<T extends LevelType = LevelType> {
 
     reportLevel = () => {
         // FIXME: Not CRUD - should use TX or commit relative reports+1 immediately
+        // TODO: Implement reports logging to avoid spam
         this.$.reports++
     }
 
@@ -149,7 +150,7 @@ export class Level<T extends LevelType = LevelType> {
             .values(this.$ as typeof levelsTable.$inferInsert)
             .$returningId()
         this.$.id = id[0].id
-        return this
+        return this.$.id
     }
 
     commit = async () => {

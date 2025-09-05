@@ -39,5 +39,5 @@ export default defineEventHandler({
 })
 
 const requestSchema = z.object({
-    levelID: z.number().gt(0),
+    levelID: z.coerce.number().positive()
 })

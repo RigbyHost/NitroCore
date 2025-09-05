@@ -24,5 +24,5 @@ export default defineEventHandler({
 })
 
 const requestSchema = z.object({
-    commentID: z.number().gt(0)
+    commentID: z.coerce.number().positive()
 })

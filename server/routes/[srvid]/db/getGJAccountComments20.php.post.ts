@@ -30,6 +30,6 @@ export default defineEventHandler({
 })
 
 const requestSchema = z.object({
-    commentID: z.array(z.number().gt(0)).min(1).max(2),
-    page: z.number().gte(0).optional().default(0)
+    commentID: z.array(z.coerce.number().positive()).min(1).max(2),
+    page: z.coerce.number().nonnegative().optional().default(0)
 })

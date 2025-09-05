@@ -1,6 +1,7 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {ungzip} from "node-gzip";
 import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
+import {z} from "zod";
 
 export default defineEventHandler({
     onRequest: [initMiddleware, authLoginMiddleware],
@@ -11,14 +12,13 @@ export default defineEventHandler({
         const s3 = useStorage("savedata")
         const path = `/gdps_savedata/${event.context.config.config!.ServerConfig.SrvID}/${user.$.uid}.nsv`
 
-        const data = usePostObject<{
-            saveData: string,
-            gameVersion: string,
-            binaryVersion: string,
-        }>(await readFormData(event))
+        const post = usePostObject<z.infer<typeof requestSchema>>(await readFormData(event))
+        const {data, success} = requestSchema.safeParse(post)
+        if (!success)
+            return await event.context.connector.error(-1, "Bad Request")
 
         data.saveData = useGeometryDashTooling().clearGDRequest(data.saveData)
-        data.saveData += `;${data.gameVersion||21};${data.binaryVersion||30}`
+        data.saveData += `;${data.gameVersion};${data.binaryVersion}`
 
         try {
             await s3.setItem(path, data.saveData)
@@ -52,4 +52,10 @@ export default defineEventHandler({
 
         return await event.context.connector.success("Backup successful")
     }
+})
+
+const requestSchema = z.object({
+    gameVersion: z.string().nonempty().optional().default("21"),
+    binaryVersion: z.string().nonempty().optional().default("30"),
+    saveData: z.string().nonempty(),
 })
