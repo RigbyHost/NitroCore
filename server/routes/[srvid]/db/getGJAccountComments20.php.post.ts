@@ -31,5 +31,5 @@ export default defineEventHandler({
 
 const requestSchema = z.object({
     commentID: z.array(z.number().gt(0)).min(1).max(2),
-    page: z.number().gt(0).optional().default(0)
+    page: z.number().gte(0).optional().default(0)
 })

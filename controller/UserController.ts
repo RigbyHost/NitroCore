@@ -1,5 +1,5 @@
 import {Database} from "~/utils/useDrizzle";
-import {usersTable} from "~~/drizzle";
+import {rolesTable, usersTable} from "~~/drizzle";
 import {User} from "~~/controller/User";
 import {sql} from "drizzle-orm";
 import {union} from "drizzle-orm/mysql-core";
@@ -64,8 +64,8 @@ export class UserController {
     getOneUser = async (
         {uid, username, email}: { uid?: number, username?: string, email?: string },
         withRole = false,
-    ): Promise<Nullable<User>> => {
-        let user: MaybeUndefined<typeof usersTable.$inferSelect>
+    ): Promise<Nullable<User<GetOneUserReturnType>>> => {
+        let user: MaybeUndefined<GetOneUserReturnType>
         if (uid)
             user = await this.db.query.usersTable
                 .findFirst({
@@ -90,8 +90,9 @@ export class UserController {
                         role: withRole || undefined,
                     }
                 })
-        if (!user) return null
-        return new User(this, user)
+        if (!user)
+            return null
+        return new User<GetOneUserReturnType>(this, user)
     }
 
     /**
@@ -102,7 +103,7 @@ export class UserController {
     getManyUsers = async (
         ids: number[],
         withRole = false,
-    ) => {
+    ): Promise<User<GetOneUserReturnType>[]> => {
         const users = await this.db.query.usersTable
             .findMany({
                 where: (user, {inArray}) => inArray(user.uid, ids),
@@ -110,7 +111,7 @@ export class UserController {
                     role: withRole || undefined,
                 }
             })
-        return users.map(user => new User(this, user))
+        return users.map(user => new User<GetOneUserReturnType>(this, user))
     }
 
     /**
@@ -378,3 +379,5 @@ const registerValidators = z.object({
 })
 
 // TODO: fabric and commit on beforeResponse
+
+type GetOneUserReturnType = (typeof usersTable.$inferSelect) & { role?: typeof rolesTable.$inferSelect }

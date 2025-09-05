@@ -4,23 +4,25 @@ import {diff} from "deep-object-diff";
 import {and, eq, gte, sql} from "drizzle-orm";
 import {UserController} from "~~/controller/UserController";
 
+type UserType = typeof usersTable.$inferSelect
+
 /**
  * User CRUD wrapper
  *
  * @class User
  */
-export class User {
+export class User<T extends UserType = UserType> {
     private readonly controller: UserController
     private readonly db: Database
-    private readonly original: typeof usersTable.$inferSelect
-    $: typeof usersTable.$inferSelect
+    private readonly original: T
+    $: T
 
     /**
      * @internal Should be always created thorugh {@link UserController}
      * @param controller UserController instance
      * @param user Drizzle User data
      */
-    constructor(controller: UserController, user: typeof this.$) {
+    constructor(controller: UserController, user: T) {
         this.db = controller.$db
         this.controller = controller
         this.original = user
