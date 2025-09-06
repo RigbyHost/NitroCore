@@ -1,0 +1,42 @@
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: mariadb
+    healthcheck:
+      test: ["CMD", "mariadb", "-h", "localhost", "-u", "root", "-proot", "-e", "SELECT 1"]
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MARIADB_DATABASE: gdps_0000
+      MARIADB_USER: cc
+      MARIADB_PASSWORD: cc
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey:/data
+
+  dev:
+    image: oven/bun
+    container_name: dev
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    command: bash -c "bun install && sleep 5 && DB_URL=mysql://root:root@mariadb:3306/gdps_0000 bunx drizzle-kit push && bun run dev"
+    depends_on:
+      - valkey
+      - mariadb
+
+volumes:
+  mysql:
+  valkey:

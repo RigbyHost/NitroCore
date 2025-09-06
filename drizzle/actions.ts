@@ -12,7 +12,7 @@ export type ActionVariant = "register_user" | "login_user" | "delete_user" | "ba
 const actionType = customType<{
     data:  ActionVariant
 }>({
-    dataType: () => "number",
+    dataType: () => "int",
     fromDriver: (value) => {
         if (typeof value !== "number") return "unknown"
         return actionsVariants[value] as ActionVariant

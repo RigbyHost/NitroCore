@@ -14,7 +14,7 @@ export const listsTable = mysqlTable("lists", {
     likes: int("likes").notNull().default(0),
     isFeatured: boolean("isFeatured").notNull().default(false),
     isUnlisted: boolean("isUnlisted").notNull().default(false),
-    levels: commaSeparated("levels").notNull().default([]),
+    levels: commaSeparated("levels"),
     diamonds: int("diamonds").notNull().default(0),
     levelDiamonds: int("lvlDiamonds").notNull().default(0),
     uploadDate: datetime("uploadDate").notNull().default(sql`CURRENT_TIMESTAMP`),

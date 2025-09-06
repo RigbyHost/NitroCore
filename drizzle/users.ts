@@ -1,10 +1,10 @@
-import {mysqlTable, int, text, datetime, json, boolean} from "drizzle-orm/mysql-core";
+import {mysqlTable, int, text, datetime, json} from "drizzle-orm/mysql-core";
 import {relations, sql} from "drizzle-orm";
 import {commaSeparated} from "./custom_types";
-import {rolesTable} from "~~/drizzle/roles";
-import {accountCommentsTable} from "~~/drizzle/account_comments";
-import {commentsTable} from "~~/drizzle/comments";
-import {levelsTable} from "~~/drizzle/levels";
+import {rolesTable} from "./roles";
+import {accountCommentsTable} from "./account_comments";
+import {commentsTable} from "./comments";
+import {levelsTable} from "./levels";
 
 export const usersTable = mysqlTable("users", {
     // Primary
@@ -88,9 +88,9 @@ export const usersTable = mysqlTable("users", {
 
     // Relationships
     isBanned: int("isBanned").notNull().default(1),
-    blacklistedUsers: commaSeparated("blacklist").notNull().default([]),
+    blacklistedUsers: commaSeparated("blacklist"),
     friendsCount: int("friends_cnt").notNull().default(0),
-    friendshipIds: commaSeparated("friendship_ids").notNull().default([]),
+    friendshipIds: commaSeparated("friendship_ids"),
 
     // Settings
     iconType: int("iconType").notNull().default(0),

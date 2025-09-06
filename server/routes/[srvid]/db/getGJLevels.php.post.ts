@@ -38,8 +38,9 @@ export default defineEventHandler({
                 result = await filter.searchLevels("latest", data, data.page)
                 break
             case 5:
-
         }
+
+        return await event.context.connector.error(-1, "Not implemented")
 
     }
 })

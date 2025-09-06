@@ -25,14 +25,17 @@ export default defineNitroConfig({
             port: 6380,
             password: 'REDIS_PASSWORD'
         }
-    }, // TODO: Add redis storage
+    },
     devStorage: {
         savedata: {
             driver: "fs-lite",
             base: "./_savedata"
         },
         config: {
-            driver: "memory"
+            driver: "redis",
+            host: 'valkey',
+            port: 6379,
+            password: ''
         }
     },
     database: {
@@ -43,6 +46,17 @@ export default defineNitroConfig({
                 password: "noone",
                 host: "gayhost",
                 port: "gayport"
+            }
+        }
+    },
+    devDatabase: {
+        default: {
+            connector: "mysql2",
+            options: {
+                user: "root",
+                password: "root",
+                host: "mariadb",
+                port: 3306
             }
         }
     }

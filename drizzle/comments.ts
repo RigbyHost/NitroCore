@@ -1,7 +1,7 @@
 import {boolean, datetime, int, mysqlTable, text} from "drizzle-orm/mysql-core";
 import {relations, sql} from "drizzle-orm";
 import {usersTable} from "./users";
-import {levelsTable} from "~~/drizzle/levels";
+import {levelsTable} from "./levels";
 
 
 export const commentsTable = mysqlTable("comments", {
