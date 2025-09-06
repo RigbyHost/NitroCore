@@ -1,5 +1,4 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
-import {ungzip} from "node-gzip";
 import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
 
@@ -23,7 +22,7 @@ export default defineEventHandler({
         try {
             await s3.setItem(path, data.saveData)
 
-            const saveData = await ungzip(
+            const saveData = await useGzip().ungzip(
                 Buffer.from(
                     data.saveData
                         .split(";")[0]

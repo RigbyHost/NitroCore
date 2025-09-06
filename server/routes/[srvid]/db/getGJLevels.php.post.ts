@@ -29,7 +29,16 @@ export default defineEventHandler({
         }
         switch (data.type) {
             case 1:
-             result = await filter.searchLevels("mostdownloaded", data, data.page)
+                result = await filter.searchLevels("mostdownloaded", data, data.page)
+                break
+            case 3:
+                result = await filter.searchLevels("trending", data, data.page)
+                break
+            case 4:
+                result = await filter.searchLevels("latest", data, data.page)
+                break
+            case 5:
+
         }
 
     }
