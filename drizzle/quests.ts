@@ -1,11 +1,12 @@
 import {customType, datetime, int, mysqlTable, text} from "drizzle-orm/mysql-core";
 
 const questType = customType<{
-    data: "daily" | "weekly" | "orbs" | "coins" | "stars"
+    data: "event" | "daily" | "weekly" | "orbs" | "coins" | "stars"
 }>({
     dataType: () => "int",
     toDriver: (value) => {
         return {
+            event: -1,
             daily: 0,
             weekly: 1,
             orbs: 2,
@@ -16,12 +17,13 @@ const questType = customType<{
     fromDriver: (value) => {
         if (typeof value !== "number") return "daily"
         return {
-            0: "daily",
-            1: "weekly",
-            2: "orbs",
-            3: "coins",
-            4: "stars"
-        }[value] as "daily" | "weekly" | "orbs" | "coins" | "stars"
+            "-1": "event",
+            "0": "daily",
+            "1": "weekly",
+            "2": "orbs",
+            "3": "coins",
+            "4": "stars"
+        }[value.toString()] as "event" | "daily" | "weekly" | "orbs" | "coins" | "stars"
     }
 })
 

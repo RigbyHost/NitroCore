@@ -1,4 +1,8 @@
 import {LevelController} from "~~/controller/LevelController";
+import {not, eq, lt, lte, gt, gte, inArray, notInArray, exists, and, or, SQL, desc, sql, ilike} from "drizzle-orm";
+import {levelsTable, questsTable, rateQueueTable} from "~~/drizzle";
+import {z} from "zod";
+import {requestSchema} from "~/routes/[srvid]/db/getGJLevels.php.post";
 
 
 export class LevelFilter {
@@ -10,12 +14,225 @@ export class LevelFilter {
         this.db = controller.$db
     }
 
-    searchLevels = async () => {}
+    searchLevels = async (
+        mode: SearchMode,
+        data: z.infer<typeof requestSchema>,
+        page: number
+    ): Promise<{
+        levels: number[],
+        total: number
+    }> => {
+        let filters: SQL[] = [lte(levelsTable.versionGame, data.versionGame)]
+        let orderBy: SQL[] = []
+
+        // region Filters
+
+        if (data.diff) {
+            const diffs: number[] = []
+            data.diff.split(",").forEach(diff => {
+                switch (diff) {
+                    case "-2":
+                        switch (data.demonFilter) {
+                            case 1:
+                                data.demonFilter = 3
+                                return
+                            case 2:
+                                data.demonFilter = 4
+                                return
+                            case 3:
+                                data.demonFilter = 0
+                                break
+                            case 4:
+                                data.demonFilter = 5
+                                break
+                            case 5:
+                                data.demonFilter = 6
+                                break
+                            default:
+                                data.demonFilter = 0
+                        }
+                        break
+                    case "-1":
+                        diffs.push(0)
+                        break
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                        diffs.push(Number(`${diff}0`))
+                        break
+                    default:
+                        diffs.push(-1)
+                }
+            })
+
+            if (data.demonFilter !== undefined) {
+                if (data.demonFilter === 0)
+                    filters.push(gte(levelsTable.demonDifficulty, 0))
+                else
+                    filters.push(eq(levelsTable.demonDifficulty, data.demonFilter))
+            } else {
+                filters.push(
+                    eq(levelsTable.demonDifficulty, -1),
+                    inArray(levelsTable.difficulty, diffs)
+                )
+            }
+        }
+
+        if (data.len)
+            filters.push(inArray(
+                levelsTable.length,
+                data.len.split(",").map(len => Number(len))
+            ))
+
+        if (data.onlyCompleted || data.uncompleted) {
+            if (data.completedLevels) {
+                const fn = data.uncompleted ? notInArray : inArray
+                filters.push(fn(
+                    levelsTable.id,
+                    data.completedLevels.split(",").map(id => Number(id))
+                ))
+            }
+        }
+
+        if (data.featured)
+            filters.push(eq(levelsTable.isFeatured, true))
+
+        const rateFilters: SQL<unknown>[] = []
+        if (data.featured)
+            rateFilters.push(eq(levelsTable.isFeatured, true))
+        if (data.epic)
+            rateFilters.push(eq(levelsTable.epicness, 1))
+        if (data.mythic)
+            rateFilters.push(eq(levelsTable.epicness, 2))
+        if (data.legendary)
+            rateFilters.push(eq(levelsTable.epicness, 3))
+
+        if (rateFilters.length > 0) {
+            if (rateFilters.length === 1)
+                filters.push(rateFilters[0])
+            else
+                filters.push(or(...rateFilters)!)
+        }
+
+        if (data.coins)
+            filters.push(gt(levelsTable.coins, 0))
+
+        if (data.star || data.noStar) {
+            const fn = data.noStar ? eq : gt
+            filters.push(fn(levelsTable.starsGot, 0))
+        }
+
+        // TODO: check if this works correctly
+        if (data.song !== undefined) {
+            if (data.songCustom) {
+                // For custom songs, songId is 0 and trackId is (song + 1)
+                filters.push(
+                    eq(levelsTable.songId, 0),
+                    eq(levelsTable.trackId, data.song + 1)
+                )
+            } else {
+                // For official songs, use the song ID directly
+                filters.push(eq(levelsTable.songId, data.song))
+            }
+        }
+
+        // endregion
+
+        switch (mode) {
+            case "mostliked":
+                orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
+                break
+            case "mostdownloaded":
+                orderBy.push(desc(levelsTable.downloads), desc(levelsTable.likes))
+                break
+            case "trending":
+                filters.push(sql`${levelsTable.uploadDate} > (DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY))`)
+                orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
+                break
+            case "latest":
+                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                break
+            case "magic":
+                filters.push(
+                    gte(levelsTable.objects, 10_000),
+                    gte(levelsTable.length, 3),
+                    eq(levelsTable.originalId, 0)
+                )
+                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                break
+            case "sent":
+                filters.push(exists(
+                    this.db.select({id: rateQueueTable.id}).from(rateQueueTable).where(eq(rateQueueTable.levelId, levelsTable.id))
+                ))
+                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                break
+            case "hall":
+                filters.push(gte(levelsTable.epicness, 1))
+                orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
+                break
+            // SAFE
+            case "safe_daily":
+                filters.push(exists(
+                    this.db.select({id: questsTable.id}).from(questsTable).where(and(
+                        eq(questsTable.levelId, levelsTable.id),
+                        eq(questsTable.type, "daily")
+                    ))
+                ))
+                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                break
+            case "safe_weekly":
+                filters.push(exists(
+                    this.db.select({id: questsTable.id}).from(questsTable).where(and(
+                        eq(questsTable.levelId, levelsTable.id),
+                        eq(questsTable.type, "weekly")
+                    ))
+                ))
+                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                break
+            case "safe_event":
+                filters.push(exists(
+                    this.db.select({id: questsTable.id}).from(questsTable).where(and(
+                        eq(questsTable.levelId, levelsTable.id),
+                        eq(questsTable.type, "event")
+                    ))
+                ))
+                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                break
+            default:
+                return {levels: [], total: 0}
+        }
+
+        if (data.str) {
+            // Search logic
+            const id = Number(data.str)
+            if (!isNaN(id)) {
+                filters.push(eq(levelsTable.id, id))
+            } else {
+                filters.push(
+                    eq(levelsTable.unlistedType, 0),
+                    ilike(levelsTable.name, `%${data.str}%`)
+                )
+            }
+        } else {
+            // Just clowning around
+            filters.push(eq(levelsTable.unlistedType, 0))
+        }
+
+        const levels = await this.db.query.levelsTable.findMany({
+            columns: {id: true},
+            where: and(...filters),
+            orderBy,
+            limit: 10,
+            offset: page*10
+        })
+        const total = await this.db.$count(levelsTable, and(...filters))
+
+        return {levels: levels.map(level => level.id), total}
+    }
 }
 
-type SearchLevelsParams = {
-    searchTerm: string,
-    difficulties: number[],
-    demonDifficulty: number,
-    length: number[],
-}
+
+type SearchMode = "mostliked" | "mostdownloaded" | "trending" | "latest" | "magic" | "hall" | "sent" |
+    "safe_daily" | "safe_weekly" | "safe_event"
