@@ -14,18 +14,9 @@ export class LevelFilter {
         this.db = controller.$db
     }
 
-    searchLevels = async (
-        mode: SearchMode,
-        data: z.infer<typeof requestSchema>,
-        page: number
-    ): Promise<{
-        levels: number[],
-        total: number
-    }> => {
+    private filterParser = (data: z.infer<typeof requestSchema>) => {
         let filters: SQL[] = [lte(levelsTable.versionGame, data.versionGame)]
         let orderBy: SQL[] = []
-
-        // region Filters
 
         if (data.diff) {
             const diffs: number[] = []
@@ -138,7 +129,18 @@ export class LevelFilter {
             }
         }
 
-        // endregion
+        return {filters, orderBy}
+    }
+
+    searchLevels = async (
+        mode: SearchMode,
+        data: z.infer<typeof requestSchema>,
+    ): Promise<{
+        levels: number[],
+        total: number
+    }> => {
+
+        const {filters, orderBy} = this.filterParser(data)
 
         switch (mode) {
             case "mostliked":
@@ -148,7 +150,8 @@ export class LevelFilter {
                 orderBy.push(desc(levelsTable.downloads), desc(levelsTable.likes))
                 break
             case "trending":
-                filters.push(sql`${levelsTable.uploadDate} > (DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY))`)
+                filters.push(sql`${levelsTable.uploadDate}
+                > (DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY))`)
                 orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
                 break
             case "latest":
@@ -225,11 +228,90 @@ export class LevelFilter {
             where: and(...filters),
             orderBy,
             limit: 10,
-            offset: page*10
+            offset: data.page * 10
         })
         const total = await this.db.$count(levelsTable, and(...filters))
 
         return {levels: levels.map(level => level.id), total}
+    }
+
+    searchUserLevels = async (
+        data: z.infer<typeof requestSchema>,
+        followMode: boolean,
+    ) => {
+        const {filters, orderBy} = this.filterParser(data)
+
+        if (data.str) {
+            const id = Number(data.str)
+            if (followMode && data.followed) {
+                if (!isNaN(id)) {
+                    filters.push(eq(levelsTable.id, id))
+                } else {
+                    filters.push(
+                        eq(levelsTable.unlistedType, 0),
+                        ilike(levelsTable.name, `%${data.str}%`)
+                    )
+                }
+
+                const users = data.followed.split(",").map(user => Number(user))
+                filters.push(inArray(levelsTable.ownerUid, users))
+            } else {
+                if (!isNaN(id)) {
+                    filters.push(eq(levelsTable.ownerUid, id))
+                }
+            }
+        } else {
+            if (followMode && data.followed) {
+                const users = data.followed.split(",").map(user => Number(user))
+                filters.push(
+                    eq(levelsTable.unlistedType, 0),
+                    inArray(levelsTable.ownerUid, users)
+                )
+            }
+        }
+
+        const levels = await this.db.query.levelsTable.findMany({
+            columns: {id: true},
+            where: and(...filters),
+            orderBy,
+            limit: 10,
+            offset: data.page * 10
+        })
+        const total = await this.db.$count(levelsTable, and(...filters))
+
+        return {levels: levels.map(level => level.id), total}
+    }
+
+    searchListLevels = async (
+        data: z.infer<typeof requestSchema>,
+    ) => {
+        const {filters, orderBy} = this.filterParser(data)
+
+        if (data.str) {
+            const strSchema = z.string().nonempty()
+                .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
+                .optional().transform(
+                    value => value === "-" ? "" : value
+                )
+
+            if (strSchema.safeParse(data.str).success) {
+                const ids = data.str.split(",").map(id => Number(id))
+                filters.push(inArray(levelsTable.id, ids))
+
+                const levels = await this.db.query.levelsTable.findMany({
+                    columns: {id: true},
+                    where: and(...filters),
+                    orderBy,
+                    limit: 10,
+                    offset: data.page * 10
+                })
+                const total = await this.db.$count(levelsTable, and(...filters))
+
+                return {levels: levels.map(level => level.id), total}
+            }
+        }
+
+        return {levels: [], total: 0}
     }
 }
 

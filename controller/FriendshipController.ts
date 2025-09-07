@@ -1,6 +1,7 @@
 import {friendRequestsTable, friendshipsTable} from "~~/drizzle";
 import {and, eq} from "drizzle-orm";
 import {UserController} from "~~/controller/UserController";
+import {User} from "~~/controller/User";
 
 
 export class FriendshipController {
@@ -72,9 +73,12 @@ export class FriendshipController {
         await this.db.delete(friendshipsTable).where(eq(friendshipsTable.id, friendship.id))
     }
 
-    getAccountFriendsIds = async (uid: number): Promise<number[]> => {
+    getAccountFriendsIds = async (
+        uid: number, user?: User
+    ): Promise<number[]> => {
         const userController = new UserController(this.db)
-        const user = await userController.getOneUser({uid})
+        if (!user)
+            user = await userController.getOneUser({uid}) as User
         if (!user) return []
         const friendsIds: number[] = []
         for (const friendshipId of user.$.friendshipIds) {

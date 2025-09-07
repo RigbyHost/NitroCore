@@ -88,9 +88,9 @@ export const usersTable = mysqlTable("users", {
 
     // Relationships
     isBanned: int("isBanned").notNull().default(1),
-    blacklistedUsers: commaSeparated("blacklist"),
+    blacklistedUsers: commaSeparated("blacklist").notNull(),
     friendsCount: int("friends_cnt").notNull().default(0),
-    friendshipIds: commaSeparated("friendship_ids"),
+    friendshipIds: commaSeparated("friendship_ids").notNull(),
 
     // Settings
     iconType: int("iconType").notNull().default(0),

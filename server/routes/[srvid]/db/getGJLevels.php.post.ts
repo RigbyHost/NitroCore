@@ -1,6 +1,8 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
+import {FriendshipController} from "~~/controller/FriendshipController";
+import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
 
 const metrics = usePerformance()
 
@@ -29,15 +31,66 @@ export default defineEventHandler({
         }
         switch (data.type) {
             case 1:
-                result = await filter.searchLevels("mostdownloaded", data, data.page)
+                result = await filter.searchLevels("mostdownloaded", data)
                 break
             case 3:
-                result = await filter.searchLevels("trending", data, data.page)
+                result = await filter.searchLevels("trending", data)
                 break
             case 4:
-                result = await filter.searchLevels("latest", data, data.page)
+                result = await filter.searchLevels("latest", data)
                 break
             case 5:
+                result = await filter.searchUserLevels(data, false)
+                break
+            case 6:
+            case 17:
+                data.featured = 1
+                result = await filter.searchLevels("latest", data)
+                break
+            case 7:
+                result = await filter.searchLevels("magic", data)
+                break
+            case 10:
+            case 19:
+                result = await filter.searchListLevels(data)
+                break
+            case 11:
+                data.star = 1
+                result = await filter.searchLevels("latest", data) // Awarded
+                break
+            case 12:
+                result = await filter.searchUserLevels(data, true) // Followed
+                break
+            case 13:
+                // Friend levels
+                await authLoginMiddleware(event)
+                if (!event.context.user)
+                    return await event.context.connector.error(-1, "Not logged in")
+                const friendshipController = new FriendshipController(event.context.drizzle)
+                const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)
+                data.followed = friends.join(",")
+                result = await filter.searchUserLevels(data, true)
+                break
+            case 16:
+                result = await filter.searchLevels("hall", data)
+                break
+            case 21:
+                result = await filter.searchLevels("safe_daily", data)
+                break
+            case 22:
+                result = await filter.searchLevels("safe_weekly", data)
+                break
+            case 23:
+                result = await filter.searchLevels("safe_event", data)
+                break
+            case 25:
+                // TODO: Search Level Lists
+                break
+            case 27:
+                result = await filter.searchLevels("sent", data)
+                break
+            default:
+                result = await filter.searchLevels("mostliked", data)
         }
 
         return await event.context.connector.error(-1, "Not implemented")
@@ -83,4 +136,9 @@ export const requestSchema = z.object({
     song: z.coerce.number().optional(),
     songCustom: z.coerce.number().optional(),
     gauntlet: z.coerce.number().optional().default(0),
+    followed: z.string().nonempty()
+        .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
+        .optional().transform(
+            value => value==="-" ? "" : value
+        ),
 })
