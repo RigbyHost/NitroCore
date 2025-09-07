@@ -1,0 +1,36 @@
+import {getRedis, seedRedis} from "~~/tests/core/redis";
+import {getMariaDB, seedDatabase} from "~~/tests/core/database";
+import c from "tinyrainbow"
+import {AbstractStartedContainer} from "testcontainers";
+import {afterAll, beforeAll} from 'vitest'
+import {setup} from "nitro-test-utils";
+
+const PREFIX = c.bgBlue(c.white(" SETUP "))
+
+let containers: AbstractStartedContainer[] = []
+
+beforeAll(async () => {
+    console.log(`${PREFIX} Starting containers...`)
+    const redis = await getRedis().start()
+    const mariadb = await getMariaDB().start()
+    console.log(`${PREFIX} Containers started. Waiting 5s for them to be ready...`)
+    await new Promise(resolve => setTimeout(resolve, 5000))
+    console.log(`${PREFIX} Seeding redis...` )
+    await seedRedis(redis)
+    console.log(`${PREFIX} Seeding database...`)
+    await seedDatabase(mariadb)
+
+    containers = [redis, mariadb]
+
+    console.log(`${PREFIX} Starting Nitro...`)
+    await setup({
+        rootDir: "."
+    })
+}, 300_000)
+
+afterAll(async () => {
+    console.log(`${PREFIX} Stopping containers...`)
+    for (const container of containers) {
+        await container.stop()
+    }
+})

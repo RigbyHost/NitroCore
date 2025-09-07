@@ -1,27 +1,17 @@
 
 
-const escapeHtml = (unsafe: string) => {
-    return unsafe
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-};
-
-
 /**
  * Clears a Geometry Dash request
  * @author Cvolton
  */
 const clearGDRequest = (request: string) => {
-    return escapeHtml(request)
-        .trim()
+    return request.trim()
         .split(":")[0]
         .split("|")[0]
         .split("~")[0]
         .split("#")[0]
         .split(")")[0]
+        .replace("\0","")
         .trim()
 }
 

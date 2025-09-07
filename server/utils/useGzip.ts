@@ -1,4 +1,4 @@
-import { gzip, gunzip, ZlibOptions } from 'zlib';
+import { gzip, gunzip } from 'zlib';
 import { promisify } from 'util';
 
 export const useGzip = () => ({
