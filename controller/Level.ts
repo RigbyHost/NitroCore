@@ -1,7 +1,7 @@
 import {LevelController} from "~~/controller/LevelController";
 import {commentsTable, levelsTable, rateQueueTable} from "~~/drizzle";
 import {diff} from "deep-object-diff";
-import {and, eq} from "drizzle-orm";
+import {and, eq, sql} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
 import {z} from "zod";
 import {ActionController} from "~~/controller/ActionController";
@@ -139,6 +139,11 @@ export class Level<T extends LevelType = LevelType> {
             isFeatured: featured,
         })
     }
+
+    onDownload = async () =>
+        this.db.update(levelsTable)
+            .set({downloads: sql`${levelsTable.downloads}+1`})
+            .where(eq(levelsTable.id, this.$.id))
 
     validate = () => {
         const {success} = validateSchema.safeParse(this.$)

@@ -29,7 +29,7 @@ export class LevelController {
                 where: (level, {eq}) => eq(level.id, levelId),
                 with: {
                     author: {
-                        columns: {uid: true}
+                        columns: {username: true}
                     }
                 }
             })
@@ -47,7 +47,7 @@ export class LevelController {
                 columns: colS,
                 with: {
                     author: {
-                        columns: {uid: true}
+                        columns: {username: true}
                     }
                 }
             })
@@ -57,7 +57,7 @@ export class LevelController {
         }
     }
 
-    getManyUsers = async (
+    getManyLevels = async (
         ids: number[],
         withUser = false,
     ) => {
@@ -107,4 +107,4 @@ export class LevelController {
 }
 
 type GetOneLevelReturnType =  MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
-    & {author: Pick<typeof usersTable.$inferSelect, "uid">}
+    & {author: Pick<typeof usersTable.$inferSelect, "username">}

@@ -4,7 +4,8 @@
   "scripts": {
     "prepare": "nitro prepare",
     "build": "nitro build",
-    "dev": "nitro dev"
+    "dev": "nitro dev",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@testcontainers/mariadb": "^11.5.1",

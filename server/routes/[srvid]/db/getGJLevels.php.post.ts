@@ -3,6 +3,7 @@ import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
 import {FriendshipController} from "~~/controller/FriendshipController";
 import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
+import {ListController} from "~~/controller/ListController";
 
 const metrics = usePerformance()
 
@@ -25,10 +26,12 @@ export default defineEventHandler({
         const levelController = new LevelController(event.context.drizzle)
         const filter = levelController.getFilter()
 
+        metrics.step("Search levels")
+
         let result: {
             levels: number[],
             total: number
-        }
+        } = {levels: [], total: 0}
         switch (data.type) {
             case 1:
                 result = await filter.searchLevels("mostdownloaded", data)
@@ -84,7 +87,18 @@ export default defineEventHandler({
                 result = await filter.searchLevels("safe_event", data)
                 break
             case 25:
-                // TODO: Search Level Lists
+                const listController = new ListController(event.context.drizzle)
+                const id = Number(data.str)
+                if (isNaN(id))
+                    break
+                const list = await listController.getOneList(id)
+                if (!list)
+                    break
+                await list.onDownload()
+                result = {
+                    levels: list.$.levels || [],
+                    total: list.$.levels?.length || 0
+                }
                 break
             case 27:
                 result = await filter.searchLevels("sent", data)
@@ -92,6 +106,15 @@ export default defineEventHandler({
             default:
                 result = await filter.searchLevels("mostliked", data)
         }
+
+        if (result.levels.length === 0)
+            return await event.context.connector.error(-2, "No levels found")
+
+        metrics.step("Get levels data")
+
+        const levels = await levelController.getManyLevels(result.levels, true)
+
+        // TODO: Music and connector
 
         return await event.context.connector.error(-1, "Not implemented")
 

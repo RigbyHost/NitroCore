@@ -13,13 +13,13 @@ export default defineEventHandler({
         const {data, success} = requestSchema.safeParse(post)
 
         if (!success)
-            return "-1"
+            return await event.context.connector.error(-1, "Bad Request")
 
         const commentController = new CommentController(event.context.drizzle)
 
         await commentController.deleteAccountComment(data.commentID, event.context.user!.$.uid)
 
-        return "1"
+        return await event.context.connector.success("Comment deleted")
     }
 })
 

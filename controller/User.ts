@@ -29,6 +29,15 @@ export class User<T extends UserType = UserType> {
         this.$ = user
     }
 
+    fetchRole = async () => {
+        if (!this.$.roleId)
+            return null
+        const role = await this.db.query.rolesTable.findFirst({
+            where: (role, {eq}) => eq(role.id, this.$.roleId)
+        });
+        return role || null
+    }
+
     /**
      * Saves all changes to the database, should always be called after modifying the user
      */
