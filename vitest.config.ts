@@ -5,5 +5,12 @@ export default defineConfig({
     plugins: [tsconfigPaths()],
     test: {
         setupFiles: ["./vitest.setup.ts"],
+        coverage: {
+            include: [
+                "controller",
+                "server"
+            ],
+            reporter: ["html", "text"]
+        }
     }
 })

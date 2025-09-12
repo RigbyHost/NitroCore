@@ -7,3 +7,4 @@ dist
 .output
 .env
 .env.local
+coverage
