@@ -38,7 +38,7 @@ export const authLoginMiddleware = defineEventHandler(async event => {
     event.context.user = user
 })
 
-const authRequestSchema = z.object({
+export const authRequestSchema = z.object({
     userName: z.string().nonempty().optional().default("").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),

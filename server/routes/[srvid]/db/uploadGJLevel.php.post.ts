@@ -93,7 +93,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     levelString: z.string().min(1).transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),

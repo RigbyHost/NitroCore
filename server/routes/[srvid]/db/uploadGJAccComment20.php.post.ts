@@ -22,7 +22,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     comment: z.string().min(1).transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),

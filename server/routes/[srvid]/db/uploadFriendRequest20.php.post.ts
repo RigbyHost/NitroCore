@@ -26,7 +26,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     toAccountID: z.coerce.number().positive(),
     comment: z.string().optional().default("").transform(
         value => useGeometryDashTooling().clearGDRequest(value)

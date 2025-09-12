@@ -29,7 +29,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     levelID: z.coerce.number().positive(),
     levelDesc: z.string().transform(
         value => useGeometryDashTooling().clearGDRequest(value)

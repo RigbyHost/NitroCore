@@ -20,6 +20,6 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     targetAccountID: z.coerce.number().positive()
 })

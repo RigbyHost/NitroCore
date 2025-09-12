@@ -29,7 +29,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     commentID: z.array(z.coerce.number().positive()).min(1).max(2),
     page: z.coerce.number().nonnegative().optional().default(0)
 })

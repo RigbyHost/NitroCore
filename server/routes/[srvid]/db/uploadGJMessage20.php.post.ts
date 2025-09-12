@@ -28,7 +28,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     toAccountID: z.coerce.number().positive(),
     body: z.string().nonempty(),
     subject: z.string().optional().default(""),

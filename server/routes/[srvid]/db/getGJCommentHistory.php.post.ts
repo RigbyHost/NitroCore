@@ -38,7 +38,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     userID: z.coerce.number().positive(),
     page: z.coerce.number().nonnegative().optional().default(0),
     mode: z.coerce.number().optional().default(0),

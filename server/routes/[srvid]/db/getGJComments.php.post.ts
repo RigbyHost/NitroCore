@@ -27,7 +27,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     levelID: z.coerce.number(), // May be Level List (negative)
     page: z.coerce.number().nonnegative().optional().default(0),
     mode: z.coerce.number().optional()

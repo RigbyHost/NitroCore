@@ -33,7 +33,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     userName: z.string().nonempty().transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),

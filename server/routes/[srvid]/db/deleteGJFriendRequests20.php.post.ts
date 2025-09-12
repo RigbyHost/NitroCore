@@ -22,7 +22,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     requestID: z.coerce.number().positive(),
     isSender: z.coerce.number().optional().default(0)
 })

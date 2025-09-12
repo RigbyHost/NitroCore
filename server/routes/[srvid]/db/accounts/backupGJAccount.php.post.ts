@@ -53,7 +53,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     gameVersion: z.string().nonempty().optional().default("21"),
     binaryVersion: z.string().nonempty().optional().default("30"),
     saveData: z.string().nonempty(),

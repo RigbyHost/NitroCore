@@ -20,7 +20,7 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     getSent: z.coerce.number().optional().default(0),
     page: z.coerce.number().nonnegative().optional().default(0)
 })

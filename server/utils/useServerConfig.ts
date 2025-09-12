@@ -2,11 +2,11 @@
 /**
  * Gets the server config for a specific server from {@link H3Event} router param `srvid`
  */
-export const useServerConfig = async (): Promise<{
+export const useServerConfig = async (serverId?: string): Promise<{
     config: Nullable<ServerConfig>,
     setConfig: (config: ServerConfig) => void
 }> => {
-    const srvid = getRouterParam(useEvent(), "srvid")!
+    const srvid = serverId || getRouterParam(useEvent(), "srvid")!
     const storage = useStorage<ServerConfig>("config")
     const config = await storage.getItem(srvid)
     const setConfig = (config: ServerConfig) => storage.setItem(srvid, config)
@@ -52,16 +52,3 @@ type ServerConfig = {
         BannedIPs: string[]
     }
 }
-
-useStorage<ServerConfig>("config").setItem("0000", {
-    ChestConfig: {} as ServerConfig["ChestConfig"],
-    ServerConfig: {
-        SrvID: "0000",
-    } as ServerConfig["ServerConfig"],
-    SecurityConfig: {
-        DisableProtection: false,
-        NoLevelLimits: false,
-        AutoActivate: false,
-        BannedIPs: []
-    }
-})
