@@ -31,7 +31,7 @@ export default defineNitroConfig({
             driver: "fs-lite",
             base: "./_savedata"
         },
-        config: {
+        config: { // DO NOT REMOVE: AUTOPOPULATED BY VITEST
             driver: "redis",
             host: 'valkey',
             port: 6379,

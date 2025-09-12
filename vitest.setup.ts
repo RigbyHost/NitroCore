@@ -2,14 +2,16 @@ import {getRedis, seedRedis} from "~~/tests/core/redis";
 import {getMariaDB, seedDatabase} from "~~/tests/core/database";
 import c from "tinyrainbow"
 import {AbstractStartedContainer} from "testcontainers";
-import {afterAll, beforeAll} from 'vitest'
-import {setup} from "nitro-test-utils";
+import {setup as setupNitro} from "nitro-test-utils";
+import {TestProject} from "vitest/node";
 
 const PREFIX = c.bgBlue(c.white(" SETUP "))
 
 let containers: AbstractStartedContainer[] = []
 
-beforeAll(async () => {
+export const setup = async (p: TestProject) => {
+    if (containers.length)
+        return
     console.log(`${PREFIX} Starting containers...`)
     const redis = await getRedis().start()
     const mariadb = await getMariaDB().start()
@@ -22,15 +24,33 @@ beforeAll(async () => {
 
     containers = [redis, mariadb]
 
-    console.log(`${PREFIX} Starting Nitro...`)
-    await setup({
-        rootDir: "."
+    p.provide("config", {
+        host: redis.getHost(),
+        port: redis.getPort(),
+        password: redis.getPassword()
     })
-}, 300_000)
 
-afterAll(async () => {
+
+
+    console.log(`${PREFIX} Starting Nitro...`)
+    // await setupNitro({
+    //     rootDir: "."
+    // })
+}
+
+export const teardown = async () => {
     console.log(`${PREFIX} Stopping containers...`)
     for (const container of containers) {
         await container.stop()
     }
-})
+}
+
+declare module 'vitest' {
+    export interface ProvidedContext {
+        config: {
+            host: string,
+            port: number,
+            password: string
+        }
+    }
+}

@@ -1,10 +1,24 @@
-import { defineConfig } from 'nitro-test-utils/config'
+import {defineConfig} from 'nitro-test-utils/config'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import AutoImport from "unplugin-auto-import/vite"
 
 export default defineConfig({
-    plugins: [tsconfigPaths()],
+    plugins: [
+        tsconfigPaths(),
+        AutoImport({
+            imports: [
+                "vitest",
+                {
+                    "nitropack/config": ["defineNitroConfig"]
+                }
+            ],
+            dirs: ['./server/utils', "./tests/mocks"],
+            dts: "./tests/imports.d.ts"
+        })
+    ],
     test: {
-        setupFiles: ["./vitest.setup.ts"],
+        setupFiles: ["./tests/core/injector.ts"],
+        globalSetup: ["./vitest.setup.ts"],
         coverage: {
             include: [
                 "controller",

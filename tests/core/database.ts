@@ -1,5 +1,4 @@
 import {MariaDbContainer, StartedMariaDbContainer} from "@testcontainers/mariadb";
-import {vi} from "vitest"
 import * as schema from "~~/drizzle"
 import {drizzle} from "drizzle-orm/mysql2";
 
@@ -11,9 +10,6 @@ export const getMariaDB = () =>
         .withUserPassword("test")
 
 export const seedDatabase = async (container: StartedMariaDbContainer) => {
-    const {createRequire} =
-        await vi.importActual<typeof import("node:module")>("node:module")
-    const require = createRequire(import.meta.url)
     const {pushMySQLSchema} = require("drizzle-kit/api") as typeof import("drizzle-kit/api")
 
     const driz = drizzle({
