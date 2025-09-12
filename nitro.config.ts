@@ -37,27 +37,5 @@ export default defineNitroConfig({
             port: 6379,
             password: ''
         }
-    },
-    database: {
-        default: {
-            connector: "mysql2",
-            options: {
-                user: "noone",
-                password: "noone",
-                host: "gayhost",
-                port: "gayport"
-            }
-        }
-    },
-    devDatabase: {
-        default: {
-            connector: "mysql2",
-            options: {
-                user: "root",
-                password: "root",
-                host: "mariadb",
-                port: 3306
-            }
-        }
     }
 });

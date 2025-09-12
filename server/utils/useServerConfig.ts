@@ -4,8 +4,9 @@
  */
 export const useServerConfig = async (serverId?: string): Promise<{
     config: Nullable<ServerConfig>,
-    setConfig: (config: ServerConfig) => void
+    setConfig: (config: ServerConfig) => Promise<void>
 }> => {
+    /* c8 ignore next */
     const srvid = serverId || getRouterParam(useEvent(), "srvid")!
     const storage = useStorage<ServerConfig>("config")
     const config = await storage.getItem(srvid)

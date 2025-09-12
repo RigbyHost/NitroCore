@@ -1,3 +1,4 @@
+/* v8 ignore start */
 import { gzip, gunzip } from 'zlib';
 import { promisify } from 'util';
 

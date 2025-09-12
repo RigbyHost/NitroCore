@@ -1,4 +1,4 @@
-
+/* v8 ignore start */
 class SimplePerformance {
     private now: number
     private steps: { [key: string]: number } = {}

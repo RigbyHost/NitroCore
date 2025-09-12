@@ -4,8 +4,10 @@ import * as schema from "~~/drizzle"
 
 
 const pools: Map<string, mysql.Pool> = new Map()
-const defaultConfig: mysql.PoolOptions = {
+// TODO: production env or appConfig
+export const defaultConfig: mysql.PoolOptions = {
     host: "localhost",
+    port: 3306,
     user: "root",
     password: "password",
     waitForConnections: true,
@@ -18,8 +20,9 @@ const defaultConfig: mysql.PoolOptions = {
  *
  * @returns Drizzle instance for the specified server
  */
-export const useDrizzle = async () => {
-    const srvid = getRouterParam(useEvent(), "srvid")!
+export const useDrizzle = async (database?: string) => {
+    /* v8 ignore next */
+    const srvid = database ||getRouterParam(useEvent(), "srvid")!
 
     if (!pools.has(srvid))
         pools.set(srvid, mysql.createPool({

@@ -32,13 +32,13 @@ const doXOR = (data: string, key: string) => {
  */
 const getDateAgo = (date: number) => {
     const diff = (Date.now() - date)/1000;
-    if (diff < 60) return `${diff} seconds`;
-    if (diff < 3600) return `${Math.floor(diff/60)} minutes`;
-    if (diff < 86400) return `${Math.floor(diff/3600)} hours`;
-    if (diff < 604800) return `${Math.floor(diff/86400)} days`;
-    if (diff < 604800*4) return `${Math.floor(diff/604800)} weeks`;
-    if (diff < 604800*4*12) return `${Math.floor(diff/604800*4)} months`;
-    return `${Math.floor(diff/(604800*4*12))} years`;
+    if (diff <= 60) return `${Math.trunc(diff)} seconds`;
+    if (diff <= 3600) return `${Math.trunc(diff/60)} minutes`;
+    if (diff <= 86400) return `${Math.trunc(diff/3600)} hours`;
+    if (diff <= 604800) return `${Math.trunc(diff/86400)} days`;
+    if (diff <= 604800*4) return `${Math.trunc(diff/604800)} weeks`;
+    if (diff <= 604800*4*12) return `${Math.trunc(diff/604800/4)} months`;
+    return `${Math.trunc(diff/(604800*4*12))} years`;
 }
 
 const hashSolo = (levelstring: string) => {
@@ -46,6 +46,7 @@ const hashSolo = (levelstring: string) => {
     let p = 0;
     const plen = levelstring.length;
     for (let i = 0; i < plen; i += (plen / 40)) {
+        /* v8 ignore next */
         if (p > 39) break;
         hash[p] = levelstring.charCodeAt(i);
         p++;
@@ -81,6 +82,7 @@ const doGJP2 = (password: string) => {
  * @returns The Geometry Dash version: "1.9","2.0", "2.1", "2.2"
  */
 const getGDVersionFromBody = async (postData?: FormData) => {
+    /* v8 ignore next 2 */
     const post = postData || await readFormData(useEvent())
     let version = 21
     if (post.has("gameVersion")) {
