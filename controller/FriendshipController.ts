@@ -91,7 +91,7 @@ export class FriendshipController {
         return friendsIds
     }
 
-    readFriendRequest = async (uid: number, reqestId: number) =>
+    readFriendRequest = async (uid: number, reqestId: number) => {
         await this.db.update(friendRequestsTable)
             .set({
                 isNew: false
@@ -100,6 +100,7 @@ export class FriendshipController {
                 eq(friendRequestsTable.id, reqestId),
                 eq(friendRequestsTable.uidDest, uid)
             ))
+    }
 
     createFriendRequest = async (uid: number, targetId: number, comment: string) => {
         if (
