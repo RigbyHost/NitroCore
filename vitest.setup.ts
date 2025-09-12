@@ -29,6 +29,12 @@ export const setup = async (p: TestProject) => {
         port: redis.getPort(),
         password: redis.getPassword()
     })
+    p.provide("database", {
+        host: mariadb.getHost(),
+        port: mariadb.getPort(),
+        user: "root",
+        password: mariadb.getRootPassword()
+    })
 
 
 
@@ -50,6 +56,12 @@ declare module 'vitest' {
         config: {
             host: string,
             port: number,
+            password: string
+        },
+        database: {
+            host: string,
+            port: number,
+            user: string,
             password: string
         }
     }

@@ -13,4 +13,11 @@ describe('useServerConfig()', () => {
         const {config} = await useServerConfig("nope")
         expect(config).toBeNull()
     })
+
+    it("Updates atomically", async () => {
+        const {config, setConfig} = await useServerConfig("0000")
+        expect(await setConfig({...config!, SecurityConfig: {...config!.SecurityConfig, AutoActivate: true}}))
+        const {config: newConfig} = await useServerConfig("0000")
+        expect(newConfig!.SecurityConfig.AutoActivate).toBe(true)
+    })
 });
