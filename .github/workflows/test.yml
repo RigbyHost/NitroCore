@@ -24,7 +24,7 @@ jobs:
       run: bun install
     
     - name: 🧪 Run Vitest tests
-      run: bun test
+      run: bun run test
 
   notify:
     name: Discord Notification
