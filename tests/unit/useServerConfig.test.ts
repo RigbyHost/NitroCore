@@ -1,3 +1,4 @@
+import {after} from "node:test";
 
 describe('useServerConfig()', () => {
     it("Loads successfully valid ID", async () => {
@@ -19,5 +20,9 @@ describe('useServerConfig()', () => {
         expect(await setConfig({...config!, SecurityConfig: {...config!.SecurityConfig, AutoActivate: true}}))
         const {config: newConfig} = await useServerConfig("0000")
         expect(newConfig!.SecurityConfig.AutoActivate).toBe(true)
+    })
+
+    afterAll(async () => {
+        await useStorage("config").dispose()
     })
 });

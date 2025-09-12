@@ -2,7 +2,6 @@ import {getRedis, seedRedis} from "~~/tests/core/redis";
 import {getMariaDB, seedDatabase} from "~~/tests/core/database";
 import c from "tinyrainbow"
 import {AbstractStartedContainer} from "testcontainers";
-import {setup as setupNitro} from "nitro-test-utils";
 import {TestProject} from "vitest/node";
 
 const PREFIX = c.bgBlue(c.white(" SETUP "))
@@ -35,13 +34,6 @@ export const setup = async (p: TestProject) => {
         user: "root",
         password: mariadb.getRootPassword()
     })
-
-
-
-    console.log(`${PREFIX} Starting Nitro...`)
-    // await setupNitro({
-    //     rootDir: "."
-    // })
 }
 
 export const teardown = async () => {

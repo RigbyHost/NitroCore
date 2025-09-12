@@ -5,7 +5,8 @@
     "prepare": "nitro prepare",
     "build": "nitro build",
     "dev": "nitro dev",
-    "test": "vitest run"
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@testcontainers/mariadb": "^11.5.1",
