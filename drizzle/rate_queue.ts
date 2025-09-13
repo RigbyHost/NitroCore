@@ -1,16 +1,15 @@
-import {boolean, int, mysqlTable, text} from "drizzle-orm/mysql-core";
+import {boolean, integer, pgTable, serial, text} from "drizzle-orm/pg-core";
 import {relations} from "drizzle-orm";
 import {usersTable} from "./users";
 import {levelsTable} from "./levels";
 
-
-export const rateQueueTable = mysqlTable("rateQueue", {
-    id: int("id").autoincrement().primaryKey(),
-    levelId: int("lvl_id").notNull(),
+export const rateQueueTable = pgTable("rateQueue", {
+    id: serial("id").primaryKey(),
+    levelId: integer("lvl_id").notNull(),
     name: text("name").notNull().default("Unnamed"),
-    uid: int("uid").notNull(),
-    modUid: int("mod_uid").notNull(),
-    stars: int("stars").notNull().default(0),
+    uid: integer("uid").notNull(),
+    modUid: integer("mod_uid").notNull(),
+    stars: integer("stars").notNull().default(0),
     isFeatured: boolean("isFeatured").notNull().default(false),
 })
 

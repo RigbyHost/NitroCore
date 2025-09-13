@@ -1,38 +1,13 @@
-import {customType, datetime, int, mysqlTable, text} from "drizzle-orm/mysql-core";
+import { pgTable, serial, text, integer, timestamp, pgEnum } from "drizzle-orm/pg-core";
 
-const questType = customType<{
-    data: "event" | "daily" | "weekly" | "orbs" | "coins" | "stars"
-}>({
-    dataType: () => "int",
-    toDriver: (value) => {
-        return {
-            event: -1,
-            daily: 0,
-            weekly: 1,
-            orbs: 2,
-            coins: 3,
-            stars: 4
-        }[value]
-    },
-    fromDriver: (value) => {
-        if (typeof value !== "number") return "daily"
-        return {
-            "-1": "event",
-            "0": "daily",
-            "1": "weekly",
-            "2": "orbs",
-            "3": "coins",
-            "4": "stars"
-        }[value.toString()] as "event" | "daily" | "weekly" | "orbs" | "coins" | "stars"
-    }
-})
+export const questTypeEnum = pgEnum("quest_type", ["event", "daily", "weekly", "orbs", "coins", "stars"]);
 
-export const questsTable = mysqlTable("quests", {
-    id: int("id").autoincrement().primaryKey(),
-    type: questType("type").notNull(),
+export const questsTable = pgTable("quests", {
+    id: serial("id").primaryKey(),
+    type: questTypeEnum("type").notNull(),
     name: text("name").notNull(),
-    needed: int("needed").notNull(),
-    reward: int("reward").notNull(),
-    levelId: int("lvl_id").notNull(),
-    timeAdded: datetime("timeExpire").notNull(),
-})
+    needed: integer("needed").notNull(),
+    reward: integer("reward").notNull(),
+    levelId: integer("lvl_id").notNull(),
+    timeAdded: timestamp("time_added").notNull(),
+});

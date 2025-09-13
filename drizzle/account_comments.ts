@@ -1,14 +1,14 @@
-import {boolean, datetime, int, mysqlTable, text} from "drizzle-orm/mysql-core";
-import {relations, sql} from "drizzle-orm";
+import {boolean, integer, pgTable, serial, text, timestamp} from "drizzle-orm/pg-core";
+import {relations} from "drizzle-orm";
 import {usersTable} from "./users";
 
 
-export const accountCommentsTable = mysqlTable("acccomments", {
-    id: int("id").autoincrement().primaryKey(),
-    uid: int("uid").notNull(),
+export const accountCommentsTable = pgTable("acccomments", {
+    id: serial("id").primaryKey(),
+    uid: integer("uid").notNull(),
     comment: text("comment").notNull(),
-    postedTime: datetime("postedTime").notNull().default(sql`CURRENT_TIMESTAMP`),
-    likes: int("likes").notNull().default(0),
+    postedTime: timestamp("postedTime").notNull().defaultNow(),
+    likes: integer("likes").notNull().default(0),
     isSpam: boolean("isSpam").notNull().default(false),
 })
 

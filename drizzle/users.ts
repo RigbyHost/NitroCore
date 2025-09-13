@@ -1,30 +1,30 @@
-import {mysqlTable, int, text, datetime, json} from "drizzle-orm/mysql-core";
-import {relations, sql} from "drizzle-orm";
+import {pgTable, integer, text, timestamp, jsonb, serial} from "drizzle-orm/pg-core";
+import {relations} from "drizzle-orm";
 import {commaSeparated} from "./custom_types";
 import {rolesTable} from "./roles";
 import {accountCommentsTable} from "./account_comments";
 import {commentsTable} from "./comments";
 import {levelsTable} from "./levels";
 
-export const usersTable = mysqlTable("users", {
+export const usersTable = pgTable("users", {
     // Primary
-    uid: int("uid").autoincrement().primaryKey(),
+    uid: serial("uid").primaryKey(),
     username: text("uname").notNull(),
     passwordHash: text("passhash").notNull(),
     gjpHash: text("gjphash").notNull(),
     email: text("email").notNull(),
-    roleId: int("role_id").notNull().default(0),
+    roleId: integer("role_id").notNull().default(0),
 
     // Stats
-    stars: int("stars").notNull().default(0),
-    diamonds: int("diamonds").notNull().default(0),
-    coins: int("coins").notNull().default(0),
-    userCoins: int("ucoins").notNull().default(0),
-    demons: int("demons").notNull().default(0),
-    creatorPoints: int("cpoints").notNull().default(0),
-    orbs: int("orbs").notNull().default(0),
-    moons: int("moons").notNull().default(0),
-    extraData: json("extraData")
+    stars: integer("stars").notNull().default(0),
+    diamonds: integer("diamonds").notNull().default(0),
+    coins: integer("coins").notNull().default(0),
+    userCoins: integer("ucoins").notNull().default(0),
+    demons: integer("demons").notNull().default(0),
+    creatorPoints: integer("cpoints").notNull().default(0),
+    orbs: integer("orbs").notNull().default(0),
+    moons: integer("moons").notNull().default(0),
+    extraData: jsonb("extraData")
         .$type<{
         DemonStats: {
             Standard: {
@@ -65,13 +65,13 @@ export const usersTable = mysqlTable("users", {
         }>(),
 
     // Technical
-    registerDate: datetime("regDate").notNull().default(sql`CURRENT_TIMESTAMP`),
-    accessDate: datetime("accessDate").notNull().default(sql`CURRENT_TIMESTAMP`),
+    registerDate: timestamp("regDate").notNull().defaultNow(),
+    accessDate: timestamp("accessDate").notNull().defaultNow(),
     lastIP: text("lastIP").notNull().default("Unknown"),
-    gameVersion: int("gameVer").notNull().default(20),
-    levelsCompleted: int("lvlsCompleted").notNull().default(0),
-    special: int("special").notNull().default(0),
-    protectMeta: json("protect_meta").notNull()
+    gameVersion: integer("gameVer").notNull().default(20),
+    levelsCompleted: integer("lvlsCompleted").notNull().default(0),
+    special: integer("special").notNull().default(0),
+    protectMeta: jsonb("protect_meta").notNull()
         .$type<{
             comment_time: number,
             post_time: number,
@@ -82,19 +82,19 @@ export const usersTable = mysqlTable("users", {
             post_time: 0,
             message_time: 0
         }),
-    protectLevelsToday: int("protect_levelsToday").notNull().default(0),
-    protectTodayStars: int("protect_todayStars").notNull().default(0),
+    protectLevelsToday: integer("protect_levelsToday").notNull().default(0),
+    protectTodayStars: integer("protect_todayStars").notNull().default(0),
 
 
     // Relationships
-    isBanned: int("isBanned").notNull().default(1),
-    blacklistedUsers: commaSeparated("blacklist").notNull(),
-    friendsCount: int("friends_cnt").notNull().default(0),
-    friendshipIds: commaSeparated("friendship_ids").notNull(),
+    isBanned: integer("isBanned").notNull().default(1),
+    blacklistedUsers: commaSeparated("blacklist"),
+    friendsCount: integer("friends_cnt").notNull().default(0),
+    friendshipIds: commaSeparated("friendship_ids"),
 
     // Settings
-    iconType: int("iconType").notNull().default(0),
-    vessels: json("vessels").notNull()
+    iconType: integer("iconType").notNull().default(0),
+    vessels: jsonb("vessels").notNull()
         .$type<{
             clr_primary: number, clr_secondary: number,
             cube: number, ship: number, ball: number, ufo: number, wave: number, robot: number,
@@ -105,7 +105,7 @@ export const usersTable = mysqlTable("users", {
             cube: 0, ship: 0, ball: 0, ufo: 0, wave: 0, robot: 0,
             spider: 0, swing: 0, jetpack: 0, trace: 0, death: 0
         }),
-    chests: json("chests").notNull()
+    chests: jsonb("chests").notNull()
         .$type<{
             small_count: number,
             big_count: number,
@@ -118,7 +118,7 @@ export const usersTable = mysqlTable("users", {
             small_time: 0,
             big_time: 0
         }),
-    settings: json("settings").notNull()
+    settings: jsonb("settings").notNull()
         .$type<{
             frS: number,
             cS: number,

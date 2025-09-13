@@ -1,22 +1,19 @@
-import {MariaDbContainer, StartedMariaDbContainer} from "@testcontainers/mariadb";
+import {PostgreSqlContainer, StartedPostgreSqlContainer} from "@testcontainers/postgresql";
 import * as schema from "~~/drizzle"
-import {drizzle} from "drizzle-orm/mysql2";
+import {drizzle} from "drizzle-orm/node-postgres";
 
-export const getMariaDB = () =>
-    new MariaDbContainer("mariadb")
-        .withRootPassword("root")
+export const getPostgres = () =>
+    new PostgreSqlContainer("postgres:17")
         .withDatabase("gdps_0000")
         .withUsername("test")
-        .withUserPassword("test")
+        .withPassword("test")
 
-export const seedDatabase = async (container: StartedMariaDbContainer) => {
-    const {pushMySQLSchema} = require("drizzle-kit/api") as typeof import("drizzle-kit/api")
+export const seedDatabase = async (container: StartedPostgreSqlContainer) => {
+    const {pushSchema} = require("drizzle-kit/api") as typeof import("drizzle-kit/api")
 
-    const driz = drizzle({
-            connection: {uri: container.getConnectionUri(true)}
-        })
-    const {apply} = await pushMySQLSchema(schema, driz, container.getDatabase())
+    const driz = drizzle(container.getConnectionUri())
+    const {apply} = await pushSchema(schema, driz)
 
     await apply()
-    driz.$client.end()
+    await driz.$client.end()
 }

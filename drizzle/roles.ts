@@ -1,12 +1,11 @@
-import {int, json, mysqlTable, text} from "drizzle-orm/mysql-core";
+import {integer, json, pgTable, serial, text} from "drizzle-orm/pg-core";
 
-
-export const rolesTable = mysqlTable("roles", {
+export const rolesTable = pgTable("roles", {
     // Primary
-    id: int("id").autoincrement().primaryKey(),
+    id: serial("id").primaryKey(),
     roleName: text("roleName").notNull().default("Moderator"),
     commentColor: text("commentColor").notNull().default("0,0,255"),
-    modLevel: int("modLevel").notNull().default(1),
+    modLevel: integer("modLevel").notNull().default(1),
     privileges: json("privs").notNull()
         .$type<{
             cRate: number,

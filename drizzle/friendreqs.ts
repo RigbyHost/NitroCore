@@ -1,13 +1,12 @@
-import {boolean, int, mysqlTable, text} from "drizzle-orm/mysql-core";
-import {relations, sql} from "drizzle-orm";
+import {boolean, integer, pgTable, serial, text, timestamp} from "drizzle-orm/pg-core";
+import {relations} from "drizzle-orm";
 import {usersTable} from "./users";
 
-
-export const friendRequestsTable = mysqlTable("friendreqs", {
-    id: int("id").autoincrement().primaryKey(),
-    uidSrc: int("uid_src").notNull(),
-    uidDest: int("uid_dest").notNull(),
-    uploadDate: int("uploadDate").notNull().default(sql`CURRENT_TIMESTAMP`),
+export const friendRequestsTable = pgTable("friendreqs", {
+    id: serial("id").primaryKey(),
+    uidSrc: integer("uid_src").notNull(),
+    uidDest: integer("uid_dest").notNull(),
+    uploadDate: timestamp("uploadDate").notNull().defaultNow(),
     comment: text("comment").notNull().default(""),
     isNew: boolean("isNew").notNull().default(true),
 })

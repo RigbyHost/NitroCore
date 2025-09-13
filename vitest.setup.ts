@@ -1,5 +1,5 @@
 import {getRedis, seedRedis} from "~~/tests/core/redis";
-import {getMariaDB, seedDatabase} from "~~/tests/core/database";
+import {getPostgres, seedDatabase} from "~~/tests/core/database";
 import c from "tinyrainbow"
 import {AbstractStartedContainer} from "testcontainers";
 import {TestProject} from "vitest/node";
@@ -13,15 +13,15 @@ export const setup = async (p: TestProject) => {
         return
     console.log(`${PREFIX} Starting containers...`)
     const redis = await getRedis().start()
-    const mariadb = await getMariaDB().start()
+    const postgres = await getPostgres().start()
     console.log(`${PREFIX} Containers started. Waiting 5s for them to be ready...`)
     await new Promise(resolve => setTimeout(resolve, 5000))
     console.log(`${PREFIX} Seeding redis...` )
     await seedRedis(redis)
     console.log(`${PREFIX} Seeding database...`)
-    await seedDatabase(mariadb)
+    await seedDatabase(postgres)
 
-    containers = [redis, mariadb]
+    containers = [redis, postgres]
 
     p.provide("config", {
         host: redis.getHost(),
@@ -29,10 +29,10 @@ export const setup = async (p: TestProject) => {
         password: redis.getPassword()
     })
     p.provide("database", {
-        host: mariadb.getHost(),
-        port: mariadb.getPort(),
+        host: postgres.getHost(),
+        port: postgres.getPort(),
         user: "root",
-        password: mariadb.getRootPassword()
+        password: postgres.getPassword()
     })
 }
 

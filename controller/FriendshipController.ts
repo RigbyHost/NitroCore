@@ -134,7 +134,7 @@ export class FriendshipController {
         const friendshipId = await this.db.insert(friendshipsTable).values({
             uid1: request.uidSrc,
             uid2: request.uidDest,
-        }).$returningId()
+        }).returning({id: friendshipsTable.id})
 
         const userController = new UserController(this.db)
 

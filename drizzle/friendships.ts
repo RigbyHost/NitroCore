@@ -1,11 +1,11 @@
-import {boolean, int, mysqlTable} from "drizzle-orm/mysql-core";
+import {boolean, integer, pgTable, serial} from "drizzle-orm/pg-core";
 import {relations} from "drizzle-orm";
 import {usersTable} from "./users";
 
-export const friendshipsTable = mysqlTable("friendships", {
-    id: int("id").autoincrement().primaryKey(),
-    uid1: int("uid1").notNull(),
-    uid2: int("uid2").notNull(),
+export const friendshipsTable = pgTable("friendships", {
+    id: serial("id").primaryKey(),
+    uid1: integer("uid1").notNull(),
+    uid2: integer("uid2").notNull(),
     u1_new: boolean("u1_new").notNull().default(false),
     u2_new: boolean("u2_new").notNull().default(false),
 })

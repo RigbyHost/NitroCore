@@ -1,25 +1,24 @@
-import {boolean, datetime, int, mysqlTable, text} from "drizzle-orm/mysql-core";
+import {boolean, integer, pgTable, serial, text, timestamp} from "drizzle-orm/pg-core";
 import {commaSeparated} from "./custom_types";
-import {relations, sql} from "drizzle-orm";
-import {usersTable} from "~~/drizzle/users";
+import {relations} from "drizzle-orm";
+import {usersTable} from "./users";
 
-
-export const listsTable = mysqlTable("lists", {
-    id: int("id").autoincrement().primaryKey(),
+export const listsTable = pgTable("lists", {
+    id: serial("id").primaryKey(),
     name: text("name").notNull().default("Unnamed"),
     description: text("description").notNull().default(""),
-    ownerId: int("uid").notNull().default(0),
-    version: int("version").notNull().default(1),
-    difficulty: int("difficulty").notNull().default(-1),
-    downloads: int("downloads").notNull().default(0),
-    likes: int("likes").notNull().default(0),
+    ownerId: integer("uid").notNull().default(0),
+    version: integer("version").notNull().default(1),
+    difficulty: integer("difficulty").notNull().default(-1),
+    downloads: integer("downloads").notNull().default(0),
+    likes: integer("likes").notNull().default(0),
     isFeatured: boolean("isFeatured").notNull().default(false),
     isUnlisted: boolean("isUnlisted").notNull().default(false),
     levels: commaSeparated("levels"),
-    diamonds: int("diamonds").notNull().default(0),
-    levelDiamonds: int("lvlDiamonds").notNull().default(0),
-    uploadDate: datetime("uploadDate").notNull().default(sql`CURRENT_TIMESTAMP`),
-    updateDate: datetime("updateDate").notNull().default(sql`CURRENT_TIMESTAMP`),
+    diamonds: integer("diamonds").notNull().default(0),
+    levelDiamonds: integer("lvlDiamonds").notNull().default(0),
+    uploadDate: timestamp("uploadDate").notNull().defaultNow(),
+    updateDate: timestamp("updateDate").notNull().defaultNow()
 })
 
 export const listRelations = relations(listsTable, ({one}) => ({

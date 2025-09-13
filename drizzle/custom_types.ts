@@ -1,4 +1,4 @@
-import {customType} from "drizzle-orm/mysql-core";
+import {customType} from "drizzle-orm/pg-core";
 
 export const commaSeparated = customType<{ data: Array<number> }>({
     dataType: () => "text",
@@ -6,7 +6,7 @@ export const commaSeparated = customType<{ data: Array<number> }>({
         if (typeof text !== "string") return []
         const candidates = text.split(",").filter(v => v)
         return candidates.length
-            ? candidates.map(Number)
+            ? candidates.map(Number).filter(v => !isNaN(v))
             : []
     },
     toDriver: (value) => {

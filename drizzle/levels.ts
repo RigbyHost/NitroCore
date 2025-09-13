@@ -1,30 +1,30 @@
-import {boolean, datetime, float, int, json, mysqlTable, text} from "drizzle-orm/mysql-core";
-import {relations, sql} from "drizzle-orm";
+import {boolean, doublePrecision, integer, json, pgTable, serial, text, timestamp} from "drizzle-orm/pg-core";
+import {relations} from "drizzle-orm";
 import {usersTable} from "./users";
 
 // TODO: Drizzle migration CREATE TABLE levels (...) AUTO_INCREMENT=30;
 
-export const levelsTable = mysqlTable("levels", {
+export const levelsTable = pgTable("levels", {
     // Primary
-    id: int("id").autoincrement().primaryKey(),
+    id: serial("id").primaryKey(),
     name: text("name").notNull().default("Unnamed"),
     description: text("description").notNull().default(""),
-    ownerUid: int("uid").notNull(),
+    ownerUid: integer("uid").notNull(),
     password: text("password").notNull().default(""),
-    version: int("version").notNull().default(1),
+    version: integer("version").notNull().default(1),
 
     // Diff
-    length: int("length").notNull().default(0),
-    difficulty: int("difficulty").notNull().default(0),
-    demonDifficulty: int("demonDifficulty").notNull().default(-1),
-    suggestedDifficulty: float("suggestDifficulty").notNull().default(0),
-    suggestedDifficultyCount: int("suggestDifficultyCount").notNull().default(0),
+    length: integer("length").notNull().default(0),
+    difficulty: integer("difficulty").notNull().default(0),
+    demonDifficulty: integer("demonDifficulty").notNull().default(-1),
+    suggestedDifficulty: doublePrecision("suggestDifficulty").notNull().default(0),
+    suggestedDifficultyCount: integer("suggestDifficultyCount").notNull().default(0),
 
     // Meta
-    trackId: int("track_id").notNull().default(0),
-    songId: int("song_id").notNull().default(0),
-    versionGame: int("versionGame").notNull(),
-    versionBinary: int("versionBinary").notNull(),
+    trackId: integer("track_id").notNull().default(0),
+    songId: integer("song_id").notNull().default(0),
+    versionGame: integer("versionGame").notNull(),
+    versionBinary: integer("versionBinary").notNull(),
     expandableStore: json("stringExtra").$type<{
         extra_string: string,
         ts: number,
@@ -32,17 +32,17 @@ export const levelsTable = mysqlTable("levels", {
     stringSettings: text("stringSettings").notNull().default(""),
     stringLevel: text("stringLevel").notNull(),
     stringLevelInfo: text("stringLevelInfo").notNull().default(""),
-    originalId: int("original_id").notNull().default(0),
+    originalId: integer("original_id").notNull().default(0),
 
     // Stats
-    objects: int("objects").notNull().default(0),
-    starsRequested: int("starsRequested").notNull().default(0),
-    starsGot: int("starsGot").notNull().default(0),
-    userCoins: int("ucoins").notNull().default(0),
-    coins: int("coins").notNull().default(0),
-    downloads: int("downloads").notNull().default(0),
-    likes: int("likes").notNull().default(0),
-    reports: int("reports").notNull().default(0),
+    objects: integer("objects").notNull().default(0),
+    starsRequested: integer("starsRequested").notNull().default(0),
+    starsGot: integer("starsGot").notNull().default(0),
+    userCoins: integer("ucoins").notNull().default(0),
+    coins: integer("coins").notNull().default(0),
+    downloads: integer("downloads").notNull().default(0),
+    likes: integer("likes").notNull().default(0),
+    reports: integer("reports").notNull().default(0),
     // /**
     //  * @deprecated The field is rudimentary and exists only for compatibility purposes
     //  */
@@ -53,16 +53,16 @@ export const levelsTable = mysqlTable("levels", {
     isVerified: boolean("isVerified").notNull().default(false),
     isFeatured: boolean("isFeatured").notNull().default(false),
     isHallOfFame: boolean("isHall").notNull().default(false),
-    epicness: int("isEpic").notNull().default(0),
-    unlistedType: int("isUnlisted").notNull().default(0),
+    epicness: integer("isEpic").notNull().default(0),
+    unlistedType: integer("isUnlisted").notNull().default(0),
     isLDM: boolean("isLDM").notNull().default(false),
 
     // Dates
-    uploadDate: datetime("uploadDate").notNull().default(sql`CURRENT_TIMESTAMP`),
-    updateDate: datetime("updateDate").notNull().default(sql`CURRENT_TIMESTAMP`),
+    uploadDate: timestamp("uploadDate").notNull().defaultNow(),
+    updateDate: timestamp("updateDate").notNull().defaultNow()
 })
 
-export const levelUserRelations = relations(levelsTable, ({one})=> ({
+export const levelRelations = relations(levelsTable, ({one})=> ({
     author: one(usersTable, {
         fields: [levelsTable.ownerUid],
         references: [usersTable.uid]

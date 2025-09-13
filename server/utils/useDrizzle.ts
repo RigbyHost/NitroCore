@@ -1,18 +1,18 @@
-import {drizzle} from "drizzle-orm/mysql2";
-import mysql from "mysql2/promise";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from 'pg';
 import * as schema from "~~/drizzle"
 
-
-const pools: Map<string, mysql.Pool> = new Map()
+const pools: Map<string, Pool> = new Map()
 // TODO: production env or appConfig
-export const defaultConfig: mysql.PoolOptions = {
+export const defaultConfig = {
     host: "localhost",
-    port: 3306,
-    user: "root",
-    password: "password",
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    port: 5432,
+    user: "postgres",
+    password: "postgres",
+    database: "postgres",
+    max: 10, // max number of clients in the pool
+    idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+    connectionTimeoutMillis: 2000, // how long to wait when connecting a new client
 }
 
 /**
@@ -24,27 +24,26 @@ export const useDrizzle = async (database?: string) => {
     /* v8 ignore next */
     const srvid = database ||getRouterParam(useEvent(), "srvid")!
 
-    if (!pools.has(srvid))
-        pools.set(srvid, mysql.createPool({
+    if (!pools.has(srvid)) {
+        const pool = new Pool({
             ...defaultConfig,
             database: `gdps_${srvid}`
-        }))
+        });
+        pools.set(srvid, pool);
+    }
 
-    return drizzle(pools.get(srvid)!, {
-        schema,
-        mode: "default"
-    })
+    return drizzle(pools.get(srvid)!, { schema })
 }
 
 export const useDrizzlePoolManager = () => {
     const closeAll = async () => {
-        for (const pool of pools.values())
-            await pool.end()
-        pools.clear()
+        await Promise.all(Array.from(pools.values()).map(pool => pool.end()));
+        pools.clear();
     }
 
     const closeOne = async (srvid: string) => {
-       await pools.get(srvid)?.end()
+        await pools.get(srvid)?.end();
+        pools.delete(srvid);
     }
 
     return {closeAll, closeOne}

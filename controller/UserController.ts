@@ -2,7 +2,7 @@ import {Database} from "~/utils/useDrizzle";
 import {rolesTable, usersTable} from "~~/drizzle";
 import {User} from "~~/controller/User";
 import {sql} from "drizzle-orm";
-import {union} from "drizzle-orm/mysql-core";
+import {union} from "drizzle-orm/pg-core";
 import {z} from "zod";
 import type {MaybeUndefined, Nullable} from "~/utils/types";
 
@@ -308,7 +308,7 @@ export class UserController {
                 isBanned: autoVerify ? 0 : 1,
                 lastIP: ip,
             })
-            .$returningId()
+            .returning({uid: usersTable.uid})
 
         return {code: res[0].uid}
     }

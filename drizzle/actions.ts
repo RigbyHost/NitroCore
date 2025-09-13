@@ -1,5 +1,4 @@
-import {boolean, customType, datetime, int, json, mysqlTable} from "drizzle-orm/mysql-core";
-import {sql} from "drizzle-orm";
+import {boolean, customType, timestamp, integer, json, pgTable, serial} from "drizzle-orm/pg-core";
 
 const actionsVariants = [
     "register_user", "login_user", "delete_user", "ban_event", "level_event", "panel_event",
@@ -12,7 +11,7 @@ export type ActionVariant = "register_user" | "login_user" | "delete_user" | "ba
 const actionType = customType<{
     data:  ActionVariant
 }>({
-    dataType: () => "int",
+    dataType: () => "integer",
     fromDriver: (value) => {
         if (typeof value !== "number") return "unknown"
         return actionsVariants[value] as ActionVariant
@@ -55,12 +54,12 @@ export type ActionData = {
     action: string
 } & Partial<ActionAuth & ActionBan & ActionMisc & ActionLevelUpload & ActionLevelDelete>
 
-export const actionsTable = mysqlTable("actions", {
-    id: int("id").autoincrement().primaryKey(),
-    date: datetime("date").notNull().default(sql`CURRENT_TIMESTAMP`),
-    uid: int("uid").notNull(),
+export const actionsTable = pgTable("actions", {
+    id: serial("id").primaryKey(),
+    date: timestamp("date").notNull().defaultNow(),
+    uid: integer("uid").notNull(),
     actionType: actionType("type").notNull(),
-    targetId: int("target_id").notNull(),
+    targetId: integer("target_id").notNull(),
     isMod: boolean("isMod").notNull().default(false),
     data: json("data").notNull().$type<ActionData>().default({} as ActionData),
 })

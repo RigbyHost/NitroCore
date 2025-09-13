@@ -153,7 +153,7 @@ export class Level<T extends LevelType = LevelType> {
     create = async () => {
         const id = await this.db.insert(levelsTable)
             .values(this.$ as typeof levelsTable.$inferInsert)
-            .$returningId()
+            .returning({id: levelsTable.id})
         this.$.id = id[0].id
         return this.$.id
     }

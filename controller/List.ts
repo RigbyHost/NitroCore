@@ -52,7 +52,7 @@ export class List<T extends ListType = ListType> {
     create = async () => {
         const id = await this.db.insert(listsTable)
             .values(this.$)
-            .$returningId()
+            .returning({id: listsTable.id})
         this.$.id = id[0].id
         return this.$.id
     }
