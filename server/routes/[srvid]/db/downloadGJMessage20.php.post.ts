@@ -16,7 +16,10 @@ export default defineEventHandler({
         const messageController = new MessageController(event.context.drizzle)
         const user = event.context.user!
         const message = await messageController.getOneMessage(data.messageID)
-        // TODO: connector
+
+        if (!message)
+            return await event.context.connector.error(-1, "Message not found")
+        return await event.context.connector.messages.getOneMessage(message, user.$)
     }
 })
 

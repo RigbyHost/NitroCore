@@ -16,7 +16,10 @@ export default defineEventHandler({
         const messageController = new MessageController(event.context.drizzle)
         const user = event.context.user!
         const messages = await messageController.getManyMessages(user.$.uid, data.page, data.getSent ? "sent" : "received")
-        // TODO: connector
+        if (!messages.total)
+            return await event.context.connector.error(-2, "No messages")
+
+        return await event.context.connector.messages.getAllMessages(messages.messages, data.getSent ? "sent" : "received")
     }
 })
 

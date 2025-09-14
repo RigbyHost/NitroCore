@@ -1,4 +1,4 @@
-import {accountCommentsTable, commentsTable, rolesTable, usersTable} from "~~/drizzle";
+import {accountCommentsTable, commentsTable, messagesTable, rolesTable, usersTable} from "~~/drizzle";
 
 export interface IConnector {
 
@@ -15,7 +15,7 @@ export interface IConnector {
             page: number
         ) => Promise<void>,
         getLevelComments: (
-            comments: typeof commentsTable.$inferSelect[],
+            comments: ILevelComment[],
             count: number,
             page: number
         ) => Promise<void>,
@@ -27,10 +27,26 @@ export interface IConnector {
             page: number
         ) => Promise<void>,
     },
+
+    messages: {
+        getOneMessage: (
+            message: typeof messagesTable.$inferSelect,
+            user: typeof usersTable.$inferSelect,
+        ) => Promise<void>,
+        getAllMessages: (
+            messages: IMessage[],
+            mode: "sent" | "received"
+        ) => Promise<void>
+    }
 }
 
 export type ILevelComment = typeof commentsTable.$inferSelect & {
     author?: typeof usersTable.$inferSelect & {
         role?: typeof rolesTable.$inferSelect
     }
+}
+
+export type IMessage = typeof messagesTable.$inferSelect & {
+    sender?: {username: string},
+    receiver?: {username: string}
 }
