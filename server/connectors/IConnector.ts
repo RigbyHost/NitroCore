@@ -22,9 +22,15 @@ export interface IConnector {
         getCommentHistory: (
             comments: typeof commentsTable.$inferSelect[],
             user: typeof usersTable.$inferSelect,
-            role: typeof rolesTable.$inferSelect,
+            role: MaybeUndefined<typeof rolesTable.$inferSelect>,
             count: number,
             page: number
         ) => Promise<void>,
     },
+}
+
+export type ILevelComment = typeof commentsTable.$inferSelect & {
+    author?: typeof usersTable.$inferSelect & {
+        role?: typeof rolesTable.$inferSelect
+    }
 }

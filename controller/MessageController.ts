@@ -92,7 +92,7 @@ export class MessageController {
         if (!receiver)
             return false
 
-        if (receiver.$.settings.mS === 2 || receiver.$.blacklistedUsers.includes(message.uidSrc))
+        if (receiver.$.settings.mS === 2 || receiver.$.blacklistedUsers?.includes(message.uidSrc))
             return false
 
         if (receiver.$.settings.mS === 2) {

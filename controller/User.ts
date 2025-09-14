@@ -63,22 +63,30 @@ export class User<T extends UserType = UserType> {
 
     blacklist = {
         add: (uid: number) => {
+            if (!this.$.blacklistedUsers)
+                this.$.blacklistedUsers=[]
             if (!this.$.blacklistedUsers.includes(uid))
                 this.$.blacklistedUsers.push(uid)
         },
         remove: (uid: number) => {
+            if (!this.$.blacklistedUsers)
+                this.$.blacklistedUsers=[]
             this.$.blacklistedUsers = this.$.blacklistedUsers.filter(uid => uid !== uid)
         }
     }
 
     friendships = {
         add: (friendshipId: number) => {
+            if (!this.$.friendshipIds)
+                this.$.friendshipIds=[]
             if (!this.$.friendshipIds.includes(friendshipId)) {
                 this.$.friendshipIds.push(friendshipId)
                 this.$.friendsCount++
             }
         },
         remove: (friendshipId: number) => {
+            if (!this.$.friendshipIds)
+                this.$.friendshipIds=[]
             if (this.$.friendshipIds.includes(friendshipId)) {
                 this.$.friendshipIds = this.$.friendshipIds.filter(fid => fid !== friendshipId)
                 this.$.friendsCount--

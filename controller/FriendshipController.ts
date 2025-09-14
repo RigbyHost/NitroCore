@@ -81,7 +81,7 @@ export class FriendshipController {
             user = await userController.getOneUser({uid}) as User
         if (!user) return []
         const friendsIds: number[] = []
-        for (const friendshipId of user.$.friendshipIds) {
+        for (const friendshipId of user.$.friendshipIds||[]) {
             const friendship = await this.getOneFriendshipById(friendshipId)
             if (!friendship) continue
             friendsIds.push(
@@ -112,7 +112,7 @@ export class FriendshipController {
         const userController = new UserController(this.db)
         const user = await userController.getOneUser({uid: targetId})
         if (!user || user.$.settings.frS > 0) return false
-        if (user.$.blacklistedUsers.includes(uid)) return false
+        if (user.$.blacklistedUsers?.includes(uid)) return false
 
         await this.db.insert(friendRequestsTable).values({
             uidSrc: uid,

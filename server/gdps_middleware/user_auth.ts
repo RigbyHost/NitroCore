@@ -20,7 +20,7 @@ export const authLoginMiddleware = defineEventHandler(async event => {
 
     let user: Nullable<User> = null
 
-    if (data.gameVersion === "2.2") {
+    if (data.gameVersion === "22") {
         user = await userController.performGJPAuth()
     } else {
         const uid = await userController.logIn(

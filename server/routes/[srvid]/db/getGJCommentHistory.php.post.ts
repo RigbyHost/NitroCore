@@ -31,7 +31,7 @@ export default defineEventHandler({
         return await event.context.connector.comments.getCommentHistory(
             comments,
             targetUser.$,
-            targetUser.$.role!,
+            targetUser.$.role,
             await commentController.countCommentHistory(data.userID),
             data.page
         )
