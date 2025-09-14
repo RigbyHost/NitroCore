@@ -74,7 +74,7 @@ export default defineEventHandler({
                 }
             )
         } else {
-            await level.create()
+            data.levelID = await level.create()
             await actionController.registerAction(
                 "level_upload",
                 event.context.user!.$.uid,
@@ -88,7 +88,7 @@ export default defineEventHandler({
             )
         }
 
-        // TODO: Numbered success
+        await event.context.connector.numberedSuccess(data.levelID, "Level uploaded successfully")
 
     }
 })

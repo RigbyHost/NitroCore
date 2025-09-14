@@ -1,4 +1,4 @@
-import {IConnector, ILevelComment, IMessage} from "~/connectors/IConnector";
+import {IConnector, IFriendRequest, ILevelComment, IMessage} from "~/connectors/IConnector";
 import {accountCommentsTable, commentsTable, messagesTable, rolesTable, usersTable} from "~~/drizzle";
 import {User} from "~~/controller/User";
 
@@ -10,6 +10,10 @@ export class GDConnector implements IConnector {
 
     success = async (message: string) => {
         await send(useEvent(), "1")
+    }
+
+    numberedSuccess = async (code: number, message: string) => {
+        await send(useEvent(), code.toString())
     }
 
     error = async (code: number, message: string) => {
@@ -173,7 +177,9 @@ export class GDConnector implements IConnector {
 
         getAllMessages: async (
             messages: IMessage[],
-            mode: "sent" | "received"
+            mode: "sent" | "received",
+            count: number,
+            page: number
         ) => {
             await send(
                 useEvent(),
@@ -194,8 +200,42 @@ export class GDConnector implements IConnector {
                     }
                 )
                     .join("|")
-                    .concat(`#${messages.length}:10:10`)
+                    .concat(`#${count}:${page * 10}::10`)
             )
         }
+    }
+
+    getFriendRequests = async (
+        requests: IFriendRequest[],
+        mode: "sent" | "received",
+        count: number,
+        page: number
+    ) => {
+        await send(
+            useEvent(),
+            requests.map(
+                request => {
+                    const user = mode === "sent" ? request.receiver : request.sender
+                    if (!user)
+                        return ""
+                    return [
+                        1, user.username,
+                        2, user.uid,
+                        9, new User(null as any, user).getShownIcon(),
+                        10, user.vessels.clr_primary,
+                        11, user.vessels.clr_secondary,
+                        14, user.iconType,
+                        15, user.special,
+                        16, user.uid,
+                        32, request.id,
+                        35, request.comment,
+                        37, useGeometryDashTooling().getDateAgo(request.uploadDate.getTime()),
+                        41, request.isNew ? 1 : 0,
+                    ].join(":")
+                }
+            )
+                .join("|")
+                .concat(`#${count}:${page * 10}:10`)
+        )
     }
 }

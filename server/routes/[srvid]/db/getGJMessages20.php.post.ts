@@ -19,7 +19,12 @@ export default defineEventHandler({
         if (!messages.total)
             return await event.context.connector.error(-2, "No messages")
 
-        return await event.context.connector.messages.getAllMessages(messages.messages, data.getSent ? "sent" : "received")
+        return await event.context.connector.messages.getAllMessages(
+            messages.messages,
+            data.getSent ? "sent" : "received",
+            messages.total,
+            data.page
+        )
     }
 })
 

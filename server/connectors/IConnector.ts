@@ -1,9 +1,17 @@
-import {accountCommentsTable, commentsTable, messagesTable, rolesTable, usersTable} from "~~/drizzle";
+import {
+    accountCommentsTable,
+    commentsTable,
+    friendRequestsTable,
+    messagesTable,
+    rolesTable,
+    usersTable
+} from "~~/drizzle";
 
 export interface IConnector {
 
     error: (code: number, message: string) => Promise<void>,
     success: (message: string) => Promise<void>,
+    numberedSuccess: (code: number, message: string) => Promise<void>,
     account: {
         sync: (savedata: string) => Promise<void>,
         login: (uid: number) => Promise<void>,
@@ -35,9 +43,18 @@ export interface IConnector {
         ) => Promise<void>,
         getAllMessages: (
             messages: IMessage[],
-            mode: "sent" | "received"
+            mode: "sent" | "received",
+            count: number,
+            page: number
         ) => Promise<void>
-    }
+    },
+
+    getFriendRequests: (
+        request: IFriendRequest[],
+        mode: "sent" | "received",
+        count: number,
+        page: number
+    ) => Promise<void>,
 }
 
 export type ILevelComment = typeof commentsTable.$inferSelect & {
@@ -49,4 +66,9 @@ export type ILevelComment = typeof commentsTable.$inferSelect & {
 export type IMessage = typeof messagesTable.$inferSelect & {
     sender?: {username: string},
     receiver?: {username: string}
+}
+
+export type IFriendRequest = typeof friendRequestsTable.$inferSelect & {
+    sender?: typeof usersTable.$inferSelect,
+    receiver?: typeof usersTable.$inferSelect
 }
