@@ -18,6 +18,6 @@ export default defineEventHandler({
     }
 })
 
-const requestSchema = z.object({
+export const requestSchema = z.object({
     page: z.coerce.number().nonnegative().optional().default(0),
 })
