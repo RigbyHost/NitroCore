@@ -1,5 +1,5 @@
 import {IConnector, IFriendRequest, ILevelComment, IMessage} from "~/connectors/IConnector";
-import {accountCommentsTable, commentsTable, messagesTable, rolesTable, usersTable} from "~~/drizzle";
+import {accountCommentsTable, commentsTable, levelpacksTable, messagesTable, rolesTable, usersTable} from "~~/drizzle";
 import {User} from "~~/controller/User";
 
 
@@ -237,5 +237,55 @@ export class GDConnector implements IConnector {
                 .join("|")
                 .concat(`#${count}:${page * 10}:10`)
         )
+    }
+
+    levels = {
+        getMapPacks: async (
+            mappacks: typeof levelpacksTable.$inferSelect[],
+            count: number,
+            page: number
+        ) => {
+            let hashstr = ""
+            const data = mappacks.map(
+                mappack => {
+                    const id = mappack.id.toString()
+                    hashstr += `${id[0]}${id[id.length-1]}${mappack.packStars}${mappack.packCoins}`
+                    return [
+                        1, mappack.id,
+                        2, mappack.packName,
+                        3, mappack.levels.join(","),
+                        4, mappack.packStars,
+                        5, mappack.packCoins,
+                        6, mappack.packDifficulty,
+                        7, mappack.packColor,
+                        8, mappack.packColor
+                    ].join(":")
+                }
+            ).join("|")
+            await send(
+                useEvent(),
+                `${data}#${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(hashstr)}`
+            )
+        },
+
+        getGauntlets: async (
+            gauntlets: typeof levelpacksTable.$inferSelect[],
+        ) => {
+            let hashstr = ""
+            const data = gauntlets.map(
+                gauntlet => {
+                    hashstr += `${gauntlet.packName}${gauntlet.levels.join(",")}`
+                    return [
+                        1, gauntlet.packName,
+                        3, gauntlet.levels.join(","),
+                    ].join(":")
+                }
+            ).join("|")
+
+            await send(
+                useEvent(),
+                `${data}#${useGeometryDashTooling().hashSolo2(hashstr)}`
+            )
+        }
     }
 }

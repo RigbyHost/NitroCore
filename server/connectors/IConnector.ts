@@ -1,7 +1,7 @@
 import {
     accountCommentsTable,
     commentsTable,
-    friendRequestsTable,
+    friendRequestsTable, levelpacksTable,
     messagesTable,
     rolesTable,
     usersTable
@@ -55,6 +55,18 @@ export interface IConnector {
         count: number,
         page: number
     ) => Promise<void>,
+
+    levels: {
+        getMapPacks: (
+            mappacks: typeof levelpacksTable.$inferSelect[],
+            count: number,
+            page: number
+        ) => Promise<void>,
+
+        getGauntlets: (
+            gauntlets: typeof levelpacksTable.$inferSelect[],
+        ) => Promise<void>,
+    }
 }
 
 export type ILevelComment = typeof commentsTable.$inferSelect & {
