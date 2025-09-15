@@ -5,11 +5,10 @@ import * as schema from "~~/drizzle"
 const pools: Map<string, Pool> = new Map()
 // TODO: production env or appConfig
 export const defaultConfig = {
-    host: "localhost",
-    port: 5432,
-    user: "postgres",
-    password: "postgres",
-    database: "postgres",
+    host: process.env.POSTGRES_HOST || "localhost",
+    port: Number(process.env.POSTGRES_PORT) || 5432,
+    user: process.env.POSTGRES_USER || "postgres",
+    password: process.env.POSTGRES_PASSWORD || "postgres",
     max: 10, // max number of clients in the pool
     idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
     connectionTimeoutMillis: 2000, // how long to wait when connecting a new client

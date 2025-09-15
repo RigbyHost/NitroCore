@@ -31,7 +31,7 @@ export const setup = async (p: TestProject) => {
     p.provide("database", {
         host: postgres.getHost(),
         port: postgres.getPort(),
-        user: "root",
+        user: postgres.getUsername(),
         password: postgres.getPassword()
     })
 }

@@ -33,9 +33,9 @@ export default defineNitroConfig({
         },
         config: { // DO NOT REMOVE: AUTOPOPULATED BY VITEST
             driver: "redis",
-            host: 'valkey',
-            port: 6379,
-            password: ''
+            host: process.env.STORAGE_HOST || 'valkey',
+            port: Number(process.env.STORAGE_PORT) || 6379,
+            password: process.env.STORAGE_PASSWORD || ''
         }
     }
 });
