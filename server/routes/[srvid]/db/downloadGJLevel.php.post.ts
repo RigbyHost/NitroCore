@@ -13,6 +13,8 @@ export default defineEventHandler({
             return await event.context.connector.error(-1, "Bad Request")
 
         const levelController = new LevelController(event.context.drizzle)
+
+        let questID = 0
         if (data.levelID < 0) {
             // TODO: CQuests
             return await event.context.connector.error(-1, "Not implemented")
@@ -83,7 +85,7 @@ export default defineEventHandler({
             ).toString("base64")
         }
 
-        // TODO: Connector
+        await event.context.connector.levels.getFullLevel(level, password, hashablePassword, questID)
     }
 })
 

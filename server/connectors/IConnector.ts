@@ -6,6 +6,8 @@ import {
     rolesTable,
     usersTable
 } from "~~/drizzle";
+import {Level} from "~~/controller/Level";
+import {GetOneLevelReturnType} from "~~/controller/LevelController";
 
 export interface IConnector {
 
@@ -66,6 +68,13 @@ export interface IConnector {
         getGauntlets: (
             gauntlets: typeof levelpacksTable.$inferSelect[],
         ) => Promise<void>,
+
+        getFullLevel: (
+            level: Level<GetOneLevelReturnType>,
+            password: string,
+            passwordHashable: string,
+            questID?: number,
+        ) => Promise<void>
     }
 }
 

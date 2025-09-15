@@ -106,5 +106,5 @@ export class LevelController {
     getFilter = () => new LevelFilter(this)
 }
 
-type GetOneLevelReturnType =  MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
-    & {author: Pick<typeof usersTable.$inferSelect, "username">}
+export type GetOneLevelReturnType =  MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
+    & {author?: Pick<typeof usersTable.$inferSelect, "username">}

@@ -1,4 +1,4 @@
-import {GDConnector} from "~/connectors/GDConnector";
+import {GDConnector} from "~/connectors/GeometryDash";
 
 export const initConnectorMiddleware = defineEventHandler((event)=>{
     if (Object.keys(getQuery(event)).includes("json"))
