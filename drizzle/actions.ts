@@ -1,12 +1,14 @@
 import {boolean, customType, timestamp, integer, json, pgTable, serial} from "drizzle-orm/pg-core";
+import {z} from "zod";
 
 const actionsVariants = [
-    "register_user", "login_user", "delete_user", "ban_event", "level_event", "panel_event",
+    "register_user", "login_user", "delete_user", "ban_event", "level_event", "list_event", "panel_event",
     "level_like", "account_comment_like", "comment_like", "list_like", "unknown"
 ]
 
-export type ActionVariant = "register_user" | "login_user" | "delete_user" | "ban_event" | "level_event" | "panel_event" |
-    "level_like" | "account_comment_like" | "comment_like" | "list_like" | "unknown"
+const s = z.enum(actionsVariants)
+
+export type ActionVariant = z.infer<typeof s>
 
 const actionType = customType<{
     data:  ActionVariant

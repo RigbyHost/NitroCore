@@ -72,6 +72,22 @@ export class ActionController {
                 type = "level_event"
                 data.action = "Rate"
                 break
+            case "list_upload":
+                type = "list_event"
+                data.action = "Upload"
+                break
+            case "list_update":
+                type = "list_event"
+                data.action = "Update"
+                break
+            case "list_delete":
+                type = "list_event"
+                data.action = "Delete"
+                break
+            case "list_rate":
+                type = "list_event"
+                data.action = "Rate"
+                break
             case "like_level":
                 type = "level_like"
                 data.action = "LikeLevel"
@@ -144,6 +160,7 @@ export class ActionController {
 
 type AvailableActions = "register_user" | "login_user" | "delete_user" | "ban_user" | "unban_user" |
     "level_upload" | "level_delete" | "level_update" | "level_rate" |
+    "list_upload" | "list_delete" | "list_update" | "list_rate" |
     "like_level" | "like_comment" | "like_account_comment" | "like_list"
 
 type ItemType = "level" | "comment" | "account_comment" | "list"

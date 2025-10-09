@@ -1,1 +1,42 @@
-// TODO: Implement
+import {initMiddleware} from "~/gdps_middleware/init_gdps";
+import {authMiddleware} from "~/gdps_middleware/user_auth";
+import {z} from "zod";
+import {ActionController} from "~~/controller/ActionController";
+import {ListController} from "~~/controller/ListController";
+
+export default defineEventHandler({
+    onRequest: [initMiddleware, authMiddleware],
+
+    handler: async (event) => {
+        const post = usePostObject<z.infer<typeof requestSchema>>(await readFormData(event))
+        const {data, success} = requestSchema.safeParse(post)
+
+        if (!success)
+            return await event.context.connector.error(-1, "Bad Request")
+
+        const listController = new ListController(event.context.drizzle)
+        const list = await listController.getOneList(data.listID)
+        if (!list)
+            return await event.context.connector.error(-1, "List not found")
+        if (!list.isOwnedBy(event.context.user!.$.uid))
+            return await event.context.connector.error(-1, "You are not the owner of this list")
+
+        await list.delete()
+
+        const actionController = new ActionController(event.context.drizzle)
+        await actionController.registerAction(
+            "list_delete",
+            event.context.user!.$.uid,
+            list.$.id,
+            {
+                uname: event.context.user!.$.username,
+                type: "Delete:Owner"
+            }
+        )
+        return await event.context.connector.success("Level deleted successfully")
+    }
+})
+
+export const requestSchema = z.object({
+    listID: z.coerce.number().positive()
+})
