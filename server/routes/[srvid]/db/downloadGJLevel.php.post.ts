@@ -2,6 +2,7 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
 import {UserController} from "~~/controller/UserController";
+import {QuestsController} from "~~/controller/QuestsController";
 
 export default defineEventHandler({
     onRequest: [initMiddleware],
@@ -16,8 +17,14 @@ export default defineEventHandler({
 
         let questID = 0
         if (data.levelID < 0) {
-            // TODO: CQuests
-            return await event.context.connector.error(-1, "Not implemented")
+            const questsController = new QuestsController(event.context.drizzle)
+            const quest = await questsController.getOneQuest({
+                numericType: data.levelID
+            })
+            if (!quest)
+                return await event.context.connector.error(-2, "Quest not found")
+            questID = quest.id
+            data.levelID = quest.levelId
         }
 
         const level = await levelController.getOneLevel(data.levelID, true)

@@ -1,1 +1,30 @@
-// TODO: Implement
+import {initMiddleware} from "~/gdps_middleware/init_gdps";
+import {z} from "zod";
+import {QuestsController} from "~~/controller/QuestsController";
+
+export default defineEventHandler({
+    onRequest: [initMiddleware],
+    handler: async (event) => {
+        const post = usePostObject<z.infer<typeof requestSchema>>(await readFormData(event))
+        const {data, success} = requestSchema.safeParse(post)
+        if (!success)
+            return await event.context.connector.error(-1, "Bad Request")
+
+        const questsController = new QuestsController(event.context.drizzle)
+        const quests = await questsController.getQuestsForUid(event.context.user!.$.uid)
+        if (quests.length > 0)
+            return // TODO: Implement connector
+        else
+            return await event.context.connector.error(-2, "Quests not found")
+    }
+})
+
+export const requestSchema = z.object({
+    chk: z.string().transform(
+        value => useGeometryDashTooling().doXOR(
+            Buffer.from(value.slice(5), "base64").toString("utf-8"),
+            "19847"
+        )
+    )
+})
+
