@@ -3,7 +3,7 @@ import { pgTable, serial, text, integer, timestamp, customType } from "drizzle-o
 const questType = customType<{
     data: "event" | "daily" | "weekly" | "orbs" | "coins" | "stars"
 }>({
-    dataType: () => "int",
+    dataType: () => "integer",
     toDriver: (value) => {
         return {
             event: -1,
