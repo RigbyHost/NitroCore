@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm"
+import {questsTable} from "~~/drizzle";
 
 export class QuestsController {
     private readonly db: Database
@@ -20,16 +21,11 @@ export class QuestsController {
             numericType?: number
         }
     ) => {
-        const typeMap = {
-            daily: 0,
-            weekly: 1,
-            event: -1
-        }
         if (type) {
             const data = await this.db.query.questsTable.findFirst({
-                where: (quest, {eq, lt, and}) => and(
-                    eq(quest.type, typeMap[type]),
-                    lt(quest.timeAdded, sql`CURRENT_TIMESTAMP`) // AVAILABLE
+                where: (quest, {eq, gt, and}) => and(
+                    eq(quest.type, type),
+                    gt(quest.timeAdded, sql`CURRENT_TIMESTAMP`) // AVAILABLE
                 ),
                 // LAST AVAILABLE
                 orderBy: (quest, {desc}) => [desc(quest.timeAdded)]
@@ -53,8 +49,8 @@ export class QuestsController {
                     break
             }
             const data = await this.db.query.questsTable.findFirst({
-                where: (quest, {eq, gt}) => {
-                    return numericType === 2 ? gt(quest.type, 1) : eq(quest.type, numericType!)
+                where: (quest) => {
+                    return numericType === 2 ? sql`${quest.type}>1` : sql`${quest.type}=${numericType}`
                 }
             })
             return data || null
@@ -63,7 +59,17 @@ export class QuestsController {
         return null
     }
 
-    getQuests = async (uid: number) => {
-
+    getQuestsForUid = async (uid: number) => {
+        const max_id = await this.db.$count(questsTable, sql`${questsTable.type}>1`)
+        const magicNumber = Math.floor(max_id / (new Date().getDay() * uid))
+        return this.db.query.questsTable.findMany({
+            where: (quest, {gt, lte, and}) => and(
+                gt(quest.timeAdded, sql`CURRENT_TIMESTAMP`),
+                sql`${questsTable.type}>1`,
+                lte(quest.id, magicNumber)
+            ),
+            limit: 3,
+            orderBy: (quest, {asc}) => [asc(quest.id)]
+        });
     }
 }

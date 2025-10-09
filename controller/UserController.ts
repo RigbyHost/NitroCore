@@ -378,6 +378,4 @@ const registerValidators = z.object({
     email: z.email("-6")
 })
 
-// TODO: fabric and commit on beforeResponse
-
 type GetOneUserReturnType = (typeof usersTable.$inferSelect) & { role?: typeof rolesTable.$inferSelect }
