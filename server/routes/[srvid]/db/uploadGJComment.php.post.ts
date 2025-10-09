@@ -3,6 +3,7 @@ import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
 import {CommentController} from "~~/controller/CommentController";
 import {LevelController} from "~~/controller/LevelController";
+import {ListController} from "~~/controller/ListController";
 
 export default defineEventHandler({
     onRequest: [initMiddleware, authMiddleware],
@@ -37,7 +38,26 @@ export default defineEventHandler({
                 )
             }
         } else {
-            // TODO: Implement Lists comments upload
+            const listController = new ListController(event.context.drizzle)
+            const list = await listController.getOneList(data.levelID)
+            if (!list)
+                return await event.context.connector.error(-1, "List not found")
+            const role = await event.context.user!.fetchRole()
+            // Decode base64
+            const content = Buffer.from(data.comment, "base64").toString("utf-8")
+            if (
+                (role || list.isOwnedBy(event.context.user!.$.uid))
+                && content.length && content[0] === "!"
+            ) {
+                // TODO: Comment commands
+            } else {
+                await commentController.postLevelComment(
+                    event.context.user!.$.uid,
+                    data.levelID,
+                    content,
+                    data.percent,
+                )
+            }
             await event.context.connector.error(-1, "Not implemented")
         }
 
