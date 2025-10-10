@@ -1,0 +1,14 @@
+FROM oven/bun AS builder
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY package.json bun.lock /app/
+RUN bun install --frozen-lockfile
+
+COPY . /app
+RUN bun run build --preset bun
+
+FROM oven/bun AS runner
+COPY --from=builder /app/.output /app
+CMD ["bun", "run", "/app/server/index.mjs"]

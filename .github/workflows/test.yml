@@ -26,20 +26,4 @@ jobs:
     - name: 🧪 Run Vitest tests
       run: bun run test
 
-  notify:
-    name: Discord Notification
-    runs-on: ubuntu-latest
-    needs:
-      - test
-    if: ${{ always() }}
-
-    steps:
-      - name: Notify Discord
-        uses: nobrayner/discord-webhook@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          username: 'Github Pipelines'
-          avatar-url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
-
 
