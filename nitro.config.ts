@@ -13,17 +13,15 @@ export default defineNitroConfig({
     storage: {
         savedata: {
             driver: "s3",
-            accessKeyId: "",
-            secretAccessKey: "",
-            endpoint: "",
-            bucket: "",
-            region: "",
+            accessKeyId: process.env.S3_ACCESS_KEY,
+            secretAccessKey: process.env.S3_SECRET,
+            endpoint: process.env.S3_URL,
+            bucket: process.env.S3_BUCKET,
+            region: process.env.S3_REGION || "us-east-1",
         },
         config: {
             driver: "redis",
-            host: 'HOSTNAME',
-            port: 6380,
-            password: 'REDIS_PASSWORD'
+            host: process.env.REDIS_URL,
         }
     },
     devStorage: {
