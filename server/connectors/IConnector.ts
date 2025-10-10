@@ -2,7 +2,7 @@ import {
     accountCommentsTable,
     commentsTable,
     friendRequestsTable, levelpacksTable,
-    messagesTable,
+    messagesTable, questsTable,
     rolesTable,
     usersTable
 } from "~~/drizzle";
@@ -74,6 +74,15 @@ export interface IConnector {
             password: string,
             passwordHashable: string,
             questID?: number,
+        ) => Promise<void>
+    },
+
+    quests: {
+        getChallenges: (
+            challenges: typeof questsTable.$inferSelect[],
+            uid: number,
+            chk: string,
+            udid: string
         ) => Promise<void>
     }
 }

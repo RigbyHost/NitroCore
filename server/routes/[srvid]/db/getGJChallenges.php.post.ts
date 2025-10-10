@@ -13,7 +13,12 @@ export default defineEventHandler({
         const questsController = new QuestsController(event.context.drizzle)
         const quests = await questsController.getQuestsForUid(event.context.user!.$.uid)
         if (quests.length > 0)
-            return // TODO: Implement connector
+            return await event.context.connector.quests.getChallenges(
+                quests,
+                event.context.user?.$.uid || 0,
+                data.chk,
+                data.udid
+            )
         else
             return await event.context.connector.error(-2, "Quests not found")
     }
@@ -25,6 +30,7 @@ export const requestSchema = z.object({
             Buffer.from(value.slice(5), "base64").toString("utf-8"),
             "19847"
         )
-    )
+    ),
+    udid: z.string().optional().default(""),
 })
 

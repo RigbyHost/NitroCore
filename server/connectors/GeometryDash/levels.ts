@@ -70,15 +70,6 @@ export const GDConnectorLevels = {
             questID
         ].join(",")
 
-        // c.output = "1:" + s(cl.Id) + ":2:" + cl.Name + ":3:" + cl.Description + ":4:" + cl.StringLevel + ":5:" + s(cl.Version) + ":6:" + s(cl.Uid) + ":8:" + s(diffNom) +
-        // 		":9:" + s(cl.Difficulty) + ":10:" + s(cl.Downloads) + ":12:" + s(cl.TrackId) + ":13:" + s(cl.VersionGame) + ":14:" + s(cl.Likes) +
-        // 		":15:" + s(cl.Length) + ":17:" + s(isDemon) + ":18:" + s(cl.StarsGot) + ":19:" + s(cl.IsFeatured) + ":25:" + s(auto) + ":26:" + cl.StringLevelInfo +
-        // 		":27:" + password + ":28:" + uplAge + ":29:" + updAge + ":30:" + s(cl.OrigId) + ":31:" + s(core.ToInt(cl.Is2p)) + ":35:" + s(cl.SongId) +
-        // 		":36:" + cl.ExpandableStore.ExtraString + ":37:" + s(cl.Ucoins) + ":38:" + s(coinsVer) + ":39:" + s(cl.StarsRequested) + ":40:" + s(core.ToInt(cl.IsLDM)) +
-        // 		":42:" + s(cl.IsEpic) + ":43:" + s(demonDiff) + ":45:" + s(cl.Objects) + ":46:1:47:2:48::52:" + sfxSongs[0] + ":53:" + sfxSongs[1] +
-        // 		":57:" + s(cl.ExpandableStore.TS) + quest +
-        // 		"#" + core.HashSolo(cl.StringLevel) + "#" + core.HashSolo2(hash) + questHash
-
         let sfxSongs = level.$.stringSettings.split(";")
         if (sfxSongs.length < 2)
             sfxSongs.push("")

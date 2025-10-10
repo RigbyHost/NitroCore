@@ -138,10 +138,12 @@ export class UserController {
      * Only for stars and creator points leaderboards.
      */
     getLeaderboard = async <T extends "stars" | "cpoints" | "global" | "friends">(
-        type: T,
-        friendsIds: T extends "friends" ? number[] : never,
-        globalStars: T extends "global" ? number : never,
-        limit: T extends "stars" | "cpoints" ? number : never
+        {type, friendsIds, globalStars, limit}: {
+            type: T,
+            friendsIds?: T extends "friends" ? number[] : never,
+            globalStars?: T extends "global" ? number : never,
+            limit?: T extends "stars" | "cpoints" ? number : never
+        }
     ): Promise<number[]> => {
         let uids: number[] = []
 
@@ -210,7 +212,7 @@ export class UserController {
                         where: (user, {and, gt, eq, inArray}) => and(
                             eq(user.isBanned, 0),
                             gt(user.stars, 0),
-                            inArray(user.uid, friendsIds)
+                            inArray(user.uid, friendsIds!)
                         ),
                         orderBy: (user, {desc, asc}) => [
                             desc(user.creatorPoints),
