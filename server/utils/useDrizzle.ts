@@ -23,6 +23,17 @@ export const useDrizzle = async (database?: string) => {
     /* v8 ignore next */
     const srvid = database ||getRouterParam(useEvent(), "srvid")!
 
+    if (useRuntimeConfig().app.platform) {
+        if (process.env.DATABASE_URL) {
+            console.log("Detected possible Postgres Neon")
+            return drizzle(process.env.DATABASE_URL, {schema})
+        }
+        if (process.env.POSTGRES_URL) {
+            console.log("Detected possible Supabase")
+            return drizzle(process.env.POSTGRES_URL, {schema})
+        }
+    }
+
     if (!pools.has(srvid)) {
         const pool = new Pool({
             ...defaultConfig,

@@ -4,7 +4,11 @@
   "scripts": {
     "prepare": "nitro prepare",
     "build": "nitro build",
-    "build:vercel": "rm nitro.config.ts && cp nitro.config-vercel.ts nitro.config.ts && nitro build",
+    "build:base": "bun run switch:base && bun run migrate && bun run build",
+    "build:vercel": "bun run switch:vercel && bun run migrate && bun run build",
+    "switch:base": "rm nitro.config.ts && cp nitro.config-base.ts nitro.config.ts",
+    "switch:vercel": "rm nitro.config.ts && cp nitro.config-vercel.ts nitro.config.ts",
+    "migrate": "drizzle-kit migrate",
     "dev": "nitro dev",
     "test": "vitest run",
     "coverage": "vitest run --coverage"
