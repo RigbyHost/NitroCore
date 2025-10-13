@@ -18,4 +18,8 @@ NitroCore без проблем запускается на большинств
 
    Если Vercel жалуется на `Project names can be up to 100 characters long and must be lowercase...`, то просто переименуйте проект, чтобы в нем не было заглавных букв
    ![](_img/img3.png)
-   
+
+6. Перейдите в раздел **Storage** проекта, нажмите **Create Database** и выберите **Edge Config** — там будет храниться конфиг вашего GDPS
+   ![](_img/img4.png)
+
+7. 

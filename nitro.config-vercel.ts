@@ -8,6 +8,9 @@ export default defineNitroConfig({
     routeRules: {
         "/**": {cors: true}
     },
+    appConfig: {
+        platform: "vercel"
+    },
     experimental: {
         asyncContext: true,
         database: true,

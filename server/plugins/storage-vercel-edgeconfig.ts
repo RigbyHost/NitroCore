@@ -2,7 +2,8 @@ import {defineDriver, normalizeKey, joinKeys} from "unstorage";
 import {EdgeConfigClient, createClient} from "@vercel/edge-config"
 
 export default defineNitroPlugin(() => {
-    useStorage().mount("config", storageDriver({}))
+    if (useRuntimeConfig().app.platform === "vercel")
+        useStorage().mount("config", storageDriver({}))
 })
 
 const storageDriver = defineDriver<{
