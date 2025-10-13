@@ -4,6 +4,7 @@
   "scripts": {
     "prepare": "nitro prepare",
     "build": "nitro build",
+    "build:vercel": "rm nitro.config.ts && cp nitro.config-vercel.ts nitro.config.ts && nitro build",
     "dev": "nitro dev",
     "test": "vitest run",
     "coverage": "vitest run --coverage"
@@ -24,6 +25,8 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@vercel/blob": "^2.0.0",
+    "@vercel/edge-config": "^1.4.0",
     "aws4fetch": "^1.0.20",
     "clamp": "^1.0.1",
     "deep-equal": "^2.2.3",
