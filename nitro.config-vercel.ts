@@ -1,7 +1,4 @@
 // https://nitro.build/config
-
-
-
 export default defineNitroConfig({
     compatibilityDate: "2025-10-10",
     srcDir: "server",
