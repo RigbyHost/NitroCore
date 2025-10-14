@@ -8,7 +8,7 @@ export default defineNitroConfig({
     routeRules: {
         "/**": {cors: true}
     },
-    appConfig: {
+    runtimeConfig: {
         platform: "vercel"
     },
     experimental: {

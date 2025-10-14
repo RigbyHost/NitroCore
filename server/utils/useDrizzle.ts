@@ -23,7 +23,7 @@ export const useDrizzle = async (database?: string) => {
     /* v8 ignore next */
     const srvid = database ||getRouterParam(useEvent(), "srvid")!
 
-    if (useRuntimeConfig().app.platform) {
+    if (useRuntimeConfig().platform) {
         if (process.env.DATABASE_URL) {
             console.log("Detected possible Postgres Neon")
             return drizzle(process.env.DATABASE_URL, {schema})
