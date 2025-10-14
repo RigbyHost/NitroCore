@@ -8,6 +8,7 @@ import {
 } from "~~/drizzle";
 import {Level} from "~~/controller/Level";
 import {GetOneLevelReturnType} from "~~/controller/LevelController";
+import {User} from "~~/controller/User";
 
 export interface IConnector {
 
@@ -84,6 +85,10 @@ export interface IConnector {
             chk: string,
             udid: string
         ) => Promise<void>
+    },
+
+    scores: {
+        getLeaderboard: (users: User[]) => Promise<void>
     }
 }
 

@@ -10,6 +10,8 @@ export default defineEventHandler({
             type: "cpoints",
             limit: config!.ServerConfig.TopSize
         })
-        // TODO: implement connector
+        if (!users.length)
+            return await event.context.connector.error(-2, "No users in leaderboard")
+        return await event.context.connector.scores.getLeaderboard(users)
     }
 })

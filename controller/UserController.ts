@@ -144,14 +144,13 @@ export class UserController {
             globalStars?: T extends "global" ? number : never,
             limit?: T extends "stars" | "cpoints" ? number : never
         }
-    ): Promise<number[]> => {
-        let uids: number[] = []
+    ): Promise<User[]> => {
+        let users: User[] = []
 
         switch (type) {
             case "stars":
-                uids = await this.db.query.usersTable
+                users = await this.db.query.usersTable
                     .findMany({
-                        columns: {uid: true},
                         where: (user, {and, gt, eq}) => and(
                             eq(user.isBanned, 0),
                             gt(user.stars, 0)
@@ -162,12 +161,11 @@ export class UserController {
                         ],
                         limit: limit
                     })
-                    .then(users => users.map(user => user.uid))
+                    .then(users => users.map(user => new User(this, user)))
                 break
             case "cpoints":
-                uids = await this.db.query.usersTable
+                users = await this.db.query.usersTable
                     .findMany({
-                        columns: {uid: true},
                         where: (user, {and, gt, eq}) => and(
                             eq(user.isBanned, 0),
                             gt(user.creatorPoints, 0)
@@ -178,37 +176,28 @@ export class UserController {
                         ],
                         limit: limit
                     })
-                    .then(users => users.map(user => user.uid))
+                    .then(users => users.map(user => new User(this, user)))
                 break
             case "global":
                 const leaderboardBetter = this.db
-                    .select({
-                        uid: usersTable.uid,
-                        stars: usersTable.stars,
-                        username: usersTable.username,
-                    })
+                    .select()
                     .from(usersTable)
                     .where(sql`${usersTable.stars}>${globalStars} AND ${usersTable.isBanned}=0`)
                     .orderBy(sql`${usersTable.stars} DESC`)
                     .limit(50)
                 const leaderboardWorse = this.db
-                    .select({
-                        uid: usersTable.uid,
-                        stars: usersTable.stars,
-                        username: usersTable.username,
-                    })
+                    .select()
                     .from(usersTable)
                     .where(sql`${usersTable.stars}>0 AND ${usersTable.stars}<=${globalStars} AND ${usersTable.isBanned}=0`)
                     .orderBy(sql`${usersTable.stars} DESC`)
                     .limit(50)
-                uids = await union(leaderboardBetter, leaderboardWorse)
+                users = await union(leaderboardBetter, leaderboardWorse)
                     .orderBy(sql`${usersTable.stars} DESC, ${usersTable.username} ASC`)
-                    .then(users => users.map(user => user.uid))
+                    .then(users => users.map(user => new User(this, user)))
                 break
             case "friends":
-                uids = await this.db.query.usersTable
+                users = await this.db.query.usersTable
                     .findMany({
-                        columns: {uid: true},
                         where: (user, {and, gt, eq, inArray}) => and(
                             eq(user.isBanned, 0),
                             gt(user.stars, 0),
@@ -220,10 +209,10 @@ export class UserController {
                         ],
                         limit: limit
                     })
-                    .then(users => users.map(user => user.uid))
+                    .then(users => users.map(user => new User(this, user)))
                 break
         }
-        return uids
+        return users
     }
 
     /**
