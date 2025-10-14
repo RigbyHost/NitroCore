@@ -84,6 +84,15 @@ export interface IConnector {
             uid: number,
             chk: string,
             udid: string
+        ) => Promise<void>,
+
+        getRewards: (
+            user: User,
+            udid: string,
+            chk: string,
+            smallLeft: number,
+            bigLeft: number,
+            chestType: number
         ) => Promise<void>
     },
 

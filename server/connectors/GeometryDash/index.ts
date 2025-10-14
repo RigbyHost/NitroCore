@@ -4,6 +4,7 @@ import {GDConnectorComments} from "~/connectors/GeometryDash/comments";
 import {GDConnectorMessages} from "~/connectors/GeometryDash/messages";
 import {GDConnectorLevels} from "~/connectors/GeometryDash/levels";
 import {GDConnectorScores} from "~/connectors/GeometryDash/scores";
+import {GDConnectorQuests} from "~/connectors/GeometryDash/quests";
 
 
 export class GDConnector implements IConnector {
@@ -78,4 +79,6 @@ export class GDConnector implements IConnector {
     levels = GDConnectorLevels
 
     scores = GDConnectorScores
+
+    quests = GDConnectorQuests
 }
