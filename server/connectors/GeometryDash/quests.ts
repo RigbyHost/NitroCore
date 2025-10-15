@@ -36,6 +36,7 @@ export const GDConnectorQuests: IConnector["quests"] = {
             bigLeft, chestBig(), user.$.chests.big_count,
             chestType
         ].join(":")
+
         await send(
             useEvent(),
             useGeometryDashTooling().generateRandomString(5)
@@ -61,9 +62,6 @@ export const GDConnectorQuests: IConnector["quests"] = {
         d.setDate(d.getDate() + 1)
         const timeLeft = d.getTime() - Date.now()
 
-        // out := virt + ":" + s(uid) + ":" + chk + ":" + udid + ":" + s(uid) + ":" + s(timeLeft) + ":" + cq.GetQuests(uid)
-        // 	out = strings.ReplaceAll(strings.ReplaceAll(base64.StdEncoding.EncodeToString([]byte(core.DoXOR(out, "19847"))), "/", "_"), "+", "-")
-        // 	c.output = virt + out + "|" + core.HashSolo3(out)
         const out = [
             useGeometryDashTooling().generateRandomString(5),
             uid, chk, udid, uid, timeLeft,
