@@ -1,6 +1,8 @@
 import {User} from "~~/controller/User";
+import {IConnector} from "~/connectors/IConnector";
+import {mappingValues, questsTable} from "~~/drizzle";
 
-export const GDConnectorQuests = {
+export const GDConnectorQuests: IConnector["quests"] = {
     getRewards: async (
         user: User,
         udid: string,
@@ -36,11 +38,51 @@ export const GDConnectorQuests = {
         ].join(":")
         await send(
             useEvent(),
-            Buffer.from(useGeometryDashTooling().doXOR(out, "59182"), "binary")
-                .toString("base64")
-                .replaceAll("/", "_")
-                .replaceAll("+", "-")
-                .concat("|", useGeometryDashTooling().hashSolo4(out))
+            useGeometryDashTooling().generateRandomString(5)
+                .concat(
+                    Buffer
+                        .from(useGeometryDashTooling().doXOR(out, "59182"), "binary")
+                        .toString("base64")
+                        .replaceAll("/", "_")
+                        .replaceAll("+", "-"),
+                    "|", useGeometryDashTooling().hashSolo4(out)
+                )
         )
-    }
+    },
+
+    getChallenges: async (
+        challenges: typeof questsTable.$inferSelect[],
+        uid: number,
+        chk: string,
+        udid: string
+    ) => {
+        const d = new Date()
+        d.setHours(0, 0, 0, 0)
+        d.setDate(d.getDate() + 1)
+        const timeLeft = d.getTime() - Date.now()
+
+        // out := virt + ":" + s(uid) + ":" + chk + ":" + udid + ":" + s(uid) + ":" + s(timeLeft) + ":" + cq.GetQuests(uid)
+        // 	out = strings.ReplaceAll(strings.ReplaceAll(base64.StdEncoding.EncodeToString([]byte(core.DoXOR(out, "19847"))), "/", "_"), "+", "-")
+        // 	c.output = virt + out + "|" + core.HashSolo3(out)
+        const out = [
+            useGeometryDashTooling().generateRandomString(5),
+            uid, chk, udid, uid, timeLeft,
+            ...challenges.map(c => [
+                c.id, mappingValues[c.type] - 1, c.needed, c.reward, c.name
+            ].join(","))
+        ].join(":")
+
+        await send(
+            useEvent(),
+            useGeometryDashTooling().generateRandomString(5)
+                .concat(
+                    Buffer
+                        .from(useGeometryDashTooling().doXOR(out, "19847"), "binary")
+                        .toString("base64")
+                        .replaceAll("/", "_")
+                        .replaceAll("+", "-"),
+                    "|", useGeometryDashTooling().hashSolo3(out)
+                )
+        )
+    },
 }

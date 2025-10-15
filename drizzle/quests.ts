@@ -1,18 +1,20 @@
 import { pgTable, serial, text, integer, timestamp, customType } from "drizzle-orm/pg-core";
 
+export const mappingValues = {
+    event: -1,
+    daily: 0,
+    weekly: 1,
+    orbs: 2,
+    coins: 3,
+    stars: 4
+}
+
 const questType = customType<{
     data: "event" | "daily" | "weekly" | "orbs" | "coins" | "stars"
 }>({
     dataType: () => "integer",
     toDriver: (value) => {
-        return {
-            event: -1,
-            daily: 0,
-            weekly: 1,
-            orbs: 2,
-            coins: 3,
-            stars: 4
-        }[value]
+        return mappingValues[value]
     },
     fromDriver: (value) => {
         if (typeof value !== "number") return "daily"
