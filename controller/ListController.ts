@@ -40,8 +40,8 @@ export class ListController {
         return lists.map(list => new List<GetOneListReturnType>(this, list))
     }
 
-    createListObject = (list: typeof listsTable.$inferSelect) => {
-        return new List(this, list)
+    createListObject = (list: typeof listsTable.$inferInsert) => {
+        return new List(this, list as typeof listsTable.$inferSelect)
     }
 }
 

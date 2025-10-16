@@ -10,4 +10,10 @@ declare module 'h3' {
     }
 }
 
+declare module 'nitropack' {
+    interface NitroRuntimeConfig {
+        platform?: string
+    }
+}
+
 export default {}
