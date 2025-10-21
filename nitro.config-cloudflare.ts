@@ -27,5 +27,13 @@ export default defineNitroConfig({
             driver: "cloudflare-kv-binding",
             binding: process.env.STORAGE || "STORAGE",
         }
+    },
+    scheduledTasks: {
+        "0 0 * * *": [
+            "nightly:refresh_sfx",
+            "nightly:count_music_downloads",
+            "nightly:reset_user_limits",
+            "nightly:train_level_model"
+        ]
     }
 });

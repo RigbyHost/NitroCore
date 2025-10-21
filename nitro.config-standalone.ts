@@ -2,11 +2,16 @@
 export default defineNitroConfig({
     compatibilityDate: "2025-10-10",
     srcDir: "server",
+    preset: "bun",
+    cloudflare: {
+        deployConfig: true,
+        nodeCompat: true
+    },
     routeRules: {
         "/**": {cors: true}
     },
     runtimeConfig: {
-        platform: "vercel"
+        platform: "standalone"
     },
     experimental: {
         asyncContext: true,
@@ -15,16 +20,13 @@ export default defineNitroConfig({
     },
     storage: {
         savedata: {
-            driver: "vercel-blob",
-            access: "public", // DO NOT CHANGE, THIS IS MANDATORY AND IS NOT A BUG: https://unstorage.unjs.io/drivers/vercel#vercel-blob
-            // token: process.env.BLOB_READ_WRITE_TOKEN, // Optional
+            driver: "fs",
+            base: "/savedata"
         },
-        // This driver doesn't exist in upstream unstorage, so it is loaded dynamically as storage plugin asn always
-        // needs process.env.EDGE_CONFIG
-        // config: {
-        //     driver: "storage-vercel-edgeconfig",
-        //     // url: process.env.EDGE_CONFIG // Optional
-        // }
+        config: {
+            driver: "fs",
+            base: "/config"
+        }
     },
     scheduledTasks: {
         "0 0 * * *": [
