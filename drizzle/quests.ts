@@ -1,4 +1,5 @@
 import { pgTable, serial, text, integer, timestamp, customType } from "drizzle-orm/pg-core";
+import {sql} from "drizzle-orm";
 
 export const mappingValues = {
     event: -1,
@@ -33,9 +34,9 @@ export const questsTable = pgTable("quests", {
     id: serial("id").primaryKey(),
     // Due to fucking robtop, we cannot have static types
     type: questType("type").notNull(),
-    name: text("name").notNull(),
-    needed: integer("needed").notNull(),
-    reward: integer("reward").notNull(),
-    levelId: integer("lvl_id").notNull(),
-    timeAdded: timestamp("time_added").notNull(),
+    name: text("name").notNull().default("Unnamed"),
+    needed: integer("needed").notNull().default(0),
+    reward: integer("reward").notNull().default(0),
+    levelId: integer("lvl_id").notNull().default(0),
+    timeAdded: timestamp("time_added").notNull().default(sql`CURRENT_TIMESTAMP`),
 });

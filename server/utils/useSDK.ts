@@ -5,3 +5,5 @@ const sdk = {
 }
 
 export const useSDK = () => sdk
+
+export {useCommandContext} from "~~/sdk/commands/context"

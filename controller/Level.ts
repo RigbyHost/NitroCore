@@ -116,7 +116,7 @@ export class Level<T extends LevelType = LevelType> {
         )
     }
 
-    verifyCoins = (verify: true) => {
+    verifyCoins = (verify: boolean) => {
         if (verify)
             this.$.coins = this.$.userCoins
         else
