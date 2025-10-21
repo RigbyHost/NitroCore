@@ -4,7 +4,7 @@ import * as schema from "~~/drizzle"
 
 let privatePool: NodePgDatabase<any>
 const pools: Map<string, Pool> = new Map()
-// TODO: production env or appConfig
+
 export const defaultConfig = {
     host: process.env.POSTGRES_HOST || "localhost",
     port: Number(process.env.POSTGRES_PORT) || 5432,
