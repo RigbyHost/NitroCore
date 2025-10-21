@@ -4,8 +4,8 @@
   "scripts": {
     "prepare": "nitro prepare",
     "build": "nitro build",
-
-    "build:base": "bun run switch:base && bun run migrate && bun run build",
+    
+    "build:base": "bun run switch:base && bun run build",
     "build:vercel": "bun run switch:vercel && bun run migrate && bun run build",
     "build:cloudflare": "bun run switch:cloudflare && bun run migrate && bun run build",
     "build:standalone": "bun run switch:standalone && bun run migrate && bun run build",
