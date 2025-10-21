@@ -1,0 +1,44 @@
+{
+  "LogConfig": {
+    "LogEnable": true,
+    "LogDB": false,
+    "LogEndpoints": false,
+    "LogRequests": false
+  },
+  "ChestConfig": {
+    "ChestSmallOrbsMin": 100,
+    "ChestSmallOrbsMax": 70,
+    "ChestSmallDiamondsMin": 10,
+    "ChestSmallDiamondsMax": 100,
+    "ChestSmallShards": [1, 2, 3, 4, 5, 6],
+    "ChestSmallKeysMin": 0,
+    "ChestSmallKeysMax": 4,
+    "ChestSmallWait": 9000,
+    "ChestBigOrbsMin": 1000,
+    "ChestBigOrbsMax": 2500,
+    "ChestBigDiamondsMin": 50,
+    "ChestBigDiamondsMax": 250,
+    "ChestBigShards": [1, 2, 3, 4, 5, 6],
+    "ChestBigKeysMin": 0,
+    "ChestBigKeysMax": 6,
+    "ChestBigWait": 18000
+  },
+  "ServerConfig": {
+    "SrvID": "0000",
+    "SrvKey": "RIGBYHOST-KEY (Used for panel, music, etc...)",
+    "MaxUsers": -1,
+    "MaxLevels": -1,
+    "MaxComments": -1,
+    "MaxPosts": -1,
+    "HalMusic": true,
+    "Locked": false,
+    "TopSize": 100,
+    "EnableModules": {}
+  },
+  "SecurityConfig": {
+    "DisableProtection": false,
+    "AutoActivate": false,
+    "NoLevelLimits": false,
+    "BannedIPs": []
+  }
+}

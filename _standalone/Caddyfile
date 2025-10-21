@@ -1,0 +1,7 @@
+mygdps.com {
+    reverse_proxy app:3000
+}
+
+mygdps.com/adminer {
+    reverse_proxy adminer:8080
+}
