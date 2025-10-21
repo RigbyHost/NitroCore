@@ -38,6 +38,7 @@ export interface IConnector {
             count: number,
             page: number
         ) => Promise<void>,
+        commentCommandResult: (result: string) => Promise<void>,
     },
 
     messages: {

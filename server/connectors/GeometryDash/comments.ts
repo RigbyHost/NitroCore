@@ -121,5 +121,9 @@ export const GDConnectorComments = {
                 .join("|")
                 .concat(`#${count}:${page * 10}:10`)
         )
-    }
+    },
+
+    commentCommandResult: async (result: string) => {
+        await send(useEvent(), `temp_1_${result}`)
+    },
 }
