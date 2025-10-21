@@ -1,5 +1,5 @@
 import {LevelController} from "~~/controller/LevelController";
-import {not, eq, lt, lte, gt, gte, inArray, notInArray, exists, and, or, SQL, desc, sql, ilike} from "drizzle-orm";
+import {eq, lte, gt, gte, inArray, notInArray, exists, and, or, SQL, desc, sql, ilike} from "drizzle-orm";
 import {levelsTable, questsTable, rateQueueTable} from "~~/drizzle";
 import {z} from "zod";
 import {requestSchema} from "~/routes/[srvid]/db/getGJLevels.php.post";
@@ -18,11 +18,11 @@ export class LevelFilter {
         let filters: SQL[] = [lte(levelsTable.versionGame, data.versionGame)]
         let orderBy: SQL[] = []
 
-        if (data.diff) {
+        if (data.diff.length) {
             const diffs: number[] = []
-            data.diff.split(",").forEach(diff => {
+            data.diff.forEach(diff => {
                 switch (diff) {
-                    case "-2":
+                    case -2:
                         switch (data.demonFilter) {
                             case 1:
                                 data.demonFilter = 3
@@ -43,14 +43,14 @@ export class LevelFilter {
                                 data.demonFilter = 0
                         }
                         break
-                    case "-1":
+                    case -1:
                         diffs.push(0)
                         break
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
                         diffs.push(Number(`${diff}0`))
                         break
                     default:
@@ -72,18 +72,12 @@ export class LevelFilter {
         }
 
         if (data.len)
-            filters.push(inArray(
-                levelsTable.length,
-                data.len.split(",").map(len => Number(len))
-            ))
+            filters.push(inArray(levelsTable.length, data.len))
 
         if (data.onlyCompleted || data.uncompleted) {
             if (data.completedLevels) {
                 const fn = data.uncompleted ? notInArray : inArray
-                filters.push(fn(
-                    levelsTable.id,
-                    data.completedLevels.split(",").map(id => Number(id))
-                ))
+                filters.push(fn(levelsTable.id, data.completedLevels))
             }
         }
 
@@ -139,7 +133,6 @@ export class LevelFilter {
         levels: number[],
         total: number
     }> => {
-
         const {filters, orderBy} = this.filterParser(data)
 
         switch (mode) {
@@ -251,9 +244,7 @@ export class LevelFilter {
                         ilike(levelsTable.name, `%${data.str}%`)
                     )
                 }
-
-                const users = data.followed.split(",").map(user => Number(user))
-                filters.push(inArray(levelsTable.ownerUid, users))
+                filters.push(inArray(levelsTable.ownerUid, data.followed))
             } else {
                 if (!isNaN(id)) {
                     filters.push(eq(levelsTable.ownerUid, id))
@@ -261,10 +252,9 @@ export class LevelFilter {
             }
         } else {
             if (followMode && data.followed) {
-                const users = data.followed.split(",").map(user => Number(user))
                 filters.push(
                     eq(levelsTable.unlistedType, 0),
-                    inArray(levelsTable.ownerUid, users)
+                    inArray(levelsTable.ownerUid, data.followed)
                 )
             }
         }

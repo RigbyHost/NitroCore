@@ -71,7 +71,7 @@ export default defineEventHandler({
                     return await event.context.connector.error(-1, "Not logged in")
                 const friendshipController = new FriendshipController(event.context.drizzle)
                 const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)
-                data.followed = friends.join(",")
+                data.followed = friends
                 result = await filter.searchUserLevels(data, true)
                 break
             case 16:
@@ -129,23 +129,37 @@ export const requestSchema = z.object({
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
     diff: z.string().nonempty()
-        // .regex(/^[\d,-]+$/) // Filter out invalid characters
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
-        .optional().transform(
+        .optional().default("")
+        .transform(
             value => value==="-" ? "" : value
+        ).transform(
+            value => value.split(",")
+                .filter(v=>v.trim()) // Cleans empty values
+                .map(v=>parseInt(v))
         ),
     demonFilter: z.coerce.number().nonnegative().optional(),
     len: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
-        .optional().transform(
+        .optional().default("")
+        .transform(
             value => value==="-" ? "" : value
+        ).transform(
+            value => value.split(",")
+                .filter(v=>v.trim()) // Cleans empty values
+                .map(v=>parseInt(v))
         ),
     uncompleted: z.coerce.number().optional().default(0),
     onlyCompleted: z.coerce.number().optional().default(0),
     completedLevels: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
-        .optional().transform(
+        .optional().default("")
+        .transform(
             value => value==="-" ? "" : value
+        ).transform(
+            value => value.split(",")
+                .filter(v=>v.trim()) // Cleans empty values
+                .map(v=>parseInt(v))
         ),
     featured: z.coerce.number().optional().default(0),
     epic: z.coerce.number().optional().default(0),
@@ -161,7 +175,12 @@ export const requestSchema = z.object({
     gauntlet: z.coerce.number().optional().default(0),
     followed: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
-        .optional().transform(
+        .optional().default("")
+        .transform(
             value => value==="-" ? "" : value
+        ).transform(
+            value => value.split(",")
+                .filter(v=>v.trim()) // Cleans empty values
+                .map(v=>parseInt(v))
         ),
 })
