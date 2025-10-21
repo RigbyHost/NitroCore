@@ -132,8 +132,8 @@ export class LevelController {
                 insane: 0,
                 extreme: 0
             },
-            weeklies: 0,
-            gauntlets: 0
+            weekly: 0,
+            gauntlet: 0
         }
 
         levels.forEach(level => {

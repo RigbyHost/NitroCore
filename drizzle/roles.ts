@@ -8,31 +8,31 @@ export const rolesTable = pgTable("roles", {
     modLevel: integer("modLevel").notNull().default(1),
     privileges: json("privs").notNull()
         .$type<{
-            cRate: number,
-            cFeature: number,
-            cEpic: number,
-            cVerCoins: number,
-            cDaily: number,
-            cWeekly: number,
-            cDelete: number,
-            cLvlAccess: number,
-            aRateDemon: number,
-            aRateReq: number,
-            aRateStars: number,
-            aReqMod: number
+            cRate: boolean,
+            cFeature: boolean,
+            cEpic: boolean,
+            cVerCoins: boolean,
+            cDaily: boolean,
+            cWeekly: boolean,
+            cDelete: boolean,
+            cLvlAccess: boolean,
+            aRateDemon: boolean,
+            aRateReq: boolean,
+            aRateStars: boolean,
+            aReqMod: boolean
         }>()
         .default({
-            cRate: 0,
-            cFeature: 0,
-            cEpic: 0,
-            cVerCoins: 0,
-            cDaily: 0,
-            cWeekly: 0,
-            cDelete: 0,
-            cLvlAccess: 0,
-            aRateDemon: 0,
-            aRateReq: 0,
-            aRateStars: 0,
-            aReqMod: 0
+            cRate: false,
+            cFeature: false,
+            cEpic: false,
+            cVerCoins: false,
+            cDaily: false,
+            cWeekly: false,
+            cDelete: false,
+            cLvlAccess: false,
+            aRateDemon: false,
+            aRateReq: false,
+            aRateStars: false,
+            aReqMod: false
         })
 })
