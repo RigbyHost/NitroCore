@@ -2,6 +2,7 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
+import {ActionController} from "~~/controller/ActionController";
 
 export default defineEventHandler({
     onRequest: [initMiddleware, authMiddleware],
@@ -45,7 +46,17 @@ export default defineEventHandler({
                     break
             }
             await level.commit()
-            // TODO: register event or whatever
+            await new ActionController(event.context.drizzle)
+                .registerAction("level_rate", event.context.user!.$.uid, level.$.id, {
+                    uname: event.context.user!.$.username,
+                    type: `Rate:${data.stars}`
+                })
+            if (data.feature > 0)
+                await new ActionController(event.context.drizzle)
+                    .registerAction("level_rate", event.context.user!.$.uid, level.$.id, {
+                        uname: event.context.user!.$.username,
+                        type: "Feature"
+                    })
         } else if (role.privileges.aRateReq) {
             await level.requestRateByModerator(event.context.user!.$.uid, data.stars, data.feature>0)
         } else {
