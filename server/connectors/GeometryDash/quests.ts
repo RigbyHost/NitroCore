@@ -83,4 +83,11 @@ export const GDConnectorQuests: IConnector["quests"] = {
                 )
         )
     },
+
+    getSpecialLevel: async (id: number, left: number) => {
+        await send(
+            useEvent(),
+            `${id}|${left}`
+        )
+    }
 }

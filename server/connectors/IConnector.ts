@@ -3,12 +3,13 @@ import {
     commentsTable,
     friendRequestsTable, levelpacksTable,
     messagesTable, questsTable,
-    rolesTable,
+    rolesTable, scoresTable,
     usersTable
 } from "~~/drizzle";
 import {Level} from "~~/controller/Level";
 import {GetOneLevelReturnType} from "~~/controller/LevelController";
 import {User} from "~~/controller/User";
+import {ScoresController} from "~~/controller/ScoresController";
 
 export interface IConnector {
 
@@ -93,11 +94,17 @@ export interface IConnector {
             smallLeft: number,
             bigLeft: number,
             chestType: number
-        ) => Promise<void>
+        ) => Promise<void>,
+
+        getSpecialLevel: (id: number, left: number) => Promise<void>
     },
 
     scores: {
-        getLeaderboard: (users: User[]) => Promise<void>
+        getLeaderboard: (users: User[]) => Promise<void>,
+        getScoresForLevel: (
+            scores: Awaited<ReturnType<ScoresController["getScoresForLevel"]>>,
+            mode: "coins" | "attempts" | "default"
+        ) => Promise<void>
     }
 }
 
