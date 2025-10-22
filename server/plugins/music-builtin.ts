@@ -1,4 +1,3 @@
-import {SDKMusicProvider} from "~~/sdk/music/types";
 
 export default defineNitroPlugin(() => {
     const msdk = useSDK().music
