@@ -1,5 +1,6 @@
 import {levelpacksTable, songsTable} from "~~/drizzle";
 import {Level, LevelWithUser} from "~~/controller/Level";
+import {List, ListWithUser} from "~~/controller/List";
 
 
 export const GDConnectorLevels = {
@@ -200,10 +201,55 @@ export const GDConnectorLevels = {
 
         await send(
             useEvent(),
-            `${levelsOutput.join("|")}#`+
-            `${userMeta.join("|")}#`+
-            `${songMeta}#`+
+            `${levelsOutput.join("|")}#` +
+            `${userMeta.join("|")}#` +
+            `${songMeta}#` +
             `${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(levelHashMeta.join(""))}`
         )
+    },
+
+    getSearchedLists: async (
+        lists: Array<List<ListWithUser>>,
+        count: number,
+        page: number,
+    ) => {
+        const listOutput: Array<string> = []
+        const userMeta: Array<string> = []
+
+        lists.forEach(list => {
+            listOutput.push(
+                [
+                    1, list.$.id,
+                    2, list.$.name,
+                    3, list.$.description,
+                    5, list.$.version,
+                    7, list.$.difficulty,
+                    10, list.$.downloads,
+                    14, list.$.likes,
+                    19, list.$.isFeatured ? 1 : 0,
+                    28, useGeometryDashTooling().getDateAgo(list.$.uploadDate.getTime()),
+                    29, useGeometryDashTooling().getDateAgo(list.$.updateDate.getTime()),
+                    49, list.$.ownerId,
+                    50, list.$.author?.username || "[DELETED]",
+                    51, list.$.levels,
+                    55, list.$.diamonds,
+                    56, list.$.levelDiamonds
+                ].join(":")
+            )
+
+            userMeta.push(
+                list.$.ownerId + ":" +
+                list.$.author?.username || "[DELETED]" + ":" +
+                list.$.ownerId
+            )
+        })
+
+        await send(
+            useEvent(),
+            `${listOutput.join("|")}#` +
+            `${userMeta.join("|")}#` +
+            `${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2("All hackers gain epic")}`
+        )
+
     }
 }

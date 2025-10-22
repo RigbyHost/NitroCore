@@ -9,6 +9,7 @@ import {
 import {Level, LevelWithUser} from "~~/controller/Level";
 import {User} from "~~/controller/User";
 import {ScoresController} from "~~/controller/ScoresController";
+import {List, ListWithUser} from "~~/controller/List";
 
 export interface IConnector {
 
@@ -84,6 +85,12 @@ export interface IConnector {
             count: number,
             page: number,
             gauntlet: boolean
+        ) => Promise<void>,
+
+        getSearchedLists: (
+            lists: Array<List<ListWithUser>>,
+            count: number,
+            page: number,
         ) => Promise<void>
     },
 

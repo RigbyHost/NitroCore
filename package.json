@@ -1,6 +1,6 @@
 {
   "name": "nitro-app",
-  "version": "0.5",
+  "version": "0.6",
   "scripts": {
     "prepare": "nitro prepare",
     "build": "nitro build",

@@ -1,6 +1,9 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {ListController} from "~~/controller/ListController";
+import {List, ListWithUser} from "~~/controller/List";
+import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
+import {FriendshipController} from "~~/controller/FriendshipController";
 
 const metrics = usePerformance()
 
@@ -22,7 +25,50 @@ export default defineEventHandler({
         const filter = listController.getFilter()
 
         metrics.step("Search lists")
-        // TODO: do
+
+        let result: {
+            lists: Array<List<ListWithUser>>,
+            total: number
+        } = {lists: [], total: 0}
+
+        switch (data.type) {
+            case 1:
+                result = await filter.searchLists("mostdownloaded", data)
+                break
+            case 3:
+                result = await filter.searchLists("trending", data)
+                break
+            case 4:
+            case 7:
+                result = await filter.searchLists("latest", data)
+                break
+            case 5:
+                result = await filter.searchUserLists(data, false)
+                break
+            case 11:
+                result = await filter.searchLists("awarded", data)
+                break
+            case 12:
+                result = await filter.searchUserLists(data, true)
+                break
+            case 13:
+                await authLoginMiddleware(event)
+                if (!event.context.user)
+                    return await event.context.connector.error(-1, "Not logged in")
+                const friendshipController = new FriendshipController(event.context.drizzle)
+                const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)
+                data.followed = friends
+                result = await filter.searchUserLists(data, true)
+                break
+            case 27:
+                result = await filter.searchLists("sent", data)
+                break
+            default:
+                result = await filter.searchLists("mostliked", data)
+        }
+
+        metrics.step("Send response")
+        return await event.context.connector.levels.getSearchedLists(result.lists, result.total, data.page)
     }
 })
 
