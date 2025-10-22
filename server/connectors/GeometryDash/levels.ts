@@ -1,7 +1,6 @@
-import {levelpacksTable} from "~~/drizzle";
+import {levelpacksTable, songsTable} from "~~/drizzle";
 import {Level} from "~~/controller/Level";
-import {GetOneLevelReturnType} from "~~/controller/LevelController";
-import {UserController} from "~~/controller/UserController";
+import {GetManyLevelsReturnType, GetOneLevelReturnType} from "~~/controller/LevelController";
 
 
 export const GDConnectorLevels = {
@@ -129,6 +128,83 @@ export const GDConnectorLevels = {
                     "#", useGeometryDashTooling().hashSolo2(hashstr),
                     suffix
                 )
+        )
+    },
+
+    getSearchedLevels: async (
+        levels: GetManyLevelsReturnType,
+        songs: typeof songsTable.$inferSelect[],
+        count: number,
+        page: number,
+        gauntlet: boolean
+    ) => {
+        const levelsOutput: Array<string> = []
+        const levelHashMeta: Array<string> = []
+        const userMeta: Array<string> = []
+        const songMeta = songs.map(
+            song => [
+                1, song.id,
+                2, song.name,
+                3, 1,
+                4, song.artist,
+                5, song.size.toFixed(2),
+                6, "",
+                10, encodeURI(song.url)
+            ].join("~|~").replaceAll("#", "")
+        ).join("~:~")
+
+        levels.forEach(level => {
+            const levelArr = [
+                1, level.$.id,
+                2, level.$.name,
+                3, level.$.description,
+                5, level.$.version,
+                6, level.$.ownerUid,
+                8, level.$.difficulty > 0 ? 10 : 0,
+                9, level.$.difficulty < 0 ? 0 : level.$.difficulty,
+                10, level.$.downloads,
+                12, level.$.trackId,
+                13, level.$.versionGame,
+                14, level.$.likes,
+                15, level.$.length,
+                17, level.$.demonDifficulty >= 0 ? 1 : 0,
+                18, level.$.starsGot,
+                19, level.$.isFeatured ? 1 : 0,
+                25, level.$.difficulty < 0 ? 1 : 0,
+                30, level.$.originalId,
+                31, level.$.is2player ? 1 : 0,
+                35, level.$.songId,
+                37, level.$.userCoins,
+                38, level.$.coins > 0 ? 1 : 0,
+                39, level.$.starsRequested,
+                42, level.$.epicness,
+                43, level.$.demonDifficulty >= 0 ? level.$.demonDifficulty : 3,
+                45, level.$.objects,
+                46, 1,
+                47, 2
+            ]
+            if (gauntlet)
+                levelArr.push(44, 1)
+            levelsOutput.push(levelArr.join(":"))
+            levelHashMeta.push(
+                level.$.id.toString()[0] +
+                level.$.id.toString()[level.$.id.toString().length - 1] +
+                level.$.starsGot +
+                (level.$.coins > 0 ? 1 : 0)
+            )
+            userMeta.push(
+                level.$.ownerUid + ":" +
+                level.$.author?.username || "[DELTED]" + ":" +
+                level.$.ownerUid
+            )
+        })
+
+        await send(
+            useEvent(),
+            `${levelsOutput.join("|")}#`+
+            `${userMeta.join("|")}#`+
+            `${songMeta}#`+
+            `${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(levelHashMeta.join(""))}`
         )
     }
 }

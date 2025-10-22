@@ -60,7 +60,7 @@ export class LevelController {
     getManyLevels = async (
         ids: number[],
         withUser = false,
-    ) => {
+    ): Promise<GetManyLevelsReturnType> => {
         const levels = await this.db.query.levelsTable.findMany({
             where: (level, {inArray}) => inArray(level.id, ids),
             with: {
@@ -185,3 +185,7 @@ type CountDemonStatsReturnType = Exclude<typeof usersTable.$inferSelect["extraDa
 
 export type GetOneLevelReturnType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
     & { author?: Pick<typeof usersTable.$inferSelect, "username"> }
+
+export type GetManyLevelsReturnType = Level<typeof levelsTable.$inferSelect & {
+    author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">
+}>[]

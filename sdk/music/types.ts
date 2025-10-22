@@ -6,6 +6,7 @@ export interface SDKMusicProvider {
 export type SDKMusicReturn = {
     name: string,
     author: string,
-    size: string,
+    size: number,
     url: string
+    originalUrl: string
 }

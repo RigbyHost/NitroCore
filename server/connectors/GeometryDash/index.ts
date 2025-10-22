@@ -5,6 +5,7 @@ import {GDConnectorMessages} from "~/connectors/GeometryDash/messages";
 import {GDConnectorLevels} from "~/connectors/GeometryDash/levels";
 import {GDConnectorScores} from "~/connectors/GeometryDash/scores";
 import {GDConnectorQuests} from "~/connectors/GeometryDash/quests";
+import {songsTable} from "~~/drizzle";
 
 
 export class GDConnector implements IConnector {
@@ -73,6 +74,21 @@ export class GDConnector implements IConnector {
             )
                 .join("|")
                 .concat(`#${count}:${page * 10}:10`)
+        )
+    }
+
+    getSongInfo = async (music: typeof songsTable.$inferSelect) => {
+        await send(
+            useEvent(),
+            [
+                1, music.id,
+                2, music.name,
+                3, 1,
+                4, music.artist,
+                5, music.size.toFixed(2),
+                6, "",
+                10, encodeURI(music.url)
+            ].join("~|~").replaceAll("#", "")
         )
     }
 

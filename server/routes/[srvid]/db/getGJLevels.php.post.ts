@@ -4,6 +4,7 @@ import {LevelController} from "~~/controller/LevelController";
 import {FriendshipController} from "~~/controller/FriendshipController";
 import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
 import {ListController} from "~~/controller/ListController";
+import {MusicController} from "~~/controller/MusicController";
 
 const metrics = usePerformance()
 
@@ -114,9 +115,16 @@ export default defineEventHandler({
 
         const levels = await levelController.getManyLevels(result.levels, true)
 
-        // TODO: Music and connector
+        const musicController = new MusicController(event.context.drizzle)
+        const music = await musicController.getSongBulk(
+            levels
+                .filter(level => level.$.songId>0)
+                .map(level => level.$.songId)
+        )
 
-        return await event.context.connector.error(-1, "Not implemented")
+        return await event.context.connector.levels.getSearchedLevels(
+            levels, music, result.total, data.page, post.gauntlet>0
+        )
 
     }
 })

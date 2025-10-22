@@ -22,7 +22,8 @@ export class SDKMusic {
         this.providers.delete(prefix)
     }
 
-    getMusic = async (id: number): Promise<Nullable<SDKMusicReturn>> => {
+    // type:id => [PROVIDER:type] => results
+    getMusic = async (id: number): Promise<Nullable<typeof songsTable.$inferSelect>> => {
         const db = useEvent().context.drizzle
         const music = await db.query.songsTable.findFirst({
             where: (song, {eq}) => eq(song.id, id)
@@ -33,17 +34,22 @@ export class SDKMusic {
         const provider = this.providers.get(arn[0])
         if (!provider) return null
 
-        return ctx.callAsync(
-            {
-                drizzle: db,
-                song: music,
-                songs: [music]
-            },
-            () => provider.getMusicById(arn[1])
-        )
+        return {
+            ...music,
+            ...await ctx.callAsync(
+                {
+                    drizzle: db,
+                    song: music,
+                    songs: [music]
+                },
+                () => provider.getMusicById(arn[1])
+            )
+        }
     }
 
-    getMusicBulk = async (ids: number[]): Promise<SDKMusicReturn[]> => {
+    // [type:id][] => Parallel[type] => [PROVIDER:type] => results => Aggregate [results]
+    //                               ↘  [PROVIDER:type] => results ↗
+    getMusicBulk = async (ids: number[]): Promise<typeof songsTable.$inferSelect[]> => {
         const db = useEvent().context.drizzle
         const music = await db.query.songsTable.findMany({
             where: (song, {inArray}) => inArray(song.id, ids)
@@ -77,6 +83,15 @@ export class SDKMusic {
             result.push(...meta)
         }
 
-        return result
+        return music.map(
+            mus => {
+                const resolved = result.find(r => r.originalUrl === mus.url)
+                if (!resolved) return mus
+                return {
+                    ...mus,
+                    ...resolved
+                }
+            }
+        )
     }
 }

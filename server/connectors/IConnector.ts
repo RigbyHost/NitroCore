@@ -3,11 +3,11 @@ import {
     commentsTable,
     friendRequestsTable, levelpacksTable,
     messagesTable, questsTable,
-    rolesTable, scoresTable,
+    rolesTable, songsTable,
     usersTable
 } from "~~/drizzle";
 import {Level} from "~~/controller/Level";
-import {GetOneLevelReturnType} from "~~/controller/LevelController";
+import {GetManyLevelsReturnType, GetOneLevelReturnType} from "~~/controller/LevelController";
 import {User} from "~~/controller/User";
 import {ScoresController} from "~~/controller/ScoresController";
 
@@ -77,6 +77,14 @@ export interface IConnector {
             password: string,
             passwordHashable: string,
             questID?: number,
+        ) => Promise<void>,
+
+        getSearchedLevels: (
+            levels: GetManyLevelsReturnType,
+            songs: typeof songsTable.$inferSelect[],
+            count: number,
+            page: number,
+            gauntlet: boolean
         ) => Promise<void>
     },
 
@@ -106,7 +114,9 @@ export interface IConnector {
             scores: Awaited<ReturnType<ScoresController["getScoresForLevel"]>>,
             mode: "coins" | "attempts" | "default"
         ) => Promise<void>
-    }
+    },
+
+    getSongInfo: (music: typeof songsTable.$inferSelect) => Promise<void>
 }
 
 export type ILevelComment = typeof commentsTable.$inferSelect & {

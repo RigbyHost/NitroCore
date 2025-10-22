@@ -7,7 +7,7 @@ export const songsTable = pgTable("songs", {
     authorId: integer("author_id").notNull(),
     name: text("name").notNull().default("Unnamed"),
     artist: text("artist").notNull().default("Unknown"),
-    size: numeric("size", { precision: 10, scale: 2 }).notNull(),
+    size: numeric("size", { precision: 10, scale: 2, mode: "number" }).notNull(),
     url: text("url").notNull(),
     isBanned: boolean("isBanned").notNull().default(false),
     downloads: integer("downloads").notNull().default(0),
