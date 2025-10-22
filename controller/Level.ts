@@ -1,12 +1,15 @@
 import {LevelController} from "~~/controller/LevelController";
-import {commentsTable, levelsTable, rateQueueTable} from "~~/drizzle";
+import {commentsTable, levelsTable, rateQueueTable, usersTable} from "~~/drizzle";
 import {diff} from "deep-object-diff";
 import {and, eq, sql} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
 import {z} from "zod";
 import {ActionController} from "~~/controller/ActionController";
 
-type LevelType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
+export type LevelType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
+export type LevelWithUser = LevelType & {
+    author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">
+}
 
 export class Level<T extends LevelType = LevelType> {
     private readonly controller: LevelController

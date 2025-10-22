@@ -2,7 +2,7 @@ import {Database} from "~/utils/useDrizzle";
 import {levelsTable, usersTable} from "~~/drizzle";
 import {eq, getTableColumns} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
-import {Level} from "~~/controller/Level";
+import {Level, LevelWithUser} from "~~/controller/Level";
 import clamp from "clamp"
 import {LevelFilter} from "~~/controller/LevelFilter";
 
@@ -23,19 +23,22 @@ export class LevelController {
     getOneLevel = async (
         levelId: number,
         full = false,
-    ): Promise<Nullable<Level<GetOneLevelReturnType>>> => {
+    ): Promise<Nullable<Level<LevelWithUser>>> => {
         if (full) {
             const data = await this.db.query.levelsTable.findFirst({
                 where: (level, {eq}) => eq(level.id, levelId),
                 with: {
                     author: {
-                        columns: {username: true}
+                        columns: {
+                            uid: true,
+                            username: true
+                        }
                     }
                 }
             })
             if (!data)
                 return null
-            return new Level<GetOneLevelReturnType>(this, data)
+            return new Level<LevelWithUser>(this, data)
         } else {
             // I can't think of cleaner way to do this with query API
             const {stringLevel, ...columns} = getTableColumns(levelsTable)
@@ -47,20 +50,23 @@ export class LevelController {
                 columns: colS,
                 with: {
                     author: {
-                        columns: {username: true}
+                        columns: {
+                            uid: true,
+                            username: true
+                        }
                     }
                 }
             })
             if (!data)
                 return null
-            return new Level<GetOneLevelReturnType>(this, data) || null
+            return new Level<LevelWithUser>(this, data) || null
         }
     }
 
     getManyLevels = async (
         ids: number[],
         withUser = false,
-    ): Promise<GetManyLevelsReturnType> => {
+    ): Promise<Level<LevelWithUser>[]> => {
         const levels = await this.db.query.levelsTable.findMany({
             where: (level, {inArray}) => inArray(level.id, ids),
             with: {
@@ -181,11 +187,3 @@ export class LevelController {
 }
 
 type CountDemonStatsReturnType = Exclude<typeof usersTable.$inferSelect["extraData"], null>["demon_stats"]
-
-
-export type GetOneLevelReturnType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
-    & { author?: Pick<typeof usersTable.$inferSelect, "username"> }
-
-export type GetManyLevelsReturnType = Level<typeof levelsTable.$inferSelect & {
-    author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">
-}>[]

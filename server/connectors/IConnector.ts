@@ -6,8 +6,7 @@ import {
     rolesTable, songsTable,
     usersTable
 } from "~~/drizzle";
-import {Level} from "~~/controller/Level";
-import {GetManyLevelsReturnType, GetOneLevelReturnType} from "~~/controller/LevelController";
+import {Level, LevelWithUser} from "~~/controller/Level";
 import {User} from "~~/controller/User";
 import {ScoresController} from "~~/controller/ScoresController";
 
@@ -73,14 +72,14 @@ export interface IConnector {
         ) => Promise<void>,
 
         getFullLevel: (
-            level: Level<GetOneLevelReturnType>,
+            level: Level<LevelWithUser>,
             password: string,
             passwordHashable: string,
             questID?: number,
         ) => Promise<void>,
 
         getSearchedLevels: (
-            levels: GetManyLevelsReturnType,
+            levels: Array<Level<LevelWithUser>>,
             songs: typeof songsTable.$inferSelect[],
             count: number,
             page: number,

@@ -1,6 +1,5 @@
 import {levelpacksTable, songsTable} from "~~/drizzle";
-import {Level} from "~~/controller/Level";
-import {GetManyLevelsReturnType, GetOneLevelReturnType} from "~~/controller/LevelController";
+import {Level, LevelWithUser} from "~~/controller/Level";
 
 
 export const GDConnectorLevels = {
@@ -53,7 +52,7 @@ export const GDConnectorLevels = {
     },
 
     getFullLevel: async (
-        level: Level<GetOneLevelReturnType>,
+        level: Level<LevelWithUser>,
         password: string,
         passwordHashable: string,
         questID: number = 0,
@@ -132,7 +131,7 @@ export const GDConnectorLevels = {
     },
 
     getSearchedLevels: async (
-        levels: GetManyLevelsReturnType,
+        levels: Array<Level<LevelWithUser>>,
         songs: typeof songsTable.$inferSelect[],
         count: number,
         page: number,

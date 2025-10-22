@@ -5,6 +5,7 @@ import {FriendshipController} from "~~/controller/FriendshipController";
 import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
 import {ListController} from "~~/controller/ListController";
 import {MusicController} from "~~/controller/MusicController";
+import {Level, LevelWithUser} from "~~/controller/Level";
 
 const metrics = usePerformance()
 
@@ -30,7 +31,7 @@ export default defineEventHandler({
         metrics.step("Search levels")
 
         let result: {
-            levels: number[],
+            levels: Level<LevelWithUser>[],
             total: number
         } = {levels: [], total: 0}
         switch (data.type) {
@@ -95,9 +96,13 @@ export default defineEventHandler({
                 const list = await listController.getOneList(id)
                 if (!list)
                     break
+                // TODO: evaluate if this should be here
                 await list.onDownload()
+                let levels: typeof result["levels"] = []
+                if (list.$.levels)
+                    levels = await levelController.getManyLevels(list.$.levels)
                 result = {
-                    levels: list.$.levels || [],
+                    levels: levels,
                     total: list.$.levels?.length || 0
                 }
                 break
@@ -113,17 +118,16 @@ export default defineEventHandler({
 
         metrics.step("Get levels data")
 
-        const levels = await levelController.getManyLevels(result.levels, true)
-
+        metrics.step("Get music")
         const musicController = new MusicController(event.context.drizzle)
         const music = await musicController.getSongBulk(
-            levels
+            result.levels
                 .filter(level => level.$.songId>0)
                 .map(level => level.$.songId)
         )
-
+        metrics.step("Send response")
         return await event.context.connector.levels.getSearchedLevels(
-            levels, music, result.total, data.page, post.gauntlet>0
+            result.levels, music, result.total, data.page, post.gauntlet>0
         )
 
     }
