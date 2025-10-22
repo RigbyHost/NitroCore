@@ -1,11 +1,14 @@
 import {ListController} from "~~/controller/ListController";
-import {listsTable} from "~~/drizzle";
+import {listsTable, usersTable} from "~~/drizzle";
 import {z} from "zod";
 import {diff} from "deep-object-diff";
 import {eq, sql} from "drizzle-orm";
 import {ActionController} from "~~/controller/ActionController";
 
-type ListType = typeof listsTable.$inferSelect
+export type ListType = typeof listsTable.$inferSelect
+export type ListWithUser = ListType & {
+    author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">
+}
 
 export class List<T extends ListType = ListType> {
     private readonly controller: ListController
