@@ -1,5 +1,5 @@
 import {friendRequestsTable, friendshipsTable} from "~~/drizzle";
-import {and, eq} from "drizzle-orm";
+import {and, eq, SQL} from "drizzle-orm";
 import {UserController} from "~~/controller/UserController";
 import {User} from "~~/controller/User";
 
@@ -26,9 +26,12 @@ export class FriendshipController {
         return count > 0
     }
 
-    countFriendRequests = async (targetId: number): Promise<number> =>
-        this.db.$count(friendRequestsTable, eq(friendRequestsTable.uidDest, targetId))
-
+    countFriendRequests = async (targetId: number, isNew: boolean): Promise<number> => {
+        let filter: SQL = eq(friendRequestsTable.uidDest, targetId)
+        if (isNew)
+            filter = and(filter, eq(friendRequestsTable.isNew, true))!
+        return this.db.$count(friendRequestsTable, filter)
+    }
     getFriendRequests = async (uid: number, type: "sent" | "received", page = 0) => {
         // TODO: Subject to optimization in `with` to ignore anything besides auth, stats and vessels
         return this.db.query.friendRequestsTable.findMany({

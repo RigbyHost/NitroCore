@@ -24,7 +24,7 @@ export default defineEventHandler({
         if (!reqs.length)
             return await event.context.connector.error(-2, "No friend requests")
 
-        return await event.context.connector.getFriendRequests(
+        return await event.context.connector.profile.getFriendRequests(
             reqs,
             data.getSent ? "sent" : "received",
             reqs.length,

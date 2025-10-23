@@ -1,6 +1,6 @@
 import {Database} from "~/utils/useDrizzle";
 import {rolesTable, usersTable} from "~~/drizzle";
-import {User} from "~~/controller/User";
+import {User, UserWithRole} from "~~/controller/User";
 import {sql} from "drizzle-orm";
 import {union} from "drizzle-orm/pg-core";
 import {z} from "zod";
@@ -63,8 +63,8 @@ export class UserController {
     getOneUser = async (
         {uid, username, email}: { uid?: number, username?: string, email?: string },
         withRole = false,
-    ): Promise<Nullable<User<GetOneUserReturnType>>> => {
-        let user: MaybeUndefined<GetOneUserReturnType>
+    ): Promise<Nullable<User<UserWithRole>>> => {
+        let user: MaybeUndefined<UserWithRole>
         if (uid)
             user = await this.db.query.usersTable
                 .findFirst({
@@ -91,7 +91,7 @@ export class UserController {
                 })
         if (!user)
             return null
-        return new User<GetOneUserReturnType>(this, user)
+        return new User<UserWithRole>(this, user)
     }
 
     /**
@@ -102,7 +102,7 @@ export class UserController {
     getManyUsers = async (
         ids: number[],
         withRole = false,
-    ): Promise<User<GetOneUserReturnType>[]> => {
+    ): Promise<User<UserWithRole>[]> => {
         const users = await this.db.query.usersTable
             .findMany({
                 where: (user, {inArray}) => inArray(user.uid, ids),
@@ -110,7 +110,7 @@ export class UserController {
                     role: withRole || undefined,
                 }
             })
-        return users.map(user => new User<GetOneUserReturnType>(this, user))
+        return users.map(user => new User<UserWithRole>(this, user))
     }
 
     /**
@@ -367,5 +367,3 @@ const registerValidators = z.object({
     password: z.string("-1").min(6, "-5"),
     email: z.email("-6")
 })
-
-type GetOneUserReturnType = (typeof usersTable.$inferSelect) & { role?: typeof rolesTable.$inferSelect }
