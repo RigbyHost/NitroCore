@@ -2,7 +2,7 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {ListController} from "~~/controller/ListController";
 import {List, ListWithUser} from "~~/controller/List";
-import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
+import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {FriendshipController} from "~~/controller/FriendshipController";
 
 const metrics = usePerformance()
@@ -52,7 +52,7 @@ export default defineEventHandler({
                 result = await filter.searchUserLists(data, true)
                 break
             case 13:
-                await authLoginMiddleware(event)
+                await authMiddleware(event)
                 if (!event.context.user)
                     return await event.context.connector.error(-1, "Not logged in")
                 const friendshipController = new FriendshipController(event.context.drizzle)

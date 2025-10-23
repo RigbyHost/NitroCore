@@ -32,25 +32,24 @@ export class UserController {
     /**
      * Searches users by username or uid
      * @param search Should be number or string with length >= 3
+     * @param page Page number
      * @returns Array of user ids
      */
-    searchUsers = async (search: string): Promise<number[]> => {
+    searchUsers = async (search: string, page: number): Promise<User[]> => {
         const searchId = Number(search) || 0
         if (!searchId && search.length < 3) return []
         const results = await this.db.query.usersTable
             .findMany({
-                columns: {
-                    uid: true,
-                },
                 where: (user, {or, eq, ilike}) => or(
                     eq(user.uid, searchId),
                     ilike(user.username, `%${search}%`)
                 ),
                 orderBy: (user, {desc}) => desc(user.stars),
-                limit: 10
+                limit: 10,
+                offset: page * 10
             })
 
-        return results.map(r => r.uid)
+        return results.map(user => new User(this, user))
     }
 
     /**

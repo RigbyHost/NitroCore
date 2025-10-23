@@ -54,12 +54,16 @@ export interface IConnector {
         ) => Promise<void>
     },
 
-    getFriendRequests: (
-        request: IFriendRequest[],
-        mode: "sent" | "received",
-        count: number,
-        page: number
-    ) => Promise<void>,
+    profile: {
+        getFriendRequests: (
+            request: IFriendRequest[],
+            mode: "sent" | "received",
+            count: number,
+            page: number
+        ) => Promise<void>,
+
+        getUserSearch: (users: Array<User>, page: number, total: number) => Promise<void>,
+    },
 
     levels: {
         getMapPacks: (
