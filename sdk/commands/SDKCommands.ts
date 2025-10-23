@@ -10,7 +10,7 @@ export class SDKCommands {
     }
 
     register = (
-        type: "level" | "lists" | "profile" | "global",
+        type: "level" | "list" | "profile" | "global",
         command: string,
         handler: SDKCommandHandlerFunction,
         permissions?: SDKCommandHandlerPermission
@@ -37,7 +37,7 @@ export class SDKCommands {
     }
 
     unregister = (
-        type: "level" | "lists" | "profile" | "global",
+        type: "level" | "list" | "profile" | "global",
         command: string
     ) => {
         const uuid = this.commandMap.get(`${type}/${command}`)
@@ -54,7 +54,7 @@ export class SDKCommands {
     }
 
     invoke = async (
-        type: "level" | "lists" | "profile" | "global",
+        type: "level" | "list" | "profile" | "global",
         command: string,
         args: string[],
         context: Context
