@@ -158,5 +158,25 @@ export const GDConnectorProfile = {
             ].join(":")
 
         )
+    },
+
+    getUsersList: async (users: Array<User>) => {
+        await send(
+            useEvent(),
+            users.map(
+                user => [
+                    1, user.$.username,
+                    2, user.$.uid,
+                    9, user.getShownIcon(),
+                    10, user.$.vessels.clr_primary,
+                    11, user.$.vessels.clr_secondary,
+                    14, user.$.iconType,
+                    15, user.$.special,
+                    16, user.$.uid,
+                    18, user.$.settings.mS,
+                    41, 0,
+                ].join(":")
+            ).join("|")
+        )
     }
 }

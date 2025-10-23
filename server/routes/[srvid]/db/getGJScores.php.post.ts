@@ -27,7 +27,7 @@ export default defineEventHandler({
                 if (!event.context.user)
                     return await event.context.connector.error(-2, "Invalid credentials")
                 const friendshipController = new FriendshipController(event.context.drizzle)
-                const friends = await friendshipController.getAccountFriendsIds(event.context.user.$.uid)
+                const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)
                 users = await userController.getLeaderboard({
                     type: "friends",
                     friendsIds: friends

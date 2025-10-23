@@ -72,7 +72,9 @@ export interface IConnector {
                 friend_requests: number,
                 messages: number
             }
-        ) => Promise<void>
+        ) => Promise<void>,
+
+        getUsersList: (users: Array<User>) => Promise<void>,
     },
 
     levels: {
