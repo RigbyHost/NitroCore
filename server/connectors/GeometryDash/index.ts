@@ -43,6 +43,12 @@ export class GDConnector implements IConnector {
 
     messages = GDConnectorMessages
 
+    levels = GDConnectorLevels
+
+    scores = GDConnectorScores
+
+    quests = GDConnectorQuests
+
     getFriendRequests = async (
         requests: IFriendRequest[],
         mode: "sent" | "received",
@@ -92,9 +98,10 @@ export class GDConnector implements IConnector {
         )
     }
 
-    levels = GDConnectorLevels
-
-    scores = GDConnectorScores
-
-    quests = GDConnectorQuests
+    getTopArtists = async (artists: string[], page: number, total: number) => {
+        await send(
+            useEvent(),
+            artists.map(artist => `4:${artist}`).join("|")
+        )
+    }
 }

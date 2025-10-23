@@ -122,7 +122,8 @@ export interface IConnector {
         ) => Promise<void>
     },
 
-    getSongInfo: (music: typeof songsTable.$inferSelect) => Promise<void>
+    getSongInfo: (music: typeof songsTable.$inferSelect) => Promise<void>,
+    getTopArtists: (artists: string[], page: number, total: number) => Promise<void>
 }
 
 export type ILevelComment = typeof commentsTable.$inferSelect & {
