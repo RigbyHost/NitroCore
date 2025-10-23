@@ -48,7 +48,7 @@ export const GDConnectorMessages = {
                 }
             )
                 .join("|")
-                .concat(`#${count}:${page * 10}::10`)
+                .concat(`#${count}:${page * 10}:10`)
         )
     }
 }

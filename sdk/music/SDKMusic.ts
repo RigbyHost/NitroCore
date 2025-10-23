@@ -30,7 +30,7 @@ export class SDKMusic {
         })
         if (!music) return null
 
-        const arn = music.url.split("::", 1)
+        const arn = music.url.split(":", 1)
         const provider = this.providers.get(arn[0])
         if (!provider) return null
 
@@ -58,7 +58,7 @@ export class SDKMusic {
 
         const sortedTracks = new Map<string, typeof music>()
         music.forEach((track) => {
-            const arn = track.url.split("::", 1)
+            const arn = track.url.split(":", 1)
             const arr = sortedTracks.get(arn[0]) || []
             sortedTracks.set(arn[0], arr.concat(track))
         })
@@ -77,7 +77,7 @@ export class SDKMusic {
                     songs: songs
                 },
                 () => provider.getBulkMusicById(songs.map(
-                    s=>s.url.split("::", 1)[1]
+                    s=>s.url.split(":", 1)[1]
                 ))
             )
             result.push(...meta)

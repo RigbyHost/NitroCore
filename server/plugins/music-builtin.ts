@@ -24,7 +24,7 @@ class HTTPProvider implements SDKMusicProvider {
             name: song.name,
             author: song.artist,
             size: song.size,
-            url: song.url.split("::", 1)[1],
+            url: song.url.split(":", 1)[1],
             originalUrl: song.url
         }))
     }
