@@ -47,7 +47,7 @@ export const useDrizzle = async (database?: string) => {
         pools.set(srvid, pool);
     }
 
-    return drizzle(pools.get(srvid)!, {schema})
+    return drizzle(pools.get(srvid)!, {schema, logger: true})
 }
 
 export const useDrizzlePoolManager = () => {

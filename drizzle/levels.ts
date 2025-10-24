@@ -1,13 +1,14 @@
 import {boolean, doublePrecision, integer, json, pgTable, serial, text, timestamp} from "drizzle-orm/pg-core";
 import {relations} from "drizzle-orm";
 import {usersTable} from "./users";
+import {citext} from "./custom_types";
 
 // TODO: Drizzle migration CREATE TABLE levels (...) AUTO_INCREMENT=30;
 
 export const levelsTable = pgTable("levels", {
     // Primary
     id: serial("id").primaryKey(),
-    name: text("name").notNull().default("Unnamed"),
+    name: citext("name").notNull().default("Unnamed"),
     description: text("description").notNull().default(""),
     ownerUid: integer("uid").notNull(),
     password: text("password").notNull().default(""),

@@ -14,3 +14,9 @@ export const commaSeparated = customType<{ data: Array<number> }>({
         return value.join(",")
     }
 })
+
+export const citext = customType<{ data: string }>({
+    dataType() {
+        return 'citext';
+    },
+});

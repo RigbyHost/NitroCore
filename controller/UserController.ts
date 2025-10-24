@@ -236,8 +236,7 @@ export class UserController {
         if (user.$.isBanned)
             return {code: -12}
         const crypto = useCrypto()
-        const passwordHash = crypto.sha256(crypto.sha512(password) + "SaltyTruth:sob:")
-        if (passwordHash !== user.$.passwordHash)
+        if (!crypto.bcrypt$10.compare(password, user.$.passwordHash))
             return {code: -1}
         user.$.lastIP = ip
         await user.commit()
@@ -287,7 +286,7 @@ export class UserController {
             return {code: -3}
 
         const crypto = useCrypto()
-        const passwordHash = crypto.sha256(crypto.sha512(parsed.data.password) + "SaltyTruth:sob:")
+        const passwordHash = crypto.bcrypt$10.hash(parsed.data.password)
 
         const res = await this.db.insert(usersTable)
             .values({

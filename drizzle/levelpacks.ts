@@ -1,11 +1,11 @@
 import {boolean, integer, pgTable, serial, text} from "drizzle-orm/pg-core";
-import {commaSeparated} from "./custom_types";
+import {citext, commaSeparated} from "./custom_types";
 
 export const levelpacksTable = pgTable("levelpacks", {
     // Primary
     id: serial("id").primaryKey(),
     isGauntlet: boolean("packType").notNull(),
-    packName: text("packName").notNull(),
+    packName: citext("packName").notNull(),
     levels: commaSeparated("levels").notNull(),
 
     // Settings

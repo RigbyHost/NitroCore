@@ -5,5 +5,4 @@ export default defineEventHandler((event) => {
         || h("x-forwarded-for")
         || h("x-real-ip")
         || event.node.req.socket.remoteAddress;
-    console.log(event.context.clientAddress);
 })

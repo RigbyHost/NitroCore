@@ -19,7 +19,7 @@ export default defineEventHandler({
             username: data.userName,
             password: data.password,
             email: data.email
-        }, ip)
+        }, ip, event.context.config.config!.SecurityConfig.AutoActivate)
 
         if (code > 0) {
             await event.context.connector.success("User registered successfully")

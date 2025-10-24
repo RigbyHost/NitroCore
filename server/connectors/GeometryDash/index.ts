@@ -16,16 +16,19 @@ export class GDConnector implements IConnector {
 
     success = async (message: string) => {
         setHeader(useEvent(), "X-Message", message)
+        console.log(`↳ ${message}`)
         await send(useEvent(), "1")
     }
 
     numberedSuccess = async (code: number, message: string) => {
         setHeader(useEvent(), "X-Message", message)
+        console.log(`↳ ${message} (code: ${code})`)
         await send(useEvent(), code.toString())
     }
 
     error = async (code: number, message: string) => {
         setHeader(useEvent(), "X-Message", message)
+        console.log(`↳ ${message} (code: ${code})`)
         await send(useEvent(), "-1")
     }
 

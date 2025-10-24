@@ -1,6 +1,6 @@
 import {pgTable, integer, text, timestamp, jsonb, serial} from "drizzle-orm/pg-core";
 import {relations} from "drizzle-orm";
-import {commaSeparated} from "./custom_types";
+import {citext, commaSeparated} from "./custom_types";
 import {rolesTable} from "./roles";
 import {accountCommentsTable} from "./account_comments";
 import {commentsTable} from "./comments";
@@ -9,10 +9,10 @@ import {levelsTable} from "./levels";
 export const usersTable = pgTable("users", {
     // Primary
     uid: serial("uid").primaryKey(),
-    username: text("uname").notNull(),
+    username: citext("uname").notNull(),
     passwordHash: text("passhash").notNull(),
     gjpHash: text("gjphash").notNull(),
-    email: text("email").notNull(),
+    email: citext("email").notNull(),
     roleId: integer("role_id").notNull().default(0),
 
     // Stats

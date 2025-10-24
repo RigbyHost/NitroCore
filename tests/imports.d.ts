@@ -21,6 +21,7 @@ declare global {
   const setupCommitListener: typeof import('../server/utils/useCommitFabric')['setupCommitListener']
   const suite: typeof import('vitest')['suite']
   const test: typeof import('vitest')['test']
+  const useCommandContext: typeof import('../server/utils/useSDK')['useCommandContext']
   const useCommit: typeof import('../server/utils/useCommit')['useCommit']
   const useCommitFabric: typeof import('../server/utils/useCommitFabric')['useCommitFabric']
   const useCommitMiddleware: typeof import('../server/utils/useCommit')['useCommitMiddleware']
@@ -30,8 +31,11 @@ declare global {
   const useFabric: typeof import('../server/utils/useFabric')['useFabric']
   const useGeometryDashTooling: typeof import('../server/utils/useGeometryDashTooling')['useGeometryDashTooling']
   const useGzip: typeof import('../server/utils/useGzip')['useGzip']
+  const useMusicContext: typeof import('../server/utils/useSDK')['useMusicContext']
   const usePerformance: typeof import('../server/utils/usePerformance')['usePerformance']
   const usePostObject: typeof import('../server/utils/usePostObject')['usePostObject']
+  const useRuntimeConfig: typeof import('./mocks/useRuntimeConfig')['useRuntimeConfig']
+  const useSDK: typeof import('../server/utils/useSDK')['useSDK']
   const useServerConfig: typeof import('../server/utils/useServerConfig')['useServerConfig']
   const useStorage: typeof import('./mocks/useStorage')['useStorage']
   const useTemporalFabric: typeof import('../server/utils/useFabric')['useTemporalFabric']
@@ -41,9 +45,12 @@ declare global {
 // for type re-export
 declare global {
   // @ts-ignore
-  export type { Maybe, Nullable, MaybeUndefined, MakeOptional } from '../server/utils/types'
+  export type { Maybe, Nullable, MaybeUndefined, MakeOptional, MaybePromise } from '../server/utils/types'
   import('../server/utils/types')
   // @ts-ignore
   export type { Database } from '../server/utils/useDrizzle'
   import('../server/utils/useDrizzle')
+  // @ts-ignore
+  export type { SDKMusicProvider } from '../server/utils/useSDK'
+  import('../server/utils/useSDK')
 }
