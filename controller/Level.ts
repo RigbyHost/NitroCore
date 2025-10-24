@@ -1,12 +1,15 @@
 import {LevelController} from "~~/controller/LevelController";
-import {commentsTable, levelsTable, rateQueueTable} from "~~/drizzle";
+import {commentsTable, levelsTable, rateQueueTable, usersTable} from "~~/drizzle";
 import {diff} from "deep-object-diff";
 import {and, eq, sql} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
 import {z} from "zod";
 import {ActionController} from "~~/controller/ActionController";
 
-type LevelType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
+export type LevelType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
+export type LevelWithUser = LevelType & {
+    author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">
+}
 
 export class Level<T extends LevelType = LevelType> {
     private readonly controller: LevelController
@@ -97,11 +100,17 @@ export class Level<T extends LevelType = LevelType> {
         const actionController = new ActionController(this.db)
         if (await actionController.isItemLiked("level", uid, this.$.id))
             throw new Error("You have already liked/disliked this level")
-        // FIXME: Not CRUD - should use TX or commit relative likes+1 immediately
-        if (action === "like")
+        if (action === "like") {
+            await this.db.update(levelsTable)
+                .set({likes: sql`${levelsTable.likes}+1`})
+                .where(eq(levelsTable.id, this.$.id))
             this.$.likes++
-        else
+        } else {
+            await this.db.update(levelsTable)
+                .set({likes: sql`${levelsTable.likes}-1`})
+                .where(eq(levelsTable.id, this.$.id))
             this.$.likes--
+        }
         await actionController.registerAction(
             "like_level",
             uid,
@@ -110,7 +119,7 @@ export class Level<T extends LevelType = LevelType> {
         )
     }
 
-    verifyCoins = (verify: true) => {
+    verifyCoins = (verify: boolean) => {
         if (verify)
             this.$.coins = this.$.userCoins
         else
@@ -166,7 +175,7 @@ export class Level<T extends LevelType = LevelType> {
     }
 
     delete = async () => {
-        // TODO: Implement relations for CASCADE delete, but imported databases don't support it, so...
+        // TODO: Implement relations for CASCADE delete
         await this.db.delete(levelsTable)
             .where(eq(levelsTable.id, this.$.id))
         await this.db.delete(rateQueueTable)

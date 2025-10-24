@@ -2,7 +2,7 @@ import {Database} from "~/utils/useDrizzle";
 import {levelsTable, usersTable} from "~~/drizzle";
 import {eq, getTableColumns} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
-import {Level} from "~~/controller/Level";
+import {Level, LevelWithUser} from "~~/controller/Level";
 import clamp from "clamp"
 import {LevelFilter} from "~~/controller/LevelFilter";
 
@@ -23,19 +23,22 @@ export class LevelController {
     getOneLevel = async (
         levelId: number,
         full = false,
-    ): Promise<Nullable<Level<GetOneLevelReturnType>>> => {
+    ): Promise<Nullable<Level<LevelWithUser>>> => {
         if (full) {
             const data = await this.db.query.levelsTable.findFirst({
                 where: (level, {eq}) => eq(level.id, levelId),
                 with: {
                     author: {
-                        columns: {username: true}
+                        columns: {
+                            uid: true,
+                            username: true
+                        }
                     }
                 }
             })
             if (!data)
                 return null
-            return new Level<GetOneLevelReturnType>(this, data)
+            return new Level<LevelWithUser>(this, data)
         } else {
             // I can't think of cleaner way to do this with query API
             const {stringLevel, ...columns} = getTableColumns(levelsTable)
@@ -47,20 +50,23 @@ export class LevelController {
                 columns: colS,
                 with: {
                     author: {
-                        columns: {username: true}
+                        columns: {
+                            uid: true,
+                            username: true
+                        }
                     }
                 }
             })
             if (!data)
                 return null
-            return new Level<GetOneLevelReturnType>(this, data) || null
+            return new Level<LevelWithUser>(this, data) || null
         }
     }
 
     getManyLevels = async (
         ids: number[],
         withUser = false,
-    ) => {
+    ): Promise<Level<LevelWithUser>[]> => {
         const levels = await this.db.query.levelsTable.findMany({
             where: (level, {inArray}) => inArray(level.id, ids),
             with: {
@@ -104,7 +110,80 @@ export class LevelController {
     }
 
     getFilter = () => new LevelFilter(this)
+
+    countDemonStats = async (levelIds: number[]): Promise<CountDemonStatsReturnType> => {
+        const levels = await this.db.query.levelsTable.findMany({
+            columns: {
+                demonDifficulty: true,
+                length: true
+            },
+            where: (level, {inArray, and, gte}) => and(
+                inArray(level.id, levelIds),
+                gte(level.demonDifficulty, 0)
+            )
+        })
+
+        const ret: CountDemonStatsReturnType = {
+            standard: {
+                easy: 0,
+                medium: 0,
+                hard: 0,
+                insane: 0,
+                extreme: 0
+            },
+            platformer: {
+                easy: 0,
+                medium: 0,
+                hard: 0,
+                insane: 0,
+                extreme: 0
+            },
+            weekly: 0,
+            gauntlet: 0
+        }
+
+        levels.forEach(level => {
+            if (level.length < 5) {
+                switch(level.demonDifficulty) {
+                    case 3:
+                        ret.standard.easy++
+                        break
+                    case 4:
+                        ret.standard.medium++
+                        break
+                    case 5:
+                        ret.standard.insane++
+                        break
+                    case 6:
+                        ret.standard.extreme++
+                        break
+                    default:
+                        ret.standard.hard++
+                        break
+                }
+            } else {
+                switch(level.demonDifficulty) {
+                    case 3:
+                        ret.platformer.easy++
+                        break
+                    case 4:
+                        ret.platformer.medium++
+                        break
+                    case 5:
+                        ret.platformer.insane++
+                        break
+                    case 6:
+                        ret.platformer.extreme++
+                        break
+                    default:
+                        ret.platformer.hard++
+                        break
+                }
+            }
+        })
+
+        return ret
+    }
 }
 
-export type GetOneLevelReturnType =  MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
-    & {author?: Pick<typeof usersTable.$inferSelect, "username">}
+type CountDemonStatsReturnType = Exclude<typeof usersTable.$inferSelect["extraData"], null>["demon_stats"]

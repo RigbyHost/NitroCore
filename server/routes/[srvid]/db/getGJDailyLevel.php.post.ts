@@ -6,7 +6,6 @@ export default defineEventHandler({
     onRequest: [initMiddleware],
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await readFormData(event))
-
         const {data, success} = requestSchema.safeParse(post)
 
         if (!success)
@@ -30,7 +29,17 @@ export default defineEventHandler({
         })
         if (!quest)
             return await event.context.connector.error(-2, "Quest not found")
-        // TODO: Add connector
+
+        const date = quest.timeAdded
+        date.setHours(0, 0, 0, 0)
+        date.setDate(date.getDate() + (data.type===2 ? 7 : 1))
+
+        const left = Math.max(0, quest.timeAdded.getTime() - Date.now())
+
+        await event.context.connector.quests.getSpecialLevel(
+            quest.id,
+            left
+        )
     }
 })
 

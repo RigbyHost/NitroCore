@@ -1,6 +1,6 @@
 import {Database} from "~/utils/useDrizzle";
 import {rolesTable, usersTable} from "~~/drizzle";
-import {User} from "~~/controller/User";
+import {User, UserWithRole} from "~~/controller/User";
 import {sql} from "drizzle-orm";
 import {union} from "drizzle-orm/pg-core";
 import {z} from "zod";
@@ -32,25 +32,24 @@ export class UserController {
     /**
      * Searches users by username or uid
      * @param search Should be number or string with length >= 3
+     * @param page Page number
      * @returns Array of user ids
      */
-    searchUsers = async (search: string): Promise<number[]> => {
+    searchUsers = async (search: string, page: number): Promise<User[]> => {
         const searchId = Number(search) || 0
         if (!searchId && search.length < 3) return []
         const results = await this.db.query.usersTable
             .findMany({
-                columns: {
-                    uid: true,
-                },
                 where: (user, {or, eq, ilike}) => or(
                     eq(user.uid, searchId),
                     ilike(user.username, `%${search}%`)
                 ),
                 orderBy: (user, {desc}) => desc(user.stars),
-                limit: 10
+                limit: 10,
+                offset: page * 10
             })
 
-        return results.map(r => r.uid)
+        return results.map(user => new User(this, user))
     }
 
     /**
@@ -64,8 +63,8 @@ export class UserController {
     getOneUser = async (
         {uid, username, email}: { uid?: number, username?: string, email?: string },
         withRole = false,
-    ): Promise<Nullable<User<GetOneUserReturnType>>> => {
-        let user: MaybeUndefined<GetOneUserReturnType>
+    ): Promise<Nullable<User<UserWithRole>>> => {
+        let user: MaybeUndefined<UserWithRole>
         if (uid)
             user = await this.db.query.usersTable
                 .findFirst({
@@ -92,7 +91,7 @@ export class UserController {
                 })
         if (!user)
             return null
-        return new User<GetOneUserReturnType>(this, user)
+        return new User<UserWithRole>(this, user)
     }
 
     /**
@@ -103,7 +102,7 @@ export class UserController {
     getManyUsers = async (
         ids: number[],
         withRole = false,
-    ): Promise<User<GetOneUserReturnType>[]> => {
+    ): Promise<User<UserWithRole>[]> => {
         const users = await this.db.query.usersTable
             .findMany({
                 where: (user, {inArray}) => inArray(user.uid, ids),
@@ -111,7 +110,7 @@ export class UserController {
                     role: withRole || undefined,
                 }
             })
-        return users.map(user => new User<GetOneUserReturnType>(this, user))
+        return users.map(user => new User<UserWithRole>(this, user))
     }
 
     /**
@@ -144,14 +143,13 @@ export class UserController {
             globalStars?: T extends "global" ? number : never,
             limit?: T extends "stars" | "cpoints" ? number : never
         }
-    ): Promise<number[]> => {
-        let uids: number[] = []
+    ): Promise<User[]> => {
+        let users: User[] = []
 
         switch (type) {
             case "stars":
-                uids = await this.db.query.usersTable
+                users = await this.db.query.usersTable
                     .findMany({
-                        columns: {uid: true},
                         where: (user, {and, gt, eq}) => and(
                             eq(user.isBanned, 0),
                             gt(user.stars, 0)
@@ -162,12 +160,11 @@ export class UserController {
                         ],
                         limit: limit
                     })
-                    .then(users => users.map(user => user.uid))
+                    .then(users => users.map(user => new User(this, user)))
                 break
             case "cpoints":
-                uids = await this.db.query.usersTable
+                users = await this.db.query.usersTable
                     .findMany({
-                        columns: {uid: true},
                         where: (user, {and, gt, eq}) => and(
                             eq(user.isBanned, 0),
                             gt(user.creatorPoints, 0)
@@ -178,37 +175,28 @@ export class UserController {
                         ],
                         limit: limit
                     })
-                    .then(users => users.map(user => user.uid))
+                    .then(users => users.map(user => new User(this, user)))
                 break
             case "global":
                 const leaderboardBetter = this.db
-                    .select({
-                        uid: usersTable.uid,
-                        stars: usersTable.stars,
-                        username: usersTable.username,
-                    })
+                    .select()
                     .from(usersTable)
                     .where(sql`${usersTable.stars}>${globalStars} AND ${usersTable.isBanned}=0`)
                     .orderBy(sql`${usersTable.stars} DESC`)
                     .limit(50)
                 const leaderboardWorse = this.db
-                    .select({
-                        uid: usersTable.uid,
-                        stars: usersTable.stars,
-                        username: usersTable.username,
-                    })
+                    .select()
                     .from(usersTable)
                     .where(sql`${usersTable.stars}>0 AND ${usersTable.stars}<=${globalStars} AND ${usersTable.isBanned}=0`)
                     .orderBy(sql`${usersTable.stars} DESC`)
                     .limit(50)
-                uids = await union(leaderboardBetter, leaderboardWorse)
+                users = await union(leaderboardBetter, leaderboardWorse)
                     .orderBy(sql`${usersTable.stars} DESC, ${usersTable.username} ASC`)
-                    .then(users => users.map(user => user.uid))
+                    .then(users => users.map(user => new User(this, user)))
                 break
             case "friends":
-                uids = await this.db.query.usersTable
+                users = await this.db.query.usersTable
                     .findMany({
-                        columns: {uid: true},
                         where: (user, {and, gt, eq, inArray}) => and(
                             eq(user.isBanned, 0),
                             gt(user.stars, 0),
@@ -220,10 +208,10 @@ export class UserController {
                         ],
                         limit: limit
                     })
-                    .then(users => users.map(user => user.uid))
+                    .then(users => users.map(user => new User(this, user)))
                 break
         }
-        return uids
+        return users
     }
 
     /**
@@ -379,5 +367,3 @@ const registerValidators = z.object({
     password: z.string("-1").min(6, "-5"),
     email: z.email("-6")
 })
-
-type GetOneUserReturnType = (typeof usersTable.$inferSelect) & { role?: typeof rolesTable.$inferSelect }

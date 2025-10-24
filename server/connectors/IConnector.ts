@@ -3,11 +3,13 @@ import {
     commentsTable,
     friendRequestsTable, levelpacksTable,
     messagesTable, questsTable,
-    rolesTable,
+    rolesTable, songsTable,
     usersTable
 } from "~~/drizzle";
-import {Level} from "~~/controller/Level";
-import {GetOneLevelReturnType} from "~~/controller/LevelController";
+import {Level, LevelWithUser} from "~~/controller/Level";
+import {User, UserWithRole} from "~~/controller/User";
+import {ScoresController} from "~~/controller/ScoresController";
+import {List, ListWithUser} from "~~/controller/List";
 
 export interface IConnector {
 
@@ -36,6 +38,7 @@ export interface IConnector {
             count: number,
             page: number
         ) => Promise<void>,
+        commentCommandResult: (result: string) => Promise<void>,
     },
 
     messages: {
@@ -51,12 +54,28 @@ export interface IConnector {
         ) => Promise<void>
     },
 
-    getFriendRequests: (
-        request: IFriendRequest[],
-        mode: "sent" | "received",
-        count: number,
-        page: number
-    ) => Promise<void>,
+    profile: {
+        getFriendRequests: (
+            request: IFriendRequest[],
+            mode: "sent" | "received",
+            count: number,
+            page: number
+        ) => Promise<void>,
+
+        getUserSearch: (users: Array<User>, page: number, total: number) => Promise<void>,
+
+        getUserInfo: (
+            user: User<UserWithRole>,
+            rank: number,
+            isFriend: boolean,
+            counters: {
+                friend_requests: number,
+                messages: number
+            }
+        ) => Promise<void>,
+
+        getUsersList: (users: Array<User>) => Promise<void>,
+    },
 
     levels: {
         getMapPacks: (
@@ -70,10 +89,24 @@ export interface IConnector {
         ) => Promise<void>,
 
         getFullLevel: (
-            level: Level<GetOneLevelReturnType>,
+            level: Level<LevelWithUser>,
             password: string,
             passwordHashable: string,
             questID?: number,
+        ) => Promise<void>,
+
+        getSearchedLevels: (
+            levels: Array<Level<LevelWithUser>>,
+            songs: typeof songsTable.$inferSelect[],
+            count: number,
+            page: number,
+            gauntlet: boolean
+        ) => Promise<void>,
+
+        getSearchedLists: (
+            lists: Array<List<ListWithUser>>,
+            count: number,
+            page: number,
         ) => Promise<void>
     },
 
@@ -83,8 +116,30 @@ export interface IConnector {
             uid: number,
             chk: string,
             udid: string
+        ) => Promise<void>,
+
+        getRewards: (
+            user: User,
+            udid: string,
+            chk: string,
+            smallLeft: number,
+            bigLeft: number,
+            chestType: number
+        ) => Promise<void>,
+
+        getSpecialLevel: (id: number, left: number) => Promise<void>
+    },
+
+    scores: {
+        getLeaderboard: (users: User[]) => Promise<void>,
+        getScoresForLevel: (
+            scores: Awaited<ReturnType<ScoresController["getScoresForLevel"]>>,
+            mode: "coins" | "attempts" | "default"
         ) => Promise<void>
-    }
+    },
+
+    getSongInfo: (music: typeof songsTable.$inferSelect) => Promise<void>,
+    getTopArtists: (artists: string[], page: number, total: number) => Promise<void>
 }
 
 export type ILevelComment = typeof commentsTable.$inferSelect & {

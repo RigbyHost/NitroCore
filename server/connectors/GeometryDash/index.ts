@@ -3,6 +3,10 @@ import {User} from "~~/controller/User";
 import {GDConnectorComments} from "~/connectors/GeometryDash/comments";
 import {GDConnectorMessages} from "~/connectors/GeometryDash/messages";
 import {GDConnectorLevels} from "~/connectors/GeometryDash/levels";
+import {GDConnectorScores} from "~/connectors/GeometryDash/scores";
+import {GDConnectorQuests} from "~/connectors/GeometryDash/quests";
+import {songsTable} from "~~/drizzle";
+import {GDConnectorProfile} from "~/connectors/GeometryDash/profile";
 
 
 export class GDConnector implements IConnector {
@@ -40,39 +44,33 @@ export class GDConnector implements IConnector {
 
     messages = GDConnectorMessages
 
-    getFriendRequests = async (
-        requests: IFriendRequest[],
-        mode: "sent" | "received",
-        count: number,
-        page: number
-    ) => {
+    levels = GDConnectorLevels
+
+    scores = GDConnectorScores
+
+    quests = GDConnectorQuests
+
+    profile = GDConnectorProfile
+
+    getSongInfo = async (music: typeof songsTable.$inferSelect) => {
         await send(
             useEvent(),
-            requests.map(
-                request => {
-                    const user = mode === "sent" ? request.receiver : request.sender
-                    if (!user)
-                        return ""
-                    return [
-                        1, user.username,
-                        2, user.uid,
-                        9, new User(null as any, user).getShownIcon(),
-                        10, user.vessels.clr_primary,
-                        11, user.vessels.clr_secondary,
-                        14, user.iconType,
-                        15, user.special,
-                        16, user.uid,
-                        32, request.id,
-                        35, request.comment,
-                        37, useGeometryDashTooling().getDateAgo(request.uploadDate.getTime()),
-                        41, request.isNew ? 1 : 0,
-                    ].join(":")
-                }
-            )
-                .join("|")
-                .concat(`#${count}:${page * 10}:10`)
+            [
+                1, music.id,
+                2, music.name,
+                3, 1,
+                4, music.artist,
+                5, music.size.toFixed(2),
+                6, "",
+                10, encodeURI(music.url)
+            ].join("~|~").replaceAll("#", "")
         )
     }
 
-    levels = GDConnectorLevels
+    getTopArtists = async (artists: string[], page: number, total: number) => {
+        await send(
+            useEvent(),
+            artists.map(artist => `4:${artist}`).join("|")
+        )
+    }
 }

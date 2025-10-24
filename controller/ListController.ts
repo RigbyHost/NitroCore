@@ -1,6 +1,7 @@
-import {List} from "~~/controller/List";
+import {List, ListWithUser} from "~~/controller/List";
 import {MakeOptional} from "~/utils/types";
 import {levelsTable, listsTable, usersTable} from "~~/drizzle";
+import {ListFilter} from "~~/controller/ListFilter";
 
 
 export class ListController {
@@ -14,18 +15,21 @@ export class ListController {
         return this.db
     }
 
-    getOneList = async (id: number): Promise<Nullable<List<GetOneListReturnType>>> => {
+    getOneList = async (id: number): Promise<Nullable<List<ListWithUser>>> => {
         const data = await this.db.query.listsTable.findFirst({
             where: (list, {eq}) => eq(list.id, id),
             with: {
                 author: {
-                    columns: {username: true}
+                    columns: {
+                        uid: true,
+                        username: true
+                    }
                 }
-            }
+            },
         })
         if (!data)
             return null
-        return new List<GetOneListReturnType>(this, data)
+        return new List<ListWithUser>(this, data)
     }
 
     getManyLists = async (ids: number[]) => {
@@ -33,17 +37,19 @@ export class ListController {
             where: (list, {inArray}) => inArray(list.id, ids),
             with: {
                 author: {
-                    columns: {username: true}
+                    columns: {
+                        uid: true,
+                        username: true
+                    }
                 }
-            }
+            },
         })
-        return lists.map(list => new List<GetOneListReturnType>(this, list))
+        return lists.map(list => new List<ListWithUser>(this, list))
     }
 
-    createListObject = (list: typeof listsTable.$inferSelect) => {
-        return new List(this, list)
+    createListObject = (list: typeof listsTable.$inferInsert) => {
+        return new List(this, list as typeof listsTable.$inferSelect)
     }
+
+    getFilter = () => new ListFilter(this)
 }
-
-type GetOneListReturnType =  typeof listsTable.$inferSelect
-    & {author: Pick<typeof usersTable.$inferSelect, "username">}

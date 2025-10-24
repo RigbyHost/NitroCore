@@ -1,11 +1,14 @@
 import {ListController} from "~~/controller/ListController";
-import {listsTable} from "~~/drizzle";
+import {listsTable, usersTable} from "~~/drizzle";
 import {z} from "zod";
 import {diff} from "deep-object-diff";
 import {eq, sql} from "drizzle-orm";
 import {ActionController} from "~~/controller/ActionController";
 
-type ListType = typeof listsTable.$inferSelect
+export type ListType = typeof listsTable.$inferSelect
+export type ListWithUser = ListType & {
+    author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">
+}
 
 export class List<T extends ListType = ListType> {
     private readonly controller: ListController
@@ -26,11 +29,17 @@ export class List<T extends ListType = ListType> {
         const actionController = new ActionController(this.controller.$db)
         if (await actionController.isItemLiked("list", uid, this.$.id))
             throw new Error("You have already liked/disliked this level")
-        // FIXME: Not CRUD - should use TX or commit relative likes+1 immediately
-        if (action === "like")
+        if (action === "like") {
+            await this.db.update(listsTable)
+                .set({likes: sql`${listsTable.likes}+1`})
+                .where(eq(listsTable.id, this.$.id))
             this.$.likes++
-        else
+        } else {
+            await this.db.update(listsTable)
+                .set({likes: sql`${listsTable.likes}-1`})
+                .where(eq(listsTable.id, this.$.id))
             this.$.likes--
+        }
         await actionController.registerAction(
             "like_list",
             uid,

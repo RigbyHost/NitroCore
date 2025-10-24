@@ -26,41 +26,41 @@ export const usersTable = pgTable("users", {
     moons: integer("moons").notNull().default(0),
     extraData: jsonb("extraData")
         .$type<{
-        DemonStats: {
-            Standard: {
-                Easy: number,
-                Medium: number,
-                Hard: number,
-                Insane: number,
-                Extreme: number
+        demon_stats: {
+            standard: {
+                easy: number,
+                medium: number,
+                hard: number,
+                insane: number,
+                extreme: number
             },
-            Platformer: {
-                Easy: number,
-                Medium: number,
-                Hard: number,
-                Insane: number,
-                Extreme: number
+            platformer: {
+                easy: number,
+                medium: number,
+                hard: number,
+                insane: number,
+                extreme: number
             },
-            Weeklies: number,
-            Gauntlets: number
+            weekly: number,
+            gauntlet: number
         },
-            StandardStats: {
-                Auto: number,
-                Easy: number,
-                Normal: number,
-                Hard: number,
-                Harder: number,
-                Insane: number,
-                Daily: number,
-                Gauntlet: number
+            standard_stats: {
+                auto: number,
+                easy: number,
+                normal: number,
+                hard: number,
+                harder: number,
+                insane: number,
+                daily: number,
+                gauntlet: number
             },
-            PlatformerStats: {
-                Auto: number,
-                Easy: number,
-                Normal: number,
-                Hard: number,
-                Harder: number,
-                Insane: number
+            platformer_stats: {
+                auto: number,
+                easy: number,
+                normal: number,
+                hard: number,
+                harder: number,
+                insane: number
             }
         }>(),
 
@@ -96,12 +96,12 @@ export const usersTable = pgTable("users", {
     iconType: integer("iconType").notNull().default(0),
     vessels: jsonb("vessels").notNull()
         .$type<{
-            clr_primary: number, clr_secondary: number,
+            clr_primary: number, clr_secondary: number, clr_glow: number,
             cube: number, ship: number, ball: number, ufo: number, wave: number, robot: number,
             spider: number, swing: number, jetpack: number, trace: number, death: number
         }>()
         .default({
-            clr_primary: 0, clr_secondary: 0,
+            clr_primary: 0, clr_secondary: 0, clr_glow: 0,
             cube: 0, ship: 0, ball: 0, ufo: 0, wave: 0, robot: 0,
             spider: 0, swing: 0, jetpack: 0, trace: 0, death: 0
         }),

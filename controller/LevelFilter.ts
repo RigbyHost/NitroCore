@@ -1,8 +1,24 @@
 import {LevelController} from "~~/controller/LevelController";
-import {not, eq, lt, lte, gt, gte, inArray, notInArray, exists, and, or, SQL, desc, sql, ilike} from "drizzle-orm";
+import {
+    eq,
+    lte,
+    gt,
+    gte,
+    inArray,
+    notInArray,
+    exists,
+    and,
+    or,
+    SQL,
+    desc,
+    sql,
+    ilike,
+    getTableColumns
+} from "drizzle-orm";
 import {levelsTable, questsTable, rateQueueTable} from "~~/drizzle";
 import {z} from "zod";
 import {requestSchema} from "~/routes/[srvid]/db/getGJLevels.php.post";
+import {Level, LevelWithUser} from "~~/controller/Level";
 
 
 export class LevelFilter {
@@ -18,11 +34,11 @@ export class LevelFilter {
         let filters: SQL[] = [lte(levelsTable.versionGame, data.versionGame)]
         let orderBy: SQL[] = []
 
-        if (data.diff) {
+        if (data.diff.length) {
             const diffs: number[] = []
-            data.diff.split(",").forEach(diff => {
+            data.diff.forEach(diff => {
                 switch (diff) {
-                    case "-2":
+                    case -2:
                         switch (data.demonFilter) {
                             case 1:
                                 data.demonFilter = 3
@@ -43,14 +59,14 @@ export class LevelFilter {
                                 data.demonFilter = 0
                         }
                         break
-                    case "-1":
+                    case -1:
                         diffs.push(0)
                         break
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
                         diffs.push(Number(`${diff}0`))
                         break
                     default:
@@ -72,18 +88,12 @@ export class LevelFilter {
         }
 
         if (data.len)
-            filters.push(inArray(
-                levelsTable.length,
-                data.len.split(",").map(len => Number(len))
-            ))
+            filters.push(inArray(levelsTable.length, data.len))
 
         if (data.onlyCompleted || data.uncompleted) {
             if (data.completedLevels) {
                 const fn = data.uncompleted ? notInArray : inArray
-                filters.push(fn(
-                    levelsTable.id,
-                    data.completedLevels.split(",").map(id => Number(id))
-                ))
+                filters.push(fn(levelsTable.id, data.completedLevels))
             }
         }
 
@@ -136,10 +146,9 @@ export class LevelFilter {
         mode: SearchMode,
         data: z.infer<typeof requestSchema>,
     ): Promise<{
-        levels: number[],
+        levels: Level<LevelWithUser>[],
         total: number
     }> => {
-
         const {filters, orderBy} = this.filterParser(data)
 
         switch (mode) {
@@ -150,7 +159,8 @@ export class LevelFilter {
                 orderBy.push(desc(levelsTable.downloads), desc(levelsTable.likes))
                 break
             case "trending":
-                filters.push(sql`${levelsTable.uploadDate} > (DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY))`)
+                filters.push(sql`${levelsTable.uploadDate}
+                > (DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY))`)
                 orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
                 break
             case "latest":
@@ -222,8 +232,24 @@ export class LevelFilter {
             filters.push(eq(levelsTable.unlistedType, 0))
         }
 
+        // Copied from LevelController. In theory should prevent sorting issues
+        // I can't think of cleaner way to do this with query API
+        // TODO: Compare column selector performance and consistency
+        const {stringLevel, ...columns} = getTableColumns(levelsTable)
+        type Col = keyof typeof columns
+        const colS = {} as Record<Col, true>
+        Object.keys(columns).forEach(key => colS[key as Col] = true)
+
         const levels = await this.db.query.levelsTable.findMany({
-            columns: {id: true},
+            columns: colS,
+            with: {
+                author: {
+                    columns: {
+                        uid: true,
+                        username: true
+                    }
+                }
+            },
             where: and(...filters),
             orderBy,
             limit: 10,
@@ -231,13 +257,19 @@ export class LevelFilter {
         })
         const total = await this.db.$count(levelsTable, and(...filters))
 
-        return {levels: levels.map(level => level.id), total}
+        return {
+            levels: levels.map(level => new Level<LevelWithUser>(null as any, level)),
+            total
+        }
     }
 
     searchUserLevels = async (
         data: z.infer<typeof requestSchema>,
         followMode: boolean,
-    ) => {
+    ): Promise<{
+        levels: Level<LevelWithUser>[],
+        total: number
+    }> => {
         const {filters, orderBy} = this.filterParser(data)
 
         if (data.str) {
@@ -251,9 +283,7 @@ export class LevelFilter {
                         ilike(levelsTable.name, `%${data.str}%`)
                     )
                 }
-
-                const users = data.followed.split(",").map(user => Number(user))
-                filters.push(inArray(levelsTable.ownerUid, users))
+                filters.push(inArray(levelsTable.ownerUid, data.followed))
             } else {
                 if (!isNaN(id)) {
                     filters.push(eq(levelsTable.ownerUid, id))
@@ -261,29 +291,50 @@ export class LevelFilter {
             }
         } else {
             if (followMode && data.followed) {
-                const users = data.followed.split(",").map(user => Number(user))
                 filters.push(
                     eq(levelsTable.unlistedType, 0),
-                    inArray(levelsTable.ownerUid, users)
+                    inArray(levelsTable.ownerUid, data.followed)
                 )
             }
         }
 
+        // Copied from LevelController. In theory should prevent sorting issues
+        // I can't think of cleaner way to do this with query API
+        // TODO: Compare column selector performance and consistency
+        const {stringLevel, ...columns} = getTableColumns(levelsTable)
+        type Col = keyof typeof columns
+        const colS = {} as Record<Col, true>
+        Object.keys(columns).forEach(key => colS[key as Col] = true)
+
         const levels = await this.db.query.levelsTable.findMany({
-            columns: {id: true},
+            columns: colS,
             where: and(...filters),
+            with: {
+                author: {
+                    columns: {
+                        uid: true,
+                        username: true
+                    }
+                }
+            },
             orderBy,
             limit: 10,
             offset: data.page * 10
         })
         const total = await this.db.$count(levelsTable, and(...filters))
 
-        return {levels: levels.map(level => level.id), total}
+        return {
+            levels: levels.map(level => new Level<LevelWithUser>(null as any, level)),
+            total
+        }
     }
 
     searchListLevels = async (
         data: z.infer<typeof requestSchema>,
-    ) => {
+    ): Promise<{
+        levels: Level<LevelWithUser>[],
+        total: number
+    }> => {
         const {filters, orderBy} = this.filterParser(data)
 
         if (data.str) {
@@ -297,16 +348,35 @@ export class LevelFilter {
                 const ids = data.str.split(",").map(id => Number(id))
                 filters.push(inArray(levelsTable.id, ids))
 
+                // Copied from LevelController. In theory should prevent sorting issues
+                // I can't think of cleaner way to do this with query API
+                // TODO: Compare column selector performance and consistency
+                const {stringLevel, ...columns} = getTableColumns(levelsTable)
+                type Col = keyof typeof columns
+                const colS = {} as Record<Col, true>
+                Object.keys(columns).forEach(key => colS[key as Col] = true)
+
                 const levels = await this.db.query.levelsTable.findMany({
-                    columns: {id: true},
+                    columns: colS,
                     where: and(...filters),
+                    with: {
+                        author: {
+                            columns: {
+                                uid: true,
+                                username: true
+                            }
+                        }
+                    },
                     orderBy,
                     limit: 10,
                     offset: data.page * 10
                 })
                 const total = await this.db.$count(levelsTable, and(...filters))
 
-                return {levels: levels.map(level => level.id), total}
+                return {
+                    levels: levels.map(level => new Level<LevelWithUser>(null as any, level)),
+                    total
+                }
             }
         }
 

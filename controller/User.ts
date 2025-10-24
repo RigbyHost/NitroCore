@@ -1,11 +1,13 @@
 import {Database} from "~/utils/useDrizzle";
-import {usersTable} from "~~/drizzle";
+import {rolesTable, usersTable} from "~~/drizzle";
 import {diff} from "deep-object-diff";
 import {and, eq, gte, sql} from "drizzle-orm";
 import {UserController} from "~~/controller/UserController";
 
-type UserType = typeof usersTable.$inferSelect
-
+export type UserType = typeof usersTable.$inferSelect
+export type UserWithRole = UserType & {
+    role?: typeof rolesTable.$inferSelect
+}
 /**
  * User CRUD wrapper
  *

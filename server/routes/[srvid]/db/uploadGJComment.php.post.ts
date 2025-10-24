@@ -15,20 +15,38 @@ export default defineEventHandler({
 
         const commentController = new CommentController(event.context.drizzle)
 
+        const role = await event.context.user!.fetchRole()
+        const csdk = useSDK().commands
+
         if (data.levelID > 0) {
             // Level
             const levelController = new LevelController(event.context.drizzle)
             const level = await levelController.getOneLevel(data.levelID)
             if (!level)
                 return await event.context.connector.error(-1, "Level not found")
-            const role = await event.context.user!.fetchRole()
             // Decode base64
             const content = Buffer.from(data.comment, "base64").toString("utf-8")
             if (
                 (role || level.isOwnedBy(event.context.user!.$.uid))
                 && content.length && content[0] === "!"
             ) {
-                // TODO: Comment commands
+                try {
+                    const cmds = content.slice(1).split(" ") // remove leading ! and split to args
+                    let data = await csdk.invoke(
+                        "level", cmds[0], cmds.slice(1),
+                        {
+                            drizzle: event.context.drizzle,
+                            user: event.context.user!,
+                            level: level,
+                            role: role
+                        }
+                    )
+                    if (!data)
+                        data = "Command executed!"
+                    return await event.context.connector.comments.commentCommandResult(data)
+                } catch (e) {
+                    return await event.context.connector.comments.commentCommandResult((e as Error).message)
+                }
             } else {
                 await commentController.postLevelComment(
                     event.context.user!.$.uid,
@@ -42,23 +60,37 @@ export default defineEventHandler({
             const list = await listController.getOneList(data.levelID)
             if (!list)
                 return await event.context.connector.error(-1, "List not found")
-            const role = await event.context.user!.fetchRole()
             // Decode base64
             const content = Buffer.from(data.comment, "base64").toString("utf-8")
             if (
                 (role || list.isOwnedBy(event.context.user!.$.uid))
                 && content.length && content[0] === "!"
             ) {
-                // TODO: Comment commands
+                try {
+                    const cmds = content.slice(1).split(" ") // remove leading ! and split to args
+                    let data = await csdk.invoke(
+                        "list", cmds[0], cmds.slice(1),
+                        {
+                            drizzle: event.context.drizzle,
+                            user: event.context.user!,
+                            list: list,
+                            role: role
+                        }
+                    )
+                    if (!data)
+                        data = "Command executed!"
+                    return await event.context.connector.comments.commentCommandResult(data)
+                } catch (e) {
+                    return await event.context.connector.comments.commentCommandResult((e as Error).message)
+                }
             } else {
                 await commentController.postLevelComment(
                     event.context.user!.$.uid,
                     data.levelID,
-                    content,
+                    data.comment,
                     data.percent,
                 )
             }
-            await event.context.connector.error(-1, "Not implemented")
         }
 
         return await event.context.connector.success("Comment uploaded")

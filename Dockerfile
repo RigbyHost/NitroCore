@@ -7,7 +7,7 @@ COPY package.json bun.lock /app/
 RUN bun install --frozen-lockfile
 
 COPY . /app
-RUN bun run build --preset bun
+RUN bun run build:base
 
 FROM oven/bun AS runner
 COPY --from=builder /app/.output /app

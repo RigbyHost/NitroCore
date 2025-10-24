@@ -1,9 +1,10 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from 'pg';
+import {drizzle, NodePgDatabase} from "drizzle-orm/node-postgres";
+import {Pool} from 'pg';
 import * as schema from "~~/drizzle"
 
+let privatePool: NodePgDatabase<any>
 const pools: Map<string, Pool> = new Map()
-// TODO: production env or appConfig
+
 export const defaultConfig = {
     host: process.env.POSTGRES_HOST || "localhost",
     port: Number(process.env.POSTGRES_PORT) || 5432,
@@ -21,17 +22,21 @@ export const defaultConfig = {
  */
 export const useDrizzle = async (database?: string) => {
     /* v8 ignore next */
-    const srvid = database ||getRouterParam(useEvent(), "srvid")!
+    const srvid = database || getRouterParam(useEvent(), "srvid")!
 
-    if (useRuntimeConfig().app.platform) {
-        if (process.env.DATABASE_URL) {
-            console.log("Detected possible Postgres Neon")
-            return drizzle(process.env.DATABASE_URL, {schema})
+    if (useRuntimeConfig().platform) {
+        if (!privatePool) {
+            if (process.env.DATABASE_URL) {
+                console.log("Detected possible Postgres Neon")
+                privatePool = drizzle(process.env.DATABASE_URL, {schema})
+            }
+            if (process.env.POSTGRES_URL) {
+                console.log("Detected possible Supabase")
+                privatePool = drizzle(process.env.POSTGRES_URL, {schema})
+            }
         }
-        if (process.env.POSTGRES_URL) {
-            console.log("Detected possible Supabase")
-            return drizzle(process.env.POSTGRES_URL, {schema})
-        }
+        return privatePool as NodePgDatabase<typeof schema>
+
     }
 
     if (!pools.has(srvid)) {
@@ -42,7 +47,7 @@ export const useDrizzle = async (database?: string) => {
         pools.set(srvid, pool);
     }
 
-    return drizzle(pools.get(srvid)!, { schema })
+    return drizzle(pools.get(srvid)!, {schema})
 }
 
 export const useDrizzlePoolManager = () => {

@@ -103,6 +103,16 @@ const getGDVersionFromBody = async (postData?: FormData) => {
     return version
 }
 
+const generateRandomString = (length: number) => {
+    let result = "";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
 /**
  * Geometry-dash specific tooling like GJP and Solo hashing
  */
@@ -116,5 +126,6 @@ export const useGeometryDashTooling = () => ({
     hashSolo4,
     doGJP,
     doGJP2,
-    getGDVersionFromBody
+    getGDVersionFromBody,
+    generateRandomString
 })

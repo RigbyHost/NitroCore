@@ -1,14 +1,11 @@
 // https://nitro.build/config
-
-
-
 export default defineNitroConfig({
     compatibilityDate: "2025-10-10",
     srcDir: "server",
     routeRules: {
         "/**": {cors: true}
     },
-    appConfig: {
+    runtimeConfig: {
         platform: "vercel"
     },
     experimental: {
@@ -28,5 +25,13 @@ export default defineNitroConfig({
         //     driver: "storage-vercel-edgeconfig",
         //     // url: process.env.EDGE_CONFIG // Optional
         // }
+    },
+    scheduledTasks: {
+        "0 0 * * *": [
+            "nightly:refresh_sfx",
+            "nightly:count_music_downloads",
+            "nightly:reset_user_limits",
+            "nightly:train_level_model"
+        ]
     }
 });

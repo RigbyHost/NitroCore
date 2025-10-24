@@ -2,8 +2,10 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
 import {FriendshipController} from "~~/controller/FriendshipController";
-import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
+import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {ListController} from "~~/controller/ListController";
+import {MusicController} from "~~/controller/MusicController";
+import {Level, LevelWithUser} from "~~/controller/Level";
 
 const metrics = usePerformance()
 
@@ -29,7 +31,7 @@ export default defineEventHandler({
         metrics.step("Search levels")
 
         let result: {
-            levels: number[],
+            levels: Level<LevelWithUser>[],
             total: number
         } = {levels: [], total: 0}
         switch (data.type) {
@@ -66,12 +68,12 @@ export default defineEventHandler({
                 break
             case 13:
                 // Friend levels
-                await authLoginMiddleware(event)
+                await authMiddleware(event)
                 if (!event.context.user)
                     return await event.context.connector.error(-1, "Not logged in")
                 const friendshipController = new FriendshipController(event.context.drizzle)
                 const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)
-                data.followed = friends.join(",")
+                data.followed = friends
                 result = await filter.searchUserLevels(data, true)
                 break
             case 16:
@@ -94,9 +96,13 @@ export default defineEventHandler({
                 const list = await listController.getOneList(id)
                 if (!list)
                     break
+                // TODO: evaluate if this should be here
                 await list.onDownload()
+                let levels: typeof result["levels"] = []
+                if (list.$.levels)
+                    levels = await levelController.getManyLevels(list.$.levels)
                 result = {
-                    levels: list.$.levels || [],
+                    levels: levels,
                     total: list.$.levels?.length || 0
                 }
                 break
@@ -112,11 +118,17 @@ export default defineEventHandler({
 
         metrics.step("Get levels data")
 
-        const levels = await levelController.getManyLevels(result.levels, true)
-
-        // TODO: Music and connector
-
-        return await event.context.connector.error(-1, "Not implemented")
+        metrics.step("Get music")
+        const musicController = new MusicController(event.context.drizzle)
+        const music = await musicController.getSongBulk(
+            result.levels
+                .filter(level => level.$.songId>0)
+                .map(level => level.$.songId)
+        )
+        metrics.step("Send response")
+        return await event.context.connector.levels.getSearchedLevels(
+            result.levels, music, result.total, data.page, post.gauntlet>0
+        )
 
     }
 })
@@ -129,23 +141,37 @@ export const requestSchema = z.object({
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
     diff: z.string().nonempty()
-        // .regex(/^[\d,-]+$/) // Filter out invalid characters
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
-        .optional().transform(
+        .optional().default("")
+        .transform(
             value => value==="-" ? "" : value
+        ).transform(
+            value => value.split(",")
+                .filter(v=>v.trim()) // Cleans empty values
+                .map(v=>parseInt(v))
         ),
     demonFilter: z.coerce.number().nonnegative().optional(),
     len: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
-        .optional().transform(
+        .optional().default("")
+        .transform(
             value => value==="-" ? "" : value
+        ).transform(
+            value => value.split(",")
+                .filter(v=>v.trim()) // Cleans empty values
+                .map(v=>parseInt(v))
         ),
     uncompleted: z.coerce.number().optional().default(0),
     onlyCompleted: z.coerce.number().optional().default(0),
     completedLevels: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
-        .optional().transform(
+        .optional().default("")
+        .transform(
             value => value==="-" ? "" : value
+        ).transform(
+            value => value.split(",")
+                .filter(v=>v.trim()) // Cleans empty values
+                .map(v=>parseInt(v))
         ),
     featured: z.coerce.number().optional().default(0),
     epic: z.coerce.number().optional().default(0),
@@ -161,7 +187,12 @@ export const requestSchema = z.object({
     gauntlet: z.coerce.number().optional().default(0),
     followed: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
-        .optional().transform(
+        .optional().default("")
+        .transform(
             value => value==="-" ? "" : value
+        ).transform(
+            value => value.split(",")
+                .filter(v=>v.trim()) // Cleans empty values
+                .map(v=>parseInt(v))
         ),
 })
