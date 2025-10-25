@@ -187,8 +187,8 @@ export class Level<T extends LevelType = LevelType> {
 
 const validateSchema = z.object({
     name: z.string().max(64),
-    description: z.string().max(512),
-    password: z.string().max(8),
+    description: z.string().max(512).optional().default(""),
+    password: z.string().max(8).optional().default(""),
     version: z.number().gt(0),
     trackId: z.number().gte(0),
     songId: z.number().gte(0),
@@ -208,4 +208,4 @@ const validateSchema = z.object({
         })
 })
 
-const ALLOW_LESS_THAN_100_OBJECTS = false
+const ALLOW_LESS_THAN_100_OBJECTS = true
