@@ -31,6 +31,7 @@ declare global {
   const useFabric: typeof import('../server/utils/useFabric')['useFabric']
   const useGeometryDashTooling: typeof import('../server/utils/useGeometryDashTooling')['useGeometryDashTooling']
   const useGzip: typeof import('../server/utils/useGzip')['useGzip']
+  const useLogger: typeof import('../server/utils/useLogger')['useLogger']
   const useMusicContext: typeof import('../server/utils/useSDK')['useMusicContext']
   const usePerformance: typeof import('../server/utils/usePerformance')['usePerformance']
   const usePostObject: typeof import('../server/utils/usePostObject')['usePostObject']
@@ -41,6 +42,7 @@ declare global {
   const useTemporalFabric: typeof import('../server/utils/useFabric')['useTemporalFabric']
   const vi: typeof import('vitest')['vi']
   const vitest: typeof import('vitest')['vitest']
+  const withPreparsedForm: typeof import('../server/utils/usePostObject')['withPreparsedForm']
 }
 // for type re-export
 declare global {

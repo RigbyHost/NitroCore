@@ -4,7 +4,7 @@ exports[`useGeometryDashTooling() > Does GJP correctly 1`] = `"¸A"`;
 
 exports[`useGeometryDashTooling() > Does GJP correctly 2`] = `"5d7e97a0ba243e789af754a88048d532023f47df"`;
 
-exports[`useGeometryDashTooling() > Hashes solo correctly 1`] = `"7201c5c18f5ad9ebfb4ad80a1b9e9ec54a21bb3b"`;
+exports[`useGeometryDashTooling() > Hashes solo correctly 1`] = `"4316d5399e5610b6f15c41b07f454754673b5a81"`;
 
 exports[`useGeometryDashTooling() > Hashes solo correctly 2`] = `"4316d5399e5610b6f15c41b07f454754673b5a81"`;
 
