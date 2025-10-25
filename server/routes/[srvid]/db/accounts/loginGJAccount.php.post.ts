@@ -9,7 +9,7 @@ export default defineEventHandler({
         const ip = event.context.clientAddress!
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
 
-        const {data, success} = requestSchema.safeParse(post)
+        const {data, success, error} = requestSchema.safeParse(post)
 
         if(!success)
             return await event.context.connector.error(-1, "Bad request")

@@ -10,13 +10,15 @@ export default defineEventHandler({
     handler: async (event) => {
         const post = await withPreparsedForm(event)
 
-        const {data, success} = requestSchema.safeParse({
+        const {data, success, error} = requestSchema.safeParse({
             commentID: post.getAll("commentID"),
             page: post.get("page")
         })
 
-        if (!success)
+        if (!success) {
+            useLogger().warn(JSON.stringify(z.treeifyError(error)))
             return await event.context.connector.error(-1, "Bad Request")
+        }
 
         const uid = data.commentID.slice(-1)[0]
 

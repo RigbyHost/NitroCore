@@ -12,9 +12,11 @@ export default defineEventHandler({
     handler: async (event) => {
         const form = await withPreparsedForm(event)
         const post = usePostObject<z.infer<typeof requestSchema>>(form)
-        const {data, success} = requestSchema.safeParse(post)
-        if (!success)
+        const {data, success, error} = requestSchema.safeParse(post)
+        if (!success) {
+            useLogger().warn(JSON.stringify(z.treeifyError(error)))
             return await event.context.connector.error(-1, "Bad Request")
+        }
 
         const levelController = new LevelController(event.context.drizzle)
         const actionController = new ActionController(event.context.drizzle)

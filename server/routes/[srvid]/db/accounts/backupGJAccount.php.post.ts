@@ -12,9 +12,11 @@ export default defineEventHandler({
         const path = `/gdps_savedata/${event.context.config.config!.ServerConfig.SrvID}/${user.$.uid}.nsv`
 
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
-        const {data, success} = requestSchema.safeParse(post)
-        if (!success)
+        const {data, success, error} = requestSchema.safeParse(post)
+        if (!success) {
+            useLogger().warn(JSON.stringify(z.treeifyError(error)))
             return await event.context.connector.error(-1, "Bad Request")
+        }
 
         data.saveData = useGeometryDashTooling().clearGDRequest(data.saveData)
         data.saveData += `;${data.gameVersion};${data.binaryVersion}`
