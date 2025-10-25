@@ -8,19 +8,16 @@ export default defineEventHandler({
     onRequest: [initMiddleware, authMiddleware],
 
     handler: async (event) => {
-        const post = await withPreparsedForm(event)
-
-        const {data, success, error} = requestSchema.safeParse({
-            commentID: post.getAll("commentID"),
-            page: post.get("page")
-        })
-
+        const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
+        const {data, success, error} = requestSchema.safeParse(post)
         if (!success) {
             useLogger().warn(JSON.stringify(z.treeifyError(error)))
             return await event.context.connector.error(-1, "Bad Request")
         }
 
-        const uid = data.commentID.slice(-1)[0]
+        const uid = typeof data.accountID === "number"
+            ? data.accountID
+            : data.accountID.slice(-1)[0]
 
         const commentController = new CommentController(event.context.drizzle)
 
@@ -32,6 +29,8 @@ export default defineEventHandler({
 })
 
 export const requestSchema = z.object({
-    commentID: z.array(z.coerce.number().positive()).min(1).max(2),
+    accountID: z.coerce.number().positive().or(
+        z.array(z.coerce.number().positive()).min(1).max(2)
+    ),
     page: z.coerce.number().nonnegative().optional().default(0)
 })
