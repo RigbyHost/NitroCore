@@ -31,7 +31,7 @@ export class LevelFilter {
     }
 
     private filterParser = (data: z.infer<typeof requestSchema>) => {
-        let filters: SQL[] = [lte(levelsTable.versionGame, data.versionGame)]
+        let filters: SQL[] = [lte(levelsTable.versionGame, data.gameVersion)]
         let orderBy: SQL[] = []
 
         if (data.diff.length) {

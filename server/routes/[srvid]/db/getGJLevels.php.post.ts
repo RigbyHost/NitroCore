@@ -138,7 +138,7 @@ export default defineEventHandler({
 export const requestSchema = z.object({
     type: z.coerce.number().optional().default(0),
     page: z.coerce.number().nonnegative().optional().default(0),
-    versionGame: z.coerce.number().optional().default(1),
+    gameVersion: z.coerce.number().optional().default(1),
     str: z.string().optional().default("").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
