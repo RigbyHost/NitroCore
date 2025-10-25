@@ -338,7 +338,7 @@ export class UserController {
     performGJPAuth = async (): Promise<Nullable<User>> => {
         const event = useEvent()
         const ip = event.context.clientAddress!
-        const post = await readFormData(event)
+        const post = await withPreparsedForm(event)
         const tooling = useGeometryDashTooling()
 
         if (await tooling.getGDVersionFromBody(post) === 22)

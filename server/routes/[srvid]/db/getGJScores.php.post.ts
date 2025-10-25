@@ -8,7 +8,7 @@ import {FriendshipController} from "~~/controller/FriendshipController";
 export default defineEventHandler({
     onRequest: [initMiddleware],
     handler: async (event) => {
-        const post = usePostObject<z.infer<typeof requestSchema>>(await readFormData(event))
+        const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {config} = event.context.config
         const userController = new UserController(event.context.drizzle)
         let users: User[] = []

@@ -15,7 +15,7 @@ export default defineEventHandler({
     handler: async (event) => {
         metrics.reset()
         metrics.step("Read & parse body")
-        const post = usePostObject<z.infer<typeof requestSchema>>(await readFormData(event))
+        const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success} = requestSchema.safeParse(post)
 
         if (!success)

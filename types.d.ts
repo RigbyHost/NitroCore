@@ -6,7 +6,8 @@ declare module 'h3' {
         config: Awaited<ReturnType<typeof useServerConfig>>
         drizzle: Database
         user?: User,
-        connector: IConnector
+        connector: IConnector,
+        _preparsedBody?: FormData
     }
 }
 

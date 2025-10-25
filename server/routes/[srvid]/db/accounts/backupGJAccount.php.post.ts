@@ -11,7 +11,7 @@ export default defineEventHandler({
         const s3 = useStorage("savedata")
         const path = `/gdps_savedata/${event.context.config.config!.ServerConfig.SrvID}/${user.$.uid}.nsv`
 
-        const post = usePostObject<z.infer<typeof requestSchema>>(await readFormData(event))
+        const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success} = requestSchema.safeParse(post)
         if (!success)
             return await event.context.connector.error(-1, "Bad Request")

@@ -10,7 +10,7 @@ export default defineEventHandler({
     onRequest: [initMiddleware, authMiddleware],
 
     handler: async (event) => {
-        const form = await readFormData(event)
+        const form = await withPreparsedForm(event)
         const post = usePostObject<z.infer<typeof requestSchema>>(form)
         const {data, success} = requestSchema.safeParse(post)
         if (!success)

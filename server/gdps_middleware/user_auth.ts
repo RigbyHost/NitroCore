@@ -12,7 +12,7 @@ export const authMiddleware = defineEventHandler(async event => {
 
 export const authLoginMiddleware = defineEventHandler(async event => {
     const userController = new UserController(event.context.drizzle)
-    const post = usePostObject<z.infer<typeof authRequestSchema>>(await readFormData(event))
+    const post = usePostObject<z.infer<typeof authRequestSchema>>(await withPreparsedForm(event))
     const {data, success} = authRequestSchema.safeParse(post)
 
     if (!success)

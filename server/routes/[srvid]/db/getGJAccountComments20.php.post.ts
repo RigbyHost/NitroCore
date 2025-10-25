@@ -8,7 +8,7 @@ export default defineEventHandler({
     onRequest: [initMiddleware, authMiddleware],
 
     handler: async (event) => {
-        const post = await readFormData(event)
+        const post = await withPreparsedForm(event)
 
         const {data, success} = requestSchema.safeParse({
             commentID: post.getAll("commentID"),

@@ -83,7 +83,7 @@ const doGJP2 = (password: string) => {
  */
 const getGDVersionFromBody = async (postData?: FormData) => {
     /* v8 ignore next 2 */
-    const post = postData || await readFormData(useEvent())
+    const post = postData || await withPreparsedForm(useEvent())
     let version = 21
     if (post.has("gameVersion")) {
         const parsed = post.get("gameVersion") as string
