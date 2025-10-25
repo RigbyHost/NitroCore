@@ -41,17 +41,16 @@ const getDateAgo = (date: number) => {
     return `${Math.trunc(diff/(604800*4*12))} years`;
 }
 
-const hashSolo = (levelstring: string) => {
-    const hash = Buffer.alloc(40);
-    let p = 0;
-    const plen = levelstring.length;
-    for (let i = 0; i < plen; i += (plen / 40)) {
-        /* v8 ignore next */
-        if (p > 39) break;
-        hash[p] = levelstring.charCodeAt(i);
-        p++;
+const hashSolo = (levelString: string) => {
+    if (levelString.length < 41)
+        return useCrypto().sha1(`${levelString}xI25fpAapCQg`);
+    let hash = `????????????????????????????????????????xI25fpAapCQg`;
+    let m = Math.floor(levelString.length / 40);
+    let i = 40;
+    while (i) {
+        hash = hash.slice(0, --i) + levelString[i*m] + hash.slice(i+1);
     }
-    return useCrypto().sha1(hash+"xI25fpAapCQg")
+    return useCrypto().sha1(hash);
 }
 
 const hashSolo2 = (lvlstring: string) => {
