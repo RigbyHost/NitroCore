@@ -106,7 +106,7 @@ export class ListFilter {
         const total = await this.db.$count(listsTable, and(...filters))
 
         return {
-            lists: lists.map(list => new List<ListWithUser>(null as any, list)),
+            lists: lists.map(list => new List<ListWithUser>(this.controller, list)),
             total
         }
     }
@@ -164,7 +164,7 @@ export class ListFilter {
         const total = await this.db.$count(listsTable, and(...filters))
 
         return {
-            lists: lists.map(list => new List<ListWithUser>(null as any, list)),
+            lists: lists.map(list => new List<ListWithUser>(this.controller, list)),
             total
         }
     }

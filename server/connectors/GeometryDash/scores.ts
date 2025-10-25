@@ -53,7 +53,7 @@ export const GDConnectorScores = {
                     2, score.uid,
                     3, getPercent(score),
                     6, score.ranking,
-                    9, new User(null as any, score.user).getShownIcon(),
+                    9, new User({$db:null} as any, score.user).getShownIcon(),
                     10, score.user.vessels.clr_primary,
                     11, score.user.vessels.clr_secondary,
                     13, score.coins,

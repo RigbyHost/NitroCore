@@ -18,7 +18,7 @@ export const GDConnectorProfile = {
                     return [
                         1, user.username,
                         2, user.uid,
-                        9, new User(null as any, user).getShownIcon(),
+                        9, new User({$db:null} as any, user).getShownIcon(),
                         10, user.vessels.clr_primary,
                         11, user.vessels.clr_secondary,
                         14, user.iconType,

@@ -254,7 +254,7 @@ export class LevelFilter {
         const total = await this.db.$count(levelsTable, and(...filters))
 
         return {
-            levels: levels.map(level => new Level<LevelWithUser>(null as any, level)),
+            levels: levels.map(level => new Level<LevelWithUser>(this.controller, level)),
             total
         }
     }
@@ -320,7 +320,7 @@ export class LevelFilter {
         const total = await this.db.$count(levelsTable, and(...filters))
 
         return {
-            levels: levels.map(level => new Level<LevelWithUser>(null as any, level)),
+            levels: levels.map(level => new Level<LevelWithUser>(this.controller, level)),
             total
         }
     }
@@ -370,7 +370,7 @@ export class LevelFilter {
                 const total = await this.db.$count(levelsTable, and(...filters))
 
                 return {
-                    levels: levels.map(level => new Level<LevelWithUser>(null as any, level)),
+                    levels: levels.map(level => new Level<LevelWithUser>(this.controller, level)),
                     total
                 }
             }

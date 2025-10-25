@@ -44,7 +44,7 @@ export const GDConnectorComments = {
                 comment => {
                     if (!comment.author)
                         return ""
-                    const user = new User(null as any, comment.author)
+                    const user = new User({$db:null} as any, comment.author)
                     const v = [
                         2, comment.comment,
                         3, comment.uid,
@@ -90,7 +90,7 @@ export const GDConnectorComments = {
             useEvent(),
             comments.map(
                 comment => {
-                    const author = new User(null as any, user)
+                    const author = new User({$db:null} as any, user)
                     const v = [
                         2, comment.comment,
                         3, comment.uid,
