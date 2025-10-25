@@ -55,7 +55,7 @@ export class ListFilter {
                 orderBy.push(desc(listsTable.downloads), desc(listsTable.likes))
                 break
             case "trending":
-                filters.push(sql`${listsTable.uploadDate} > (DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY))`)
+                filters.push(sql`${listsTable.uploadDate} > (CURRENT_DATE - INTERVAL '7' DAY)`)
                 orderBy.push(desc(listsTable.likes), desc(listsTable.downloads))
                 break
             case "latest":

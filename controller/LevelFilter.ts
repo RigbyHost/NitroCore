@@ -87,7 +87,7 @@ export class LevelFilter {
             }
         }
 
-        if (data.len)
+        if (data.len.length)
             filters.push(inArray(levelsTable.length, data.len))
 
         if (data.onlyCompleted || data.uncompleted) {
@@ -96,9 +96,6 @@ export class LevelFilter {
                 filters.push(fn(levelsTable.id, data.completedLevels))
             }
         }
-
-        if (data.featured)
-            filters.push(eq(levelsTable.isFeatured, true))
 
         const rateFilters: SQL<unknown>[] = []
         if (data.featured)
@@ -159,8 +156,7 @@ export class LevelFilter {
                 orderBy.push(desc(levelsTable.downloads), desc(levelsTable.likes))
                 break
             case "trending":
-                filters.push(sql`${levelsTable.uploadDate}
-                > (DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY))`)
+                filters.push(sql`${levelsTable.uploadDate} > (CURRENT_DATE - INTERVAL '7' DAY)`)
                 orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
                 break
             case "latest":
