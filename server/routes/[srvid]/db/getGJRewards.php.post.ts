@@ -55,5 +55,5 @@ export const requestSchema = z.object({
         )
     ),
     udid: z.string().optional().default(""),
-    rewardType: z.coerce.number().min(1).max(2).optional().default(0),
+    rewardType: z.coerce.number().min(0).max(2).optional().default(0),
 })
