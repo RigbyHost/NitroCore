@@ -100,7 +100,6 @@ export default defineEventHandler({
 })
 
 export const requestSchema = z.object({
-    commentID: z.coerce.number().positive(),
     levelID: z.coerce.number(),
     comment: z.string().nonempty().transform(
         value => useGeometryDashTooling().clearGDRequest(value)
