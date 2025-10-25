@@ -19,7 +19,7 @@ export class List<T extends ListType = ListType> {
     constructor(controller: ListController, list: T) {
         this.controller = controller
         this.db = controller.$db
-        this.original = list
+        this.original = structuredClone(list)
         this.$ = list
     }
 

@@ -27,7 +27,7 @@ export class User<T extends UserType = UserType> {
     constructor(controller: UserController, user: T) {
         this.db = controller.$db
         this.controller = controller
-        this.original = user
+        this.original = structuredClone(user)
         this.$ = user
     }
 

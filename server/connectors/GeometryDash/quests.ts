@@ -27,9 +27,9 @@ export const GDConnectorQuests: IConnector["quests"] = {
             intR(config!.ChestConfig.ChestSmallDiamondsMin, config!.ChestConfig.ChestSmallDiamondsMax),
             config!.ChestConfig.ChestSmallShards[intR(0, config!.ChestConfig.ChestSmallShards.length - 1)],
             intR(config!.ChestConfig.ChestSmallKeysMin, config!.ChestConfig.ChestSmallKeysMax)
-        ]
+        ].join(",")
 
-        const out = [
+        let out = [
             useGeometryDashTooling().generateRandomString(5),
             user.$.uid, chk, udid, user.$.uid,
             smallLeft, chestSmall(), user.$.chests.small_count,
@@ -37,16 +37,15 @@ export const GDConnectorQuests: IConnector["quests"] = {
             chestType
         ].join(":")
 
+        out = Buffer
+            .from(useGeometryDashTooling().doXOR(out, "59182"))
+            .toString("base64")
+            .replaceAll("/", "_")
+            .replaceAll("+", "-")
         await send(
             useEvent(),
             useGeometryDashTooling().generateRandomString(5)
-                .concat(
-                    Buffer
-                        .from(useGeometryDashTooling().doXOR(out, "59182"), "binary")
-                        .toString("base64")
-                        .replaceAll("/", "_")
-                        .replaceAll("+", "-"),
-                    "|", useGeometryDashTooling().hashSolo4(out)
+                .concat(out, "|", useGeometryDashTooling().hashSolo4(out)
                 )
         )
     },

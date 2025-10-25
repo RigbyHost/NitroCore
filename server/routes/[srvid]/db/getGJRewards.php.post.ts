@@ -13,16 +13,19 @@ export default defineEventHandler({
         }
 
         const {config} = event.context.config
+        const now = Math.floor(new Date().getTime()/1000)
 
-        let smallChestsLeft = Math.max(0, config!.ChestConfig.ChestSmallWait - 100 + event.context.user!.$.chests.small_time - Date.now())
-        let bigChestsLeft = Math.max(0, config!.ChestConfig.ChestSmallWait - 100 + event.context.user!.$.chests.big_time - Date.now())
+        let smallChestsLeft = Math.max(0, config!.ChestConfig.ChestSmallWait - 100 + event.context.user!.$.chests.small_time - now)
+        let bigChestsLeft = Math.max(0, config!.ChestConfig.ChestSmallWait - 100 + event.context.user!.$.chests.big_time - now)
+
+
 
         switch (data.rewardType) {
             case 1:
                 if (smallChestsLeft > 0)
                     return await event.context.connector.error(-2, "Small chests not ready")
                 event.context.user!.$.chests.small_count++
-                event.context.user!.$.chests.small_time = Date.now()
+                event.context.user!.$.chests.small_time = now
                 await event.context.user!.commit()
                 smallChestsLeft = config!.ChestConfig.ChestSmallWait
                 break
@@ -30,7 +33,7 @@ export default defineEventHandler({
                 if (bigChestsLeft > 0)
                     return await event.context.connector.error(-2, "Big chests not ready")
                 event.context.user!.$.chests.big_count++
-                event.context.user!.$.chests.big_time = Date.now()
+                event.context.user!.$.chests.big_time = now
                 await event.context.user!.commit()
                 bigChestsLeft = config!.ChestConfig.ChestBigWait
                 break

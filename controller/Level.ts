@@ -5,7 +5,6 @@ import {and, eq, sql} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
 import {z} from "zod";
 import {ActionController} from "~~/controller/ActionController";
-
 export type LevelType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
 export type LevelWithUser = LevelType & {
     author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">
@@ -20,7 +19,7 @@ export class Level<T extends LevelType = LevelType> {
     constructor(controller: LevelController, level: T) {
         this.db = controller.$db
         this.controller = controller
-        this.original = level
+        this.original = structuredClone(level)
         this.$ = level
     }
 
