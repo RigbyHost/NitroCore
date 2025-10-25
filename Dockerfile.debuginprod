@@ -1,0 +1,12 @@
+FROM oven/bun AS builder
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY package.json bun.lock /app/
+RUN bun install --frozen-lockfile
+
+COPY . /app
+RUN bun run build:debug
+
+CMD ["bun", "run", "nitro", "dev"]

@@ -8,10 +8,14 @@
     "build:vercel": "bun run switch:vercel && bun run migrate && bun run build",
     "build:cloudflare": "bun run switch:cloudflare && bun run migrate && bun run build",
     "build:standalone": "bun run switch:standalone && bun run migrate && bun run build",
+    "build:debug": "bun run switch:debug && bun run build",
+
     "switch:base": "rm nitro.config.ts && cp nitro.config-base.ts nitro.config.ts",
     "switch:vercel": "rm nitro.config.ts && cp nitro.config-vercel.ts nitro.config.ts",
     "switch:cloudflare": "rm nitro.config.ts && cp nitro.config-cloudflare.ts nitro.config.ts",
     "switch:standalone": "rm nitro.config.ts && cp nitro.config-standalone.ts nitro.config.ts",
+    "switch:debug": "rm nitro.config.ts && cp nitro.config-debug.ts nitro.config.ts",
+
     "migrate": "drizzle-kit migrate",
     "dev": "nitro dev",
     "test": "vitest run",
