@@ -44,7 +44,8 @@ type ServerConfig = {
         HalMusic: boolean,
         Locked: boolean,
         TopSize: number,
-        EnableModules: Record<string, boolean>
+        EnableModules: Record<string, boolean>,
+        ModuleConfig: Record<string, unknown> // name: config
     },
     SecurityConfig: {
         DisableProtection: boolean,
