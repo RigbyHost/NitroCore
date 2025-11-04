@@ -2,7 +2,7 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 
 export default defineNitroPlugin(nitro => {
     nitro.router.get(
-        "/:srvid/switcher/getInfo.php",
+        "/:srvid/db/switcher/getInfo.php",
         defineEventHandler({
             onRequest: [initMiddleware],
             handler: async (event) => {
