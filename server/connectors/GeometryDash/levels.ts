@@ -239,7 +239,7 @@ export const GDConnectorLevels = {
 
             userMeta.push(
                 list.$.ownerId + ":" +
-                list.$.author?.username || "[DELETED]" + ":" +
+                (list.$.author?.username || "[DELETED]") + ":" +
                 list.$.ownerId
             )
         })
