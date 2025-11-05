@@ -1,9 +1,10 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {QuestsController} from "~~/controller/QuestsController";
+import {authMiddleware} from "~/gdps_middleware/user_auth";
 
 export default defineEventHandler({
-    onRequest: [initMiddleware],
+    onRequest: [initMiddleware, authMiddleware],
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success, error} = requestSchema.safeParse(post)
