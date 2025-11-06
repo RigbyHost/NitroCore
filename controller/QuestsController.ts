@@ -59,17 +59,15 @@ export class QuestsController {
         return null
     }
 
-    getQuestsForUid = async (uid: number) => {
+    getQuests = async () => {
         const max_id = await this.db.$count(questsTable, sql`${questsTable.type}>1`)
-        const magicNumber = Math.floor(max_id / (new Date().getDay() * uid))
         return this.db.query.questsTable.findMany({
             where: (quest, {gt, lte, and}) => and(
                 gt(quest.timeAdded, sql`CURRENT_TIMESTAMP`),
                 sql`${questsTable.type}>1`,
-                lte(quest.id, magicNumber)
             ),
             limit: 3,
-            orderBy: (quest, {asc}) => [asc(quest.id)]
+            orderBy: (quest, {sql}) => sql`RANDOM()`
         });
     }
 }
