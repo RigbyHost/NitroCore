@@ -2,7 +2,7 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {UserController} from "~~/controller/UserController";
 import {z} from "zod";
 import {User} from "~~/controller/User";
-import {authMiddleware} from "~/gdps_middleware/user_auth";
+import {authHook} from "~/gdps_middleware/user_auth";
 import {FriendshipController} from "~~/controller/FriendshipController";
 
 export default defineEventHandler({
@@ -14,17 +14,15 @@ export default defineEventHandler({
         let users: User[] = []
         switch (post.type) {
             case "relative":
-                await authMiddleware(event) // Rigby IQ Move
-                if (!event.context.user)
+                if (!await authHook(event))
                     return await event.context.connector.error(-2, "Invalid credentials")
                 users = await userController.getLeaderboard({
                     type: "global",
-                    globalStars: event.context.user.$.stars
+                    globalStars: event.context.user!.$.stars
                 })
                 break
             case "friends":
-                await authMiddleware(event) // Rigby IQ Move
-                if (!event.context.user)
+                if (!await authHook(event))
                     return await event.context.connector.error(-2, "Invalid credentials")
                 const friendshipController = new FriendshipController(event.context.drizzle)
                 const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)

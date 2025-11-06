@@ -1,6 +1,6 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
-import {authMiddleware} from "~/gdps_middleware/user_auth";
+import {authHook} from "~/gdps_middleware/user_auth";
 import {UserController} from "~~/controller/UserController";
 import {FriendshipController} from "~~/controller/FriendshipController";
 import {MessageController} from "~~/controller/MessageController";
@@ -17,7 +17,7 @@ export default defineEventHandler({
         }
 
         // Maybe authenticated
-        await authMiddleware(event)
+        await authHook(event)
         const ourUid = event.context.user?.$.uid || 0
 
         const userController = new UserController(event.context.drizzle)

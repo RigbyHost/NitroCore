@@ -10,6 +10,15 @@ export const authMiddleware = defineEventHandler(async event => {
     event.context.user = user
 })
 
+export const authHook = defineEventHandler(async event => {
+    const userCtx = new UserController(event.context.drizzle!)
+    const user = await userCtx.performGJPAuth()
+    if (!user)
+        return false
+    event.context.user = user
+    return true
+})
+
 export const authLoginMiddleware = defineEventHandler(async event => {
     const userController = new UserController(event.context.drizzle)
     const post = usePostObject<z.infer<typeof authRequestSchema>>(await withPreparsedForm(event))

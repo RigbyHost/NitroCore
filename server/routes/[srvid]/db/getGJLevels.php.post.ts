@@ -2,7 +2,7 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
 import {FriendshipController} from "~~/controller/FriendshipController";
-import {authMiddleware} from "~/gdps_middleware/user_auth";
+import {authHook} from "~/gdps_middleware/user_auth";
 import {ListController} from "~~/controller/ListController";
 import {MusicController} from "~~/controller/MusicController";
 import {Level, LevelWithUser} from "~~/controller/Level";
@@ -70,8 +70,7 @@ export default defineEventHandler({
                 break
             case 13:
                 // Friend levels
-                await authMiddleware(event)
-                if (!event.context.user)
+                if (!await authHook(event))
                     return await event.context.connector.error(-1, "Not logged in")
                 const friendshipController = new FriendshipController(event.context.drizzle)
                 const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)
