@@ -18,6 +18,7 @@ export default defineEventHandler({
 
         // Maybe authenticated
         await authMiddleware(event)
+        const ourUid = event.context.user?.$.uid || 0
 
         const userController = new UserController(event.context.drizzle)
         const user = await userController.getOneUser({uid: data.targetAccountID}, true)
@@ -25,18 +26,20 @@ export default defineEventHandler({
         if (!user)
             return await event.context.connector.error(-1, "User not found")
 
-        if (event.context.user && user.$.blacklistedUsers?.includes(event.context.user.$.uid))
+        if (ourUid && user.$.blacklistedUsers?.includes(ourUid))
             return await event.context.connector.error(-1, "User has blacklisted you")
 
         const friendshipController = new FriendshipController(event.context.drizzle)
         const messageController = new MessageController(event.context.drizzle)
-        const isFriend = await friendshipController.isAlreadyFriends(event.context.user!.$.uid, user.$.uid)
+        const isFriend = ourUid
+            ? await friendshipController.isAlreadyFriends(event.context.user!.$.uid, user.$.uid)
+            : false
 
         let counters = {
             friend_requests: 0,
             messages: 0
         }
-        if (event.context.user!.$.uid === user.$.uid) {
+        if (ourUid === user.$.uid) {
             counters = {
                 friend_requests: await friendshipController.countFriendRequests(event.context.user!.$.uid, true),
                 messages: await messageController.countMessages(event.context.user!.$.uid, true)
