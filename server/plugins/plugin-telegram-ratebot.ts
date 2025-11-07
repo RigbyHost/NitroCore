@@ -1,0 +1,170 @@
+import {ActionHookPayload} from "~~/controller/ActionController";
+import {LevelController} from "~~/controller/LevelController";
+import type {LevelWithUser} from "~~/controller/Level";
+import type {MaybeUndefined} from "~/utils/types";
+
+type TelegramRateBotConfig = {
+    botToken: string,
+    chatId: number | string,
+    disableNotification?: boolean,
+    threadId?: number,
+    apiBaseUrl?: string
+}
+
+type DifficultyDescriptor = {
+    name: string,
+    stars: number
+}
+
+export default defineNitroPlugin((nitro) => {
+    nitro.hooks.hook("action:level_rate", async (payload: ActionHookPayload) => {
+        try {
+            await sendTelegramRateNotification(payload)
+        } catch (error) {
+            useLogger().warn(`[TelegramRateBot] ${(error as Error).message}`)
+        }
+    })
+})
+
+const sendTelegramRateNotification = async (payload: ActionHookPayload) => {
+    const actionType = payload.data?.type || ""
+    if (!actionType.startsWith("Rate:"))
+        return
+
+    const suffix = actionType.slice(5).toLowerCase()
+    if (!suffix || suffix === "reset")
+        return
+
+    const event = tryGetEvent()
+    const srvid =
+        payload.srvid
+        || event?.context.config?.config?.ServerConfig.SrvID
+        || (event ? getRouterParam(event, "srvid") : undefined)
+
+    const config =
+        event?.context.config?.config
+        ?? (srvid ? (await useServerConfig(srvid)).config : null)
+    if (!config)
+        return
+
+    if (!config.ServerConfig.EnableModules?.["telegram_ratebot"])
+        return
+
+    const moduleConfig = config.ServerConfig.ModuleConfig?.["telegram_ratebot"] as MaybeUndefined<TelegramRateBotConfig>
+    if (!moduleConfig?.botToken || !moduleConfig.chatId)
+        return
+
+    const telegramBase = (moduleConfig.apiBaseUrl || "https://api.telegram.org").replace(/\/$/, "")
+    const levelController = new LevelController(payload.db)
+    const level = await levelController.getOneLevel(payload.targetId)
+    if (!level)
+        return
+
+    const message = buildTelegramMessage(level.$, {
+        moderator: payload.data.uname || `User #${payload.uid}`,
+        serverId: config.ServerConfig.SrvID
+    })
+
+    const body: Record<string, unknown> = {
+        chat_id: moduleConfig.chatId,
+        text: message,
+        disable_notification: moduleConfig.disableNotification ?? false,
+    }
+    if (moduleConfig.threadId)
+        body.message_thread_id = moduleConfig.threadId
+
+    try {
+        await $fetch(`${telegramBase}/bot${moduleConfig.botToken}/sendMessage`, {
+            method: "POST",
+            body
+        })
+    } catch (error) {
+        useLogger().error(`[TelegramRateBot] Failed to send message: ${(error as Error).message}`)
+    }
+}
+
+const buildTelegramMessage = (
+    level: LevelWithUser,
+    meta: {moderator: string, serverId?: string}
+) => {
+    const difficulty = describeDifficulty(level.starsGot ?? 0, level.demonDifficulty ?? -1)
+    const creator = level.author?.username || `User #${level.ownerUid}`
+    const coins = formatCoins(level.coins ?? 0, level.userCoins ?? 0)
+    const feature = level.isFeatured ? "Featured" : "Not featured"
+    const epic = resolveEpic(level.epicness ?? 0)
+
+    const lines = [
+        `⭐ Level rated by ${meta.moderator}`,
+        `• Name: ${level.name}`,
+        `• Level ID: ${level.id}`,
+        `• Creator: ${creator}`,
+        `• Difficulty: ${difficulty.name}`,
+        `• Stars: ${difficulty.stars}`,
+        `• Feature: ${feature}`,
+        ...(epic !== "None" ? [`• Epic Tier: ${epic}`] : []),
+        `• Coins: ${coins}`,
+        meta.serverId ? `• Server: ${meta.serverId}` : undefined,
+    ].filter(Boolean)
+
+    return lines.join("\n")
+}
+
+const describeDifficulty = (stars: number, demonDifficulty: number): DifficultyDescriptor => {
+    if (!stars)
+        return {name: "Unrated", stars: 0}
+    if (stars === 1)
+        return {name: "Auto", stars}
+    if (stars === 2)
+        return {name: "Easy", stars}
+    if (stars === 3)
+        return {name: "Normal", stars}
+    if (stars === 4 || stars === 5)
+        return {name: "Hard", stars}
+    if (stars === 6 || stars === 7)
+        return {name: "Harder", stars}
+    if (stars === 8 || stars === 9)
+        return {name: "Insane", stars}
+    if (stars >= 10)
+        return {name: resolveDemonLabel(demonDifficulty), stars}
+    return {name: `${stars}★`, stars}
+}
+
+const resolveDemonLabel = (value: number) => {
+    const map: Record<number, string> = {
+        3: "Easy Demon",
+        4: "Medium Demon",
+        0: "Hard Demon",
+        5: "Insane Demon",
+        6: "Extreme Demon",
+    }
+    return map[value] || "Insane Demon"
+}
+
+const resolveEpic = (value: number) => {
+    switch (value) {
+        case 1:
+            return "Epic"
+        case 2:
+            return "Legendary"
+        case 3:
+            return "Mythic"
+        default:
+            return "None"
+    }
+}
+
+const formatCoins = (verified: number, userCoins: number) => {
+    if (!userCoins)
+        return "No user coins"
+    if (verified >= userCoins)
+        return `${verified} verified coins`
+    return `${verified}/${userCoins} verified`
+}
+
+const tryGetEvent = () => {
+    try {
+        return useEvent()
+    } catch {
+        return undefined
+    }
+}

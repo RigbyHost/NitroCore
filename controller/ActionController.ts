@@ -117,6 +117,39 @@ export class ActionController {
             isMod: isMod,
             data: data as ActionData,
         })
+
+        const nitroApp = typeof useNitroApp === "function" ? useNitroApp() : undefined
+        if (nitroApp) {
+            const event = (() => {
+                try {
+                    return useEvent()
+                } catch {
+                    return undefined
+                }
+            })()
+            const srvid = event
+                ? (getRouterParam(event, "srvid") || event.context.config?.config?.ServerConfig.SrvID)
+                : undefined
+            const payload: ActionHookPayload = {
+                action,
+                actionType: type,
+                uid,
+                targetId,
+                data: structuredClone(data) as ActionData,
+                srvid,
+                db: this.db,
+                isModAction: isMod
+            }
+            try {
+                await nitroApp.hooks.callHook("action:registered", payload)
+                if (action === "level_rate")
+                    await nitroApp.hooks.callHook("action:level_rate", payload)
+            } catch (error) {
+                useLogger().warn(
+                    `[ActionController] Failed to dispatch action hooks: ${(error as Error).message}`
+                )
+            }
+        }
     }
 
     /**
@@ -164,3 +197,14 @@ type AvailableActions = "register_user" | "login_user" | "delete_user" | "ban_us
     "like_level" | "like_comment" | "like_account_comment" | "like_list"
 
 type ItemType = "level" | "comment" | "account_comment" | "list"
+
+export type ActionHookPayload = {
+    action: AvailableActions,
+    actionType: ActionVariant,
+    uid: number,
+    targetId: number,
+    data: ActionData,
+    srvid?: string,
+    db: Database,
+    isModAction: boolean
+}
