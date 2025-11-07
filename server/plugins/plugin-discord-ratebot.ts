@@ -111,30 +111,31 @@ const createWebhookBody = (
 ) => {
     const rating = Math.max(level.starsGot ?? 0, 0)
     const difficulty = resolveDifficulty(rating, level.demonDifficulty ?? -1)
-    const featureState = level.isFeatured ? "Featured" : "Not featured"
+    const featureState = level.isFeatured ? "Да" : "Нет"
     const epicTier = resolveEpic(level.epicness ?? 0)
-    const creator = level.author?.username || `User #${level.ownerUid}`
+    const creator = level.author?.username || `Пользователь #${level.ownerUid}`
+    const actionLabel = translateAction(meta.actionDescriptor)
     const embed = {
         title: `${level.name} • ${difficulty.label}`,
-        description: `**${meta.moderator}** rated this level ${rating ? `${rating}★` : "without stars"}.`,
+        description: `**${meta.moderator}** обновил оценку уровня ${rating ? `до ${rating}★` : "без звёзд"}.`,
         color: difficulty.color,
         fields: [
-            {name: "Level ID", value: level.id.toString(), inline: true},
-            {name: "Creator", value: creator, inline: true},
-            {name: "Difficulty", value: rating ? `${rating}★ • ${difficulty.label}` : difficulty.label, inline: true},
-            {name: "Feature", value: featureState, inline: true},
-            {name: "Epic Tier", value: epicTier, inline: true},
-            {name: "Coins", value: formatCoins(level.coins ?? 0, level.userCoins ?? 0), inline: true},
-            {name: "Server", value: meta.serverId || "Unknown", inline: true},
+            {name: "ID уровня", value: level.id.toString(), inline: true},
+            {name: "Автор", value: creator, inline: true},
+            {name: "Сложность", value: rating ? `${rating}★ • ${difficulty.label}` : difficulty.label, inline: true},
+            {name: "Фича", value: featureState, inline: true},
+            {name: "Эпик", value: epicTier, inline: true},
+            {name: "Монеты", value: formatCoins(level.coins ?? 0, level.userCoins ?? 0), inline: true},
+            {name: "Сервер", value: meta.serverId || "Неизвестно", inline: true},
         ],
         footer: {
-            text: `Rated via ${meta.actionDescriptor}`
+            text: `Действие: ${actionLabel}`
         },
         timestamp: new Date().toISOString()
     }
 
-    if (!level.isFeatured && epicTier === "None") {
-        embed.fields = embed.fields.filter(field => field.name !== "Epic Tier")
+    if (!level.isFeatured && epicTier === "Нет") {
+        embed.fields = embed.fields.filter(field => field.name !== "Эпик")
     }
 
     const body: Record<string, unknown> = {
@@ -153,19 +154,19 @@ const createWebhookBody = (
 
 const resolveDifficulty = (stars: number, demonDifficulty: number): DifficultyInfo => {
     if (!stars)
-        return {label: "Unrated", color: difficultyPalette.unrated}
+        return {label: "Без рейтинга", color: difficultyPalette.unrated}
     if (stars === 1)
-        return {label: "Auto", color: difficultyPalette.auto}
+        return {label: "Авто", color: difficultyPalette.auto}
     if (stars === 2)
-        return {label: "Easy", color: difficultyPalette.easy}
+        return {label: "Лёгкий", color: difficultyPalette.easy}
     if (stars === 3)
-        return {label: "Normal", color: difficultyPalette.normal}
+        return {label: "Нормальный", color: difficultyPalette.normal}
     if (stars === 4 || stars === 5)
-        return {label: "Hard", color: difficultyPalette.hard}
+        return {label: "Сложный", color: difficultyPalette.hard}
     if (stars === 6 || stars === 7)
-        return {label: "Harder", color: difficultyPalette.harder}
+        return {label: "Очень сложный", color: difficultyPalette.harder}
     if (stars === 8 || stars === 9)
-        return {label: "Insane", color: difficultyPalette.insane}
+        return {label: "Безумный", color: difficultyPalette.insane}
     if (stars >= 10) {
         const demonLabel = resolveDemon(demonDifficulty)
         return {label: demonLabel, color: difficultyPalette.demon}
@@ -175,32 +176,58 @@ const resolveDifficulty = (stars: number, demonDifficulty: number): DifficultyIn
 
 const resolveDemon = (value: number) => {
     const map: Record<number, string> = {
-        3: "Easy Demon",
-        4: "Medium Demon",
-        0: "Hard Demon",
-        5: "Insane Demon",
-        6: "Extreme Demon",
+        3: "Лёгкий демон",
+        4: "Средний демон",
+        0: "Сложный демон",
+        5: "Безумный демон",
+        6: "Экстремальный демон",
     }
-    return map[value] || "Insane Demon"
+    return map[value] || "Безумный демон"
 }
 
 const resolveEpic = (value: number) => {
     switch (value) {
         case 1:
-            return "Epic"
+            return "Эпик"
         case 2:
-            return "Legendary"
+            return "Легендарный"
         case 3:
-            return "Mythic"
+            return "Мифический"
         default:
-            return "None"
+            return "Нет"
     }
 }
 
 const formatCoins = (verified: number, userCoins: number) => {
     if (!userCoins)
-        return "No user coins"
+        return "Нет пользовательских монет"
     if (verified >= userCoins)
-        return `${verified} verified coins`
-    return `${verified}/${userCoins} verified`
+        return `${userCoins}/${userCoins} подтверждены`
+    return `${verified}/${userCoins} подтверждены`
+}
+
+const translateAction = (action: string) => {
+    if (!action.startsWith("Rate:"))
+        return action
+    const suffix = action.slice(5).toLowerCase()
+    const map: Record<string, string> = {
+        reset: "Сброс рейтинга",
+        feature: "Выдача фичи",
+        unfeature: "Снятие фичи",
+        epic: "Выдача эпика",
+        legendary: "Выдача легендарного",
+        mythic: "Выдача мифического",
+        unepic: "Снятие эпика",
+        auto: "Уровень отмечен как Авто",
+        easy: "Выставлен лёгкий уровень",
+        normal: "Выставлен нормальный уровень",
+        hard: "Выставлен сложный уровень",
+        harder: "Выставлен очень сложный уровень",
+        insane: "Выставлен безумный уровень"
+    }
+    if (map[suffix])
+        return map[suffix]
+    if (!Number.isNaN(Number(suffix)))
+        return `Выставлено ${suffix}★`
+    return action
 }

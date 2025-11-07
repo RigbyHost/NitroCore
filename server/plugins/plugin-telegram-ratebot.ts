@@ -61,7 +61,7 @@ const sendTelegramRateNotification = async (payload: ActionHookPayload) => {
         return
 
     const message = buildTelegramMessage(level.$, {
-        moderator: payload.data.uname || `User #${payload.uid}`,
+        moderator: payload.data.uname || `Пользователь #${payload.uid}`,
         serverId: config.ServerConfig.SrvID
     })
 
@@ -88,22 +88,22 @@ const buildTelegramMessage = (
     meta: {moderator: string, serverId?: string}
 ) => {
     const difficulty = describeDifficulty(level.starsGot ?? 0, level.demonDifficulty ?? -1)
-    const creator = level.author?.username || `User #${level.ownerUid}`
+    const creator = level.author?.username || `Пользователь #${level.ownerUid}`
     const coins = formatCoins(level.coins ?? 0, level.userCoins ?? 0)
-    const feature = level.isFeatured ? "Featured" : "Not featured"
+    const feature = level.isFeatured ? "Да" : "Нет"
     const epic = resolveEpic(level.epicness ?? 0)
 
     const lines = [
-        `⭐ Level rated by ${meta.moderator}`,
-        `• Name: ${level.name}`,
-        `• Level ID: ${level.id}`,
-        `• Creator: ${creator}`,
-        `• Difficulty: ${difficulty.name}`,
-        `• Stars: ${difficulty.stars}`,
-        `• Feature: ${feature}`,
-        ...(epic !== "None" ? [`• Epic Tier: ${epic}`] : []),
-        `• Coins: ${coins}`,
-        meta.serverId ? `• Server: ${meta.serverId}` : undefined,
+        `⭐ Оценка уровня от ${meta.moderator}`,
+        `• Название: ${level.name}`,
+        `• ID: ${level.id}`,
+        `• Автор: ${creator}`,
+        `• Сложность: ${difficulty.name}`,
+        `• Звёзды: ${difficulty.stars}`,
+        `• Фича: ${feature}`,
+        ...(epic !== "Нет" ? [`• Эпик: ${epic}`] : []),
+        `• Монеты: ${coins}`,
+        meta.serverId ? `• Сервер: ${meta.serverId}` : undefined,
     ].filter(Boolean)
 
     return lines.join("\n")
@@ -111,19 +111,19 @@ const buildTelegramMessage = (
 
 const describeDifficulty = (stars: number, demonDifficulty: number): DifficultyDescriptor => {
     if (!stars)
-        return {name: "Unrated", stars: 0}
+        return {name: "Без рейтинга", stars: 0}
     if (stars === 1)
-        return {name: "Auto", stars}
+        return {name: "Авто", stars}
     if (stars === 2)
-        return {name: "Easy", stars}
+        return {name: "Лёгкий", stars}
     if (stars === 3)
-        return {name: "Normal", stars}
+        return {name: "Нормальный", stars}
     if (stars === 4 || stars === 5)
-        return {name: "Hard", stars}
+        return {name: "Сложный", stars}
     if (stars === 6 || stars === 7)
-        return {name: "Harder", stars}
+        return {name: "Очень сложный", stars}
     if (stars === 8 || stars === 9)
-        return {name: "Insane", stars}
+        return {name: "Безумный", stars}
     if (stars >= 10)
         return {name: resolveDemonLabel(demonDifficulty), stars}
     return {name: `${stars}★`, stars}
@@ -131,34 +131,34 @@ const describeDifficulty = (stars: number, demonDifficulty: number): DifficultyD
 
 const resolveDemonLabel = (value: number) => {
     const map: Record<number, string> = {
-        3: "Easy Demon",
-        4: "Medium Demon",
-        0: "Hard Demon",
-        5: "Insane Demon",
-        6: "Extreme Demon",
+        3: "Лёгкий демон",
+        4: "Средний демон",
+        0: "Сложный демон",
+        5: "Безумный демон",
+        6: "Экстремальный демон",
     }
-    return map[value] || "Insane Demon"
+    return map[value] || "Безумный демон"
 }
 
 const resolveEpic = (value: number) => {
     switch (value) {
         case 1:
-            return "Epic"
+            return "Эпик"
         case 2:
-            return "Legendary"
+            return "Легендарный"
         case 3:
-            return "Mythic"
+            return "Мифический"
         default:
-            return "None"
+            return "Нет"
     }
 }
 
 const formatCoins = (verified: number, userCoins: number) => {
     if (!userCoins)
-        return "No user coins"
+        return "Нет пользовательских монет"
     if (verified >= userCoins)
-        return `${verified} verified coins`
-    return `${verified}/${userCoins} verified`
+        return `${userCoins}/${userCoins} подтверждены`
+    return `${verified}/${userCoins} подтверждены`
 }
 
 const tryGetEvent = () => {
