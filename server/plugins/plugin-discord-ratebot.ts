@@ -154,19 +154,19 @@ const createWebhookBody = (
 
 const resolveDifficulty = (stars: number, demonDifficulty: number): DifficultyInfo => {
     if (!stars)
-        return {label: "Без рейтинга", color: difficultyPalette.unrated}
+        return {label: "Unrated", color: difficultyPalette.unrated}
     if (stars === 1)
-        return {label: "Авто", color: difficultyPalette.auto}
+        return {label: "Auto", color: difficultyPalette.auto}
     if (stars === 2)
-        return {label: "Лёгкий", color: difficultyPalette.easy}
+        return {label: "Easy", color: difficultyPalette.easy}
     if (stars === 3)
-        return {label: "Нормальный", color: difficultyPalette.normal}
+        return {label: "Normal", color: difficultyPalette.normal}
     if (stars === 4 || stars === 5)
-        return {label: "Сложный", color: difficultyPalette.hard}
+        return {label: "Hard", color: difficultyPalette.hard}
     if (stars === 6 || stars === 7)
-        return {label: "Очень сложный", color: difficultyPalette.harder}
+        return {label: "Harder", color: difficultyPalette.harder}
     if (stars === 8 || stars === 9)
-        return {label: "Безумный", color: difficultyPalette.insane}
+        return {label: "Insane", color: difficultyPalette.insane}
     if (stars >= 10) {
         const demonLabel = resolveDemon(demonDifficulty)
         return {label: demonLabel, color: difficultyPalette.demon}
@@ -176,13 +176,13 @@ const resolveDifficulty = (stars: number, demonDifficulty: number): DifficultyIn
 
 const resolveDemon = (value: number) => {
     const map: Record<number, string> = {
-        3: "Лёгкий демон",
-        4: "Средний демон",
-        0: "Сложный демон",
-        5: "Безумный демон",
-        6: "Экстремальный демон",
+        3: "Easy Demon",
+        4: "Medium Demon",
+        0: "Hard Demon",
+        5: "Insane Demon",
+        6: "Extreme Demon",
     }
-    return map[value] || "Безумный демон"
+    return map[value] || "Insane Demon"
 }
 
 const resolveEpic = (value: number) => {

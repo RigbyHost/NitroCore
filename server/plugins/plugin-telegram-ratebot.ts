@@ -111,19 +111,19 @@ const buildTelegramMessage = (
 
 const describeDifficulty = (stars: number, demonDifficulty: number): DifficultyDescriptor => {
     if (!stars)
-        return {name: "Без рейтинга", stars: 0}
+        return {name: "Unrated", stars: 0}
     if (stars === 1)
-        return {name: "Авто", stars}
+        return {name: "Auto", stars}
     if (stars === 2)
-        return {name: "Лёгкий", stars}
+        return {name: "Easy", stars}
     if (stars === 3)
-        return {name: "Нормальный", stars}
+        return {name: "Normal", stars}
     if (stars === 4 || stars === 5)
-        return {name: "Сложный", stars}
+        return {name: "Hard", stars}
     if (stars === 6 || stars === 7)
-        return {name: "Очень сложный", stars}
+        return {name: "Harder", stars}
     if (stars === 8 || stars === 9)
-        return {name: "Безумный", stars}
+        return {name: "Insane", stars}
     if (stars >= 10)
         return {name: resolveDemonLabel(demonDifficulty), stars}
     return {name: `${stars}★`, stars}
@@ -131,13 +131,13 @@ const describeDifficulty = (stars: number, demonDifficulty: number): DifficultyD
 
 const resolveDemonLabel = (value: number) => {
     const map: Record<number, string> = {
-        3: "Лёгкий демон",
-        4: "Средний демон",
-        0: "Сложный демон",
-        5: "Безумный демон",
-        6: "Экстремальный демон",
+        3: "Easy Demon",
+        4: "Medium Demon",
+        0: "Hard Demon",
+        5: "Insane Demon",
+        6: "Extreme Demon",
     }
-    return map[value] || "Безумный демон"
+    return map[value] || "Insane Demon"
 }
 
 const resolveEpic = (value: number) => {
