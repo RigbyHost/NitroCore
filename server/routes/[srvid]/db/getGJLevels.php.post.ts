@@ -47,6 +47,10 @@ export default defineEventHandler({
                 result = await filter.searchLevels("latest", data)
                 break
             case 5:
+                // I DO NOT KNOW WHAT IS THE ISSUE, BUT THIS IS A WORKAROUND
+                if (data.uuid === "1" && data.str === "1" && await authHook(event)) {
+                    data.str = event.context.user!.$.uid.toString()
+                }
                 result = await filter.searchUserLevels(data, false)
                 break
             case 6:
@@ -135,6 +139,7 @@ export default defineEventHandler({
 })
 
 export const requestSchema = z.object({
+    uuid: z.string().optional(),
     type: z.coerce.number().optional().default(0),
     page: z.coerce.number().nonnegative().optional().default(0),
     gameVersion: z.coerce.number().optional().default(1),
