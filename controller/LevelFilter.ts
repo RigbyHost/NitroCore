@@ -171,9 +171,12 @@ export class LevelFilter {
                 orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
                 break
             case "sent":
-                filters.push(exists(
-                    this.db.select({id: rateQueueTable.id}).from(rateQueueTable).where(eq(rateQueueTable.levelId, levelsTable.id))
-                ))
+                filters.push(sql`
+                    ${levelsTable.id} IN (
+                        SELECT ${rateQueueTable.levelId}
+                        FROM ${rateQueueTable}
+                    )
+                `)
                 orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
                 break
             case "hall":
