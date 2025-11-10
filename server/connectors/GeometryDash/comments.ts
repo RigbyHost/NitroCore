@@ -59,7 +59,9 @@ export const GDConnectorComments = {
                     ]
                     if (comment.author.role?.commentColor)
                         v.push(12, comment.author.role.commentColor)
-                    v.concat([
+
+                    let output = v.join("~")
+                    output += [
                         ":1", comment.author.username,
                         9, user.getShownIcon(),
                         10, comment.author.vessels.clr_primary,
@@ -67,9 +69,9 @@ export const GDConnectorComments = {
                         14, comment.author.iconType,
                         15, comment.author.special,
                         16, comment.author.uid,
-                    ])
+                    ].join("~")
 
-                    return v.join("~")
+                    return output
                 }
             )
                 .join("|")
