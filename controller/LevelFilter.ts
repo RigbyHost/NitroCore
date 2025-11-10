@@ -6,7 +6,6 @@ import {
     gte,
     inArray,
     notInArray,
-    exists,
     and,
     or,
     SQL,
@@ -15,7 +14,7 @@ import {
     ilike,
     getTableColumns
 } from "drizzle-orm";
-import {levelsTable, questsTable, rateQueueTable} from "~~/drizzle";
+import {levelsTable, mappingValues} from "~~/drizzle";
 import {z} from "zod";
 import {requestSchema} from "~/routes/[srvid]/db/getGJLevels.php.post";
 import {Level, LevelWithUser} from "~~/controller/Level";
@@ -171,9 +170,12 @@ export class LevelFilter {
                 orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
                 break
             case "sent":
-                filters.push(exists(
-                    this.db.select({id: rateQueueTable.id}).from(rateQueueTable).where(eq(rateQueueTable.levelId, levelsTable.id))
-                ))
+                filters.push(sql`
+                    ${levelsTable.id} IN (
+                        SELECT ${sql.raw(`"rateQueue"."lvl_id"`)}
+                        FROM "rateQueue"
+                    )
+                `)
                 orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
                 break
             case "hall":
@@ -182,30 +184,36 @@ export class LevelFilter {
                 break
             // SAFE
             case "safe_daily":
-                filters.push(exists(
-                    this.db.select({id: questsTable.id}).from(questsTable).where(and(
-                        eq(questsTable.levelId, levelsTable.id),
-                        eq(questsTable.type, "daily")
-                    ))
-                ))
+                filters.push(sql`
+                    EXISTS (
+                        SELECT 1
+                        FROM "quests"
+                        WHERE "quests"."lvl_id" = ${levelsTable.id}
+                          AND "quests"."type" = ${mappingValues.daily}
+                    )
+                `)
                 orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
                 break
             case "safe_weekly":
-                filters.push(exists(
-                    this.db.select({id: questsTable.id}).from(questsTable).where(and(
-                        eq(questsTable.levelId, levelsTable.id),
-                        eq(questsTable.type, "weekly")
-                    ))
-                ))
+                filters.push(sql`
+                    EXISTS (
+                        SELECT 1
+                        FROM "quests"
+                        WHERE "quests"."lvl_id" = ${levelsTable.id}
+                          AND "quests"."type" = ${mappingValues.weekly}
+                    )
+                `)
                 orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
                 break
             case "safe_event":
-                filters.push(exists(
-                    this.db.select({id: questsTable.id}).from(questsTable).where(and(
-                        eq(questsTable.levelId, levelsTable.id),
-                        eq(questsTable.type, "event")
-                    ))
-                ))
+                filters.push(sql`
+                    EXISTS (
+                        SELECT 1
+                        FROM "quests"
+                        WHERE "quests"."lvl_id" = ${levelsTable.id}
+                          AND "quests"."type" = ${mappingValues.event}
+                    )
+                `)
                 orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
                 break
             default:
