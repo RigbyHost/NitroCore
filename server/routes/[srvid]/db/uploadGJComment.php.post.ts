@@ -53,7 +53,7 @@ export default defineEventHandler({
                 await commentController.postLevelComment(
                     event.context.user!.$.uid,
                     data.levelID,
-                    content,
+                    data.comment,
                     data.percent,
                 )
             }
