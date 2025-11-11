@@ -61,7 +61,7 @@ export const GDConnectorQuests: IConnector["quests"] = {
         d.setDate(d.getDate() + 1)
         const timeLeft = d.getTime() - Date.now()
 
-        const out = [
+        let out = [
             useGeometryDashTooling().generateRandomString(5),
             uid, chk, udid, uid, timeLeft,
             ...challenges.map(c => [
@@ -69,16 +69,16 @@ export const GDConnectorQuests: IConnector["quests"] = {
             ].join(","))
         ].join(":")
 
+        out = Buffer
+            .from(useGeometryDashTooling().doXOR(out, "19847"), "binary")
+            .toString("base64")
+            .replaceAll("/", "_")
+            .replaceAll("+", "-")
+
         await send(
             useEvent(),
             useGeometryDashTooling().generateRandomString(5)
-                .concat(
-                    Buffer
-                        .from(useGeometryDashTooling().doXOR(out, "19847"), "binary")
-                        .toString("base64")
-                        .replaceAll("/", "_")
-                        .replaceAll("+", "-"),
-                    "|", useGeometryDashTooling().hashSolo3(out)
+                .concat(out, "|", useGeometryDashTooling().hashSolo3(out)
                 )
         )
     },
