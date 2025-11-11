@@ -83,6 +83,8 @@ export class FriendshipController {
         if (!user)
             user = await userController.getOneUser({uid}) as User
         if (!user) return []
+        if (!uid && user)
+            uid = user.$.uid
         const friendsIds: number[] = []
         for (const friendshipId of user.$.friendshipIds||[]) {
             const friendship = await this.getOneFriendshipById(friendshipId)

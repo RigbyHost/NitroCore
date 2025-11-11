@@ -55,6 +55,9 @@ export class User<T extends UserType = UserType> {
             deltas.chests = this.$.chests
         if (deltas.settings)
             deltas.settings = this.$.settings
+
+        console.log(deltas)
+
         await this.db.update(usersTable)
             .set({
                 ...deltas,
