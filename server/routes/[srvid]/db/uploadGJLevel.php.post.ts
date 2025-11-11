@@ -21,7 +21,7 @@ export default defineEventHandler({
         const levelController = new LevelController(event.context.drizzle)
         const actionController = new ActionController(event.context.drizzle)
 
-        const level = new Level(levelController, {
+        const levelConfig = {
             ownerUid: event.context.user!.$.uid,
             versionGame: await useGeometryDashTooling().getGDVersionFromBody(form),
             versionBinary: data.binaryVersion,
@@ -46,23 +46,26 @@ export default defineEventHandler({
             },
             stringLevelInfo: data.levelInfo,
             stringSettings: `${data.songIDs};${data.sfxIDs}`
-        } as typeof levelsTable.$inferSelect)
+        } as typeof levelsTable.$inferSelect
+
 
         if (data.unlisted1)
-            level.$.unlistedType = data.unlisted1
-        level.$.unlistedType = level.$.unlistedType % 2 + data.unlisted2 % 2
-
-        if (!level.validate())
-            return await event.context.connector.error(-1, "Invalid level data")
+            levelConfig.unlistedType = data.unlisted1
+        levelConfig.unlistedType = levelConfig.unlistedType % 2 + data.unlisted2 % 2
 
         if (data.levelID) {
             // Update level
-            const existingLevel = await levelController.getOneLevel(data.levelID)
-            if (!existingLevel)
+            const level = await levelController.getOneLevel(data.levelID)
+            if (!level)
                 return await event.context.connector.error(-1, "Level not found")
-            if (!existingLevel.isOwnedBy(event.context.user!.$.uid))
+            if (!level.isOwnedBy(event.context.user!.$.uid))
                 return await event.context.connector.error(-1, "You are not the owner of this level")
-            level.$.id = data.levelID
+            level.$ = {
+                ...level.$,
+                ...levelConfig
+            }
+            if (!level.validate())
+                return await event.context.connector.error(-1, "Invalid level data")
             await level.commit()
             await actionController.registerAction(
                 "level_update",
@@ -76,6 +79,9 @@ export default defineEventHandler({
                 }
             )
         } else {
+            const level = new Level(levelController, levelConfig)
+            if (!level.validate())
+                return await event.context.connector.error(-1, "Invalid level data")
             data.levelID = await level.create()
             await actionController.registerAction(
                 "level_upload",

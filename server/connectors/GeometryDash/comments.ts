@@ -17,11 +17,12 @@ export const GDConnectorComments = {
             comments.map(
                 comment => [
                     2, comment.comment,
-                    3, comment.uid,
+                    // 3, comment.uid,
                     4, comment.likes,
                     5, 0,
                     6, comment.id,
                     7, comment.isSpam ? 1 : 0,
+                    // 8, comment.uid,
                     9, useGeometryDashTooling().getDateAgo(comment.postedTime.getTime()),
                 ].join("~")
             )
