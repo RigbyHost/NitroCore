@@ -55,8 +55,10 @@ export class User<T extends UserType = UserType> {
             deltas.chests = this.$.chests
         if (deltas.settings)
             deltas.settings = this.$.settings
-
-        console.log(deltas)
+        if (deltas.friendshipIds)
+            deltas.friendshipIds = this.$.friendshipIds
+        if (deltas.blacklistedUsers)
+            deltas.blacklistedUsers = this.$.blacklistedUsers
 
         await this.db.update(usersTable)
             .set({
