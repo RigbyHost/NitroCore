@@ -28,11 +28,11 @@ export const useDrizzle = async (database?: string) => {
         if (!privatePool) {
             if (process.env.DATABASE_URL) {
                 console.log("Detected possible Postgres Neon")
-                privatePool = drizzle(process.env.DATABASE_URL, {schema})
+                privatePool = drizzle(process.env.DATABASE_URL, {schema, logger: !!process.env.DEBUG})
             }
             if (process.env.POSTGRES_URL) {
                 console.log("Detected possible Supabase")
-                privatePool = drizzle(process.env.POSTGRES_URL, {schema})
+                privatePool = drizzle(process.env.POSTGRES_URL, {schema, logger: !!process.env.DEBUG})
             }
         }
         return privatePool as NodePgDatabase<typeof schema>
@@ -47,7 +47,7 @@ export const useDrizzle = async (database?: string) => {
         pools.set(srvid, pool);
     }
 
-    return drizzle(pools.get(srvid)!, {schema, logger: true})
+    return drizzle(pools.get(srvid)!, {schema, logger: !!process.env.DEBUG})
 }
 
 export const useDrizzlePoolManager = () => {
