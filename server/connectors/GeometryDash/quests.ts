@@ -59,7 +59,7 @@ export const GDConnectorQuests: IConnector["quests"] = {
         const d = new Date()
         d.setHours(0, 0, 0, 0)
         d.setDate(d.getDate() + 1)
-        const timeLeft = d.getTime() - Date.now()
+        const timeLeft = Math.floor((d.getTime() - Date.now()) / 1000) // in seconds
 
         let out = [
             useGeometryDashTooling().generateRandomString(5),
