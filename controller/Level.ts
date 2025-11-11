@@ -168,6 +168,8 @@ export class Level<T extends LevelType = LevelType> {
 
     commit = async () => {
         const deltas = diff(this.original, this.$) as typeof levelsTable.$inferSelect
+        if (deltas.expandableStore)
+            deltas.expandableStore = this.$.expandableStore
         await this.db.update(levelsTable)
             .set(deltas)
             .where(eq(levelsTable.id, this.$.id))
