@@ -48,6 +48,7 @@ export default defineEventHandler({
                     break
             }
             await level.commit()
+            await levelController.recalculateCreatorPoints(level.$.ownerUid)
             await new ActionController(event.context.drizzle)
                 .registerAction("level_rate", event.context.user!.$.uid, level.$.id, {
                     uname: event.context.user!.$.username,
