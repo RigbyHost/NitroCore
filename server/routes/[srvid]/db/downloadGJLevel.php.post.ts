@@ -89,7 +89,7 @@ export default defineEventHandler({
 
             level.$.description = Buffer.from(
                 Buffer.from(level.$.description, "base64").toString("utf-8") +
-                ` \n[Suggested difficulty: ${diffName} [${level.$.suggestedDifficulty.toFixed(2)}] (${level.$.suggestedDifficultyCount} votes)`,
+                ` \n[Suggested difficulty: ${diffName} [${level.$.suggestedDifficulty.toFixed(2)}] (${level.$.suggestedDifficultyCount} votes)]`,
                 "utf-8"
             ).toString("base64")
         }
