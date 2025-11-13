@@ -34,7 +34,7 @@ export class ActionController {
         data: MakeOptional<ActionData, "action">,
     ) => {
         const userController = new UserController(this.db)
-        const user = (await userController.getOneUser({uid: targetId}))!
+        const user = uid > 0 ? await userController.getOneUser({uid}): null
 
         let type: ActionVariant
         switch (action) {
@@ -54,7 +54,8 @@ export class ActionController {
             case "unban_user":
                 type = "ban_event"
                 data.action = action === "ban_user" ? "Ban" : "Unban"
-                data.uname = user.$.username || ""
+                const luser = await userController.getOneUser({uid: targetId})
+                data.uname = luser?.$.username || ""
                 break
             case "level_upload":
                 type = "level_event"
@@ -108,7 +109,7 @@ export class ActionController {
                 return
         }
 
-        const isMod = user.$.roleId > 0
+        const isMod = user ? user.$.roleId > 0 : false
 
         await this.db.insert(actionsTable).values({
             uid: uid,
