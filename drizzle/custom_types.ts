@@ -20,3 +20,12 @@ export const citext = customType<{ data: string }>({
         return 'citext';
     },
 });
+
+export const bytea = customType<{
+    data: Buffer
+    default: false
+}>({
+    dataType() {
+        return 'bytea'
+    },
+})

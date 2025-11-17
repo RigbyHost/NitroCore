@@ -104,7 +104,7 @@ export default defineEventHandler({
                 if (!list)
                     break
                 // TODO: evaluate if this should be here
-                await list.onDownload()
+                await list.onDownload(event.context.clientAddress!)
                 let levels: typeof result["levels"] = []
                 if (list.$.levels)
                     levels = await levelController.getManyLevels(list.$.levels)

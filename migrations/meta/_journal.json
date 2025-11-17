@@ -22,6 +22,13 @@
       "when": 1761318921687,
       "tag": "0002_curly_dreaming_celestial",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1763370198245,
+      "tag": "0003_numerous_jack_power",
+      "breakpoints": true
     }
   ]
 }

@@ -33,7 +33,7 @@ export default defineEventHandler({
         if (!level)
             return await event.context.connector.error(-2, "Level not found")
 
-        await level.onDownload()
+        await level.onDownload(event.context.clientAddress!)
 
         let password = "0"
         let hashablePassword = level.$.password

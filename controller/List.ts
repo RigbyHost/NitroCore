@@ -1,5 +1,5 @@
 import {ListController} from "~~/controller/ListController";
-import {listsTable, usersTable} from "~~/drizzle";
+import {downloadsTable, listsTable, usersTable} from "~~/drizzle";
 import {z} from "zod";
 import {diff} from "deep-object-diff";
 import {eq, sql} from "drizzle-orm";
@@ -48,10 +48,17 @@ export class List<T extends ListType = ListType> {
         )
     }
 
-    onDownload = async () =>
+    onDownload = async (ip: string) => {
+        const verify = await this.db.insert(downloadsTable).values({
+            id: -this.$.id,
+            ip: ip
+        }).onConflictDoNothing().returning()
+        if (!verify.length)
+            return
         this.db.update(listsTable)
             .set({downloads: sql`${listsTable.downloads}+1`})
             .where(eq(listsTable.id, this.$.id))
+    }
 
     validate = () => {
         const {success} = validateSchema.safeParse(this.$)
