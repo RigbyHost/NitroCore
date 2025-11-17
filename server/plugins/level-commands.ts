@@ -174,7 +174,7 @@ export default defineNitroPlugin(() => {
                 }
             }
 
-            ctx.drizzle.insert(questsTable).values({
+            await ctx.drizzle.insert(questsTable).values({
                 type: "daily",
                 levelId: ctx.level!.$.id,
                 timeAdded: date,
@@ -225,7 +225,7 @@ export default defineNitroPlugin(() => {
                 }
             }
 
-            ctx.drizzle.insert(questsTable).values({
+            await ctx.drizzle.insert(questsTable).values({
                 type: "weekly",
                 levelId: ctx.level!.$.id,
                 timeAdded: date,
