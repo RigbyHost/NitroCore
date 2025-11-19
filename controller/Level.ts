@@ -134,7 +134,7 @@ export class Level<T extends LevelType = LevelType> {
     requestRateByModerator = async (modUid: number, stars: number, featured: boolean) => {
         const cnt = await this.db.$count(rateQueueTable, and(
             eq(rateQueueTable.modUid, modUid),
-            eq(rateQueueTable.levelId, stars),
+            eq(rateQueueTable.levelId, this.$.id),
         ))
         if (cnt > 0)
             throw new Error("You have already requested a rating for this level")
