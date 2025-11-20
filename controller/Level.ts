@@ -1,5 +1,5 @@
 import {LevelController} from "~~/controller/LevelController";
-import {commentsTable, levelsTable, rateQueueTable, usersTable} from "~~/drizzle";
+import {commentsTable, downloadsTable, levelsTable, rateQueueTable, usersTable} from "~~/drizzle";
 import {diff} from "deep-object-diff";
 import {and, eq, sql} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
@@ -134,7 +134,7 @@ export class Level<T extends LevelType = LevelType> {
     requestRateByModerator = async (modUid: number, stars: number, featured: boolean) => {
         const cnt = await this.db.$count(rateQueueTable, and(
             eq(rateQueueTable.modUid, modUid),
-            eq(rateQueueTable.levelId, stars),
+            eq(rateQueueTable.levelId, this.$.id),
         ))
         if (cnt > 0)
             throw new Error("You have already requested a rating for this level")
@@ -148,10 +148,17 @@ export class Level<T extends LevelType = LevelType> {
         })
     }
 
-    onDownload = async () =>
-        this.db.update(levelsTable)
+    onDownload = async (ip: string) => {
+        const verify = await this.db.insert(downloadsTable).values({
+            id: this.$.id,
+            ip: ip
+        }).onConflictDoNothing().returning()
+        if (!verify.length)
+            return
+        await this.db.update(levelsTable)
             .set({downloads: sql`${levelsTable.downloads}+1`})
             .where(eq(levelsTable.id, this.$.id))
+    }
 
     validate = () => {
         const {success} = validateSchema.safeParse(this.$)
@@ -168,6 +175,8 @@ export class Level<T extends LevelType = LevelType> {
 
     commit = async () => {
         const deltas = diff(this.original, this.$) as typeof levelsTable.$inferSelect
+        if (deltas.expandableStore)
+            deltas.expandableStore = this.$.expandableStore
         await this.db.update(levelsTable)
             .set(deltas)
             .where(eq(levelsTable.id, this.$.id))

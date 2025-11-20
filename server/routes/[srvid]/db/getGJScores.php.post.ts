@@ -28,7 +28,7 @@ export default defineEventHandler({
                 const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)
                 users = await userController.getLeaderboard({
                     type: "friends",
-                    friendsIds: friends
+                    friendsIds: friends.concat(event.context.user!.$.uid)
                 })
                 break
             case "creators":

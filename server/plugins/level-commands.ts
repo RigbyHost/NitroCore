@@ -1,6 +1,7 @@
 import {ActionController} from "~~/controller/ActionController";
 import {questsTable} from "~~/drizzle";
 import {and, eq} from "drizzle-orm";
+import {LevelController} from "~~/controller/LevelController";
 
 export default defineNitroPlugin(() => {
     const csdk = useSDK().commands
@@ -11,6 +12,7 @@ export default defineNitroPlugin(() => {
             const ctx = useCommandContext()
             ctx.level!.featureLevel(true)
             await ctx.level!.commit()
+            await new LevelController(ctx.drizzle).recalculateCreatorPoints(ctx.level!.$.ownerUid)
 
             await new ActionController(ctx.drizzle)
                 .registerAction("level_rate", ctx.user!.$.uid, ctx.level!.$.id, {
@@ -27,6 +29,7 @@ export default defineNitroPlugin(() => {
             const ctx = useCommandContext()
             ctx.level!.featureLevel(false)
             await ctx.level!.commit()
+            await new LevelController(ctx.drizzle).recalculateCreatorPoints(ctx.level!.$.ownerUid)
 
             await new ActionController(ctx.drizzle)
                 .registerAction("level_rate", ctx.user!.$.uid, ctx.level!.$.id, {
@@ -44,6 +47,7 @@ export default defineNitroPlugin(() => {
             ctx.level!.featureLevel(true)
             ctx.level!.epicLevel("epic")
             await ctx.level!.commit()
+            await new LevelController(ctx.drizzle).recalculateCreatorPoints(ctx.level!.$.ownerUid)
 
             await new ActionController(ctx.drizzle)
                 .registerAction("level_rate", ctx.user!.$.uid, ctx.level!.$.id, {
@@ -61,6 +65,7 @@ export default defineNitroPlugin(() => {
             ctx.level!.featureLevel(true)
             ctx.level!.epicLevel("legendary")
             await ctx.level!.commit()
+            await new LevelController(ctx.drizzle).recalculateCreatorPoints(ctx.level!.$.ownerUid)
 
             await new ActionController(ctx.drizzle)
                 .registerAction("level_rate", ctx.user!.$.uid, ctx.level!.$.id, {
@@ -78,6 +83,7 @@ export default defineNitroPlugin(() => {
             ctx.level!.featureLevel(true)
             ctx.level!.epicLevel("mythic")
             await ctx.level!.commit()
+            await new LevelController(ctx.drizzle).recalculateCreatorPoints(ctx.level!.$.ownerUid)
 
             await new ActionController(ctx.drizzle)
                 .registerAction("level_rate", ctx.user!.$.uid, ctx.level!.$.id, {
@@ -95,6 +101,7 @@ export default defineNitroPlugin(() => {
             ctx.level!.epicLevel("unepic")
             ctx.level!.featureLevel(false)
             await ctx.level!.commit()
+            await new LevelController(ctx.drizzle).recalculateCreatorPoints(ctx.level!.$.ownerUid)
 
             await new ActionController(ctx.drizzle)
                 .registerAction("level_rate", ctx.user!.$.uid, ctx.level!.$.id, {
@@ -167,7 +174,7 @@ export default defineNitroPlugin(() => {
                 }
             }
 
-            ctx.drizzle.insert(questsTable).values({
+            await ctx.drizzle.insert(questsTable).values({
                 type: "daily",
                 levelId: ctx.level!.$.id,
                 timeAdded: date,
@@ -218,7 +225,7 @@ export default defineNitroPlugin(() => {
                 }
             }
 
-            ctx.drizzle.insert(questsTable).values({
+            await ctx.drizzle.insert(questsTable).values({
                 type: "weekly",
                 levelId: ctx.level!.$.id,
                 timeAdded: date,

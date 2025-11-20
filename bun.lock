@@ -5,14 +5,14 @@
       "name": "nitro-app",
       "dependencies": {
         "@vercel/blob": "^2.0.0",
-        "@vercel/edge-config": "^1.4.0",
+        "@vercel/edge-config": "^1.4.3",
         "aws4fetch": "^1.0.20",
         "bcrypt": "^6.0.0",
         "clamp": "^1.0.1",
         "deep-equal": "^2.2.3",
         "deep-object-diff": "^1.1.9",
         "dotenv": "^17.2.3",
-        "drizzle-orm": "^0.44.6",
+        "drizzle-orm": "^0.44.7",
         "eventemitter3": "^5.0.1",
         "pg": "^8.16.3",
         "tinyrainbow": "^3.0.3",
@@ -21,16 +21,16 @@
         "zod": "^4.1.12",
       },
       "devDependencies": {
-        "@testcontainers/postgresql": "^11.7.1",
-        "@testcontainers/valkey": "^11.7.1",
+        "@testcontainers/postgresql": "^11.8.0",
+        "@testcontainers/valkey": "^11.8.0",
         "@types/bcrypt": "^6.0.0",
         "@types/clamp": "^1.0.3",
-        "@types/pg": "^8.15.5",
+        "@types/pg": "^8.15.6",
         "@vitest/coverage-v8": "^3.2.4",
-        "drizzle-kit": "^0.31.5",
+        "drizzle-kit": "^0.31.6",
         "h3": "^1.15.4",
-        "nitro-test-utils": "^0.9.4",
-        "nitropack": "^2.12.7",
+        "nitro-test-utils": "^0.10.1",
+        "nitropack": "^2.12.9",
         "typescript": "^5.9.3",
         "unplugin-auto-import": "^20.2.0",
         "vite-tsconfig-paths": "^5.1.4",
@@ -821,7 +821,7 @@
 
     "nanoid": ["nanoid@3.3.11", "", { "bin": { "nanoid": "bin/nanoid.cjs" } }, "sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w=="],
 
-    "nitro-test-utils": ["nitro-test-utils@0.9.4", "", { "dependencies": { "dotenv": "^17.2.3", "listhen": "^1.9.0", "ofetch": "^1.4.1", "pathe": "^2.0.3", "ufo": "^1.6.1" }, "peerDependencies": { "nitropack": "^2", "vitest": "^2 || ^3" } }, "sha512-SaqauWPC73paZxzZ/i3usQ1LNTykC3Or9rzx/tF3sOv/Bg4EbuIHYdfuRIfEGox4vVQkmcKn011rQmQKDdxDxQ=="],
+    "nitro-test-utils": ["nitro-test-utils@0.10.1", "", { "dependencies": { "dotenv": "^17.2.3", "listhen": "^1.9.0", "ofetch": "^1.5.0", "pathe": "^2.0.3", "ufo": "^1.6.1" }, "peerDependencies": { "nitropack": "^2", "vitest": "^2 || ^3 || ^4" } }, "sha512-2joRwYNIzfLLVSSmTd18ZMISYnaumc+NuE1/BfqNpf5yy8E8tZWaPRLWjCADCioK2N7rXGetnPxsEHZJKP22xw=="],
 
     "nitropack": ["nitropack@2.12.9", "", { "dependencies": { "@cloudflare/kv-asset-handler": "^0.4.0", "@rollup/plugin-alias": "^5.1.1", "@rollup/plugin-commonjs": "^28.0.9", "@rollup/plugin-inject": "^5.0.5", "@rollup/plugin-json": "^6.1.0", "@rollup/plugin-node-resolve": "^16.0.3", "@rollup/plugin-replace": "^6.0.2", "@rollup/plugin-terser": "^0.4.4", "@vercel/nft": "^0.30.3", "archiver": "^7.0.1", "c12": "^3.3.1", "chokidar": "^4.0.3", "citty": "^0.1.6", "compatx": "^0.2.0", "confbox": "^0.2.2", "consola": "^3.4.2", "cookie-es": "^2.0.0", "croner": "^9.1.0", "crossws": "^0.3.5", "db0": "^0.3.4", "defu": "^6.1.4", "destr": "^2.0.5", "dot-prop": "^10.1.0", "esbuild": "^0.25.11", "escape-string-regexp": "^5.0.0", "etag": "^1.8.1", "exsolve": "^1.0.7", "globby": "^15.0.0", "gzip-size": "^7.0.0", "h3": "^1.15.4", "hookable": "^5.5.3", "httpxy": "^0.1.7", "ioredis": "^5.8.2", "jiti": "^2.6.1", "klona": "^2.0.6", "knitwork": "^1.2.0", "listhen": "^1.9.0", "magic-string": "^0.30.21", "magicast": "^0.5.0", "mime": "^4.1.0", "mlly": "^1.8.0", "node-fetch-native": "^1.6.7", "node-mock-http": "^1.0.3", "ofetch": "^1.5.0", "ohash": "^2.0.11", "pathe": "^2.0.3", "perfect-debounce": "^2.0.0", "pkg-types": "^2.3.0", "pretty-bytes": "^7.1.0", "radix3": "^1.1.2", "rollup": "^4.52.5", "rollup-plugin-visualizer": "^6.0.5", "scule": "^1.3.0", "semver": "^7.7.3", "serve-placeholder": "^2.0.2", "serve-static": "^2.2.0", "source-map": "^0.7.6", "std-env": "^3.10.0", "ufo": "^1.6.1", "ultrahtml": "^1.6.0", "uncrypto": "^0.1.3", "unctx": "^2.4.1", "unenv": "^2.0.0-rc.23", "unimport": "^5.5.0", "unplugin-utils": "^0.3.1", "unstorage": "^1.17.1", "untyped": "^2.0.0", "unwasm": "^0.3.11", "youch": "^4.1.0-beta.11", "youch-core": "^0.3.3" }, "peerDependencies": { "xml2js": "^0.6.2" }, "optionalPeers": ["xml2js"], "bin": { "nitro": "dist/cli/index.mjs", "nitropack": "dist/cli/index.mjs" } }, "sha512-t6qqNBn2UDGMWogQuORjbL2UPevB8PvIPsPHmqvWpeGOlPr4P8Oc5oA8t3wFwGmaolM2M/s2SwT23nx9yARmOg=="],
 
@@ -853,7 +853,7 @@
 
     "object.assign": ["object.assign@4.1.7", "", { "dependencies": { "call-bind": "^1.0.8", "call-bound": "^1.0.3", "define-properties": "^1.2.1", "es-object-atoms": "^1.0.0", "has-symbols": "^1.1.0", "object-keys": "^1.1.1" } }, "sha512-nK28WOo+QIjBkDduTINE4JkF/UJJKyf2EJxvJKfblDpyg0Q+pkOHNTL0Qwy6NP6FhE/EnzV73BxxqcJaXY9anw=="],
 
-    "ofetch": ["ofetch@1.4.1", "", { "dependencies": { "destr": "^2.0.3", "node-fetch-native": "^1.6.4", "ufo": "^1.5.4" } }, "sha512-QZj2DfGplQAr2oj9KzceK9Hwz6Whxazmn85yYeVuS3u9XTMOGMRx0kO95MQ+vLsj/S/NwBDMMLU5hpxvI6Tklw=="],
+    "ofetch": ["ofetch@1.5.1", "", { "dependencies": { "destr": "^2.0.5", "node-fetch-native": "^1.6.7", "ufo": "^1.6.1" } }, "sha512-2W4oUZlVaqAPAil6FUg/difl6YhqhUR7x2eZY4bQCko22UXg3hptq9KLQdqFClV+Wu85UX7hNtdGTngi/1BxcA=="],
 
     "ohash": ["ohash@2.0.11", "", {}, "sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ=="],
 
@@ -1340,6 +1340,8 @@
     "unplugin-auto-import/unimport": ["unimport@5.4.1", "", { "dependencies": { "acorn": "^8.15.0", "escape-string-regexp": "^5.0.0", "estree-walker": "^3.0.3", "local-pkg": "^1.1.2", "magic-string": "^0.30.19", "mlly": "^1.8.0", "pathe": "^2.0.3", "picomatch": "^4.0.3", "pkg-types": "^2.3.0", "scule": "^1.3.0", "strip-literal": "^3.1.0", "tinyglobby": "^0.2.15", "unplugin": "^2.3.10", "unplugin-utils": "^0.3.0" } }, "sha512-wMZ2JKUCleCK2zfRHeWcbrUHKXOC3SVBYkyn/wTGzh0THX6sT4hSjuKXxKANN4/WMbT6ZPM4JzcDcnhD2x9Bpg=="],
 
     "unplugin-auto-import/unplugin-utils": ["unplugin-utils@0.3.0", "", { "dependencies": { "pathe": "^2.0.3", "picomatch": "^4.0.3" } }, "sha512-JLoggz+PvLVMJo+jZt97hdIIIZ2yTzGgft9e9q8iMrC4ewufl62ekeW7mixBghonn2gVb/ICjyvlmOCUBnJLQg=="],
+
+    "unstorage/ofetch": ["ofetch@1.4.1", "", { "dependencies": { "destr": "^2.0.3", "node-fetch-native": "^1.6.4", "ufo": "^1.5.4" } }, "sha512-QZj2DfGplQAr2oj9KzceK9Hwz6Whxazmn85yYeVuS3u9XTMOGMRx0kO95MQ+vLsj/S/NwBDMMLU5hpxvI6Tklw=="],
 
     "untun/pathe": ["pathe@1.1.2", "", {}, "sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ=="],
 

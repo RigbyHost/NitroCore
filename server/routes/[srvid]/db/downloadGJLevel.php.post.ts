@@ -33,7 +33,7 @@ export default defineEventHandler({
         if (!level)
             return await event.context.connector.error(-2, "Level not found")
 
-        await level.onDownload()
+        await level.onDownload(event.context.clientAddress!)
 
         let password = "0"
         let hashablePassword = level.$.password
@@ -89,7 +89,7 @@ export default defineEventHandler({
 
             level.$.description = Buffer.from(
                 Buffer.from(level.$.description, "base64").toString("utf-8") +
-                ` \n[Suggested difficulty: ${diffName} [${level.$.suggestedDifficulty.toFixed(2)}] (${level.$.suggestedDifficultyCount} votes)`,
+                ` \n[Suggested difficulty: ${diffName} [${level.$.suggestedDifficulty.toFixed(2)}] (${level.$.suggestedDifficultyCount} votes)]`,
                 "utf-8"
             ).toString("base64")
         }

@@ -23,9 +23,9 @@ export class QuestsController {
     ) => {
         if (type) {
             const data = await this.db.query.questsTable.findFirst({
-                where: (quest, {eq, gt, and}) => and(
+                where: (quest, {eq, lte, and}) => and(
                     eq(quest.type, type),
-                    gt(quest.timeAdded, sql`CURRENT_TIMESTAMP`) // AVAILABLE
+                    lte(quest.timeAdded, sql`CURRENT_TIMESTAMP`) // AVAILABLE
                 ),
                 // LAST AVAILABLE
                 orderBy: (quest, {desc}) => [desc(quest.timeAdded)]
@@ -62,8 +62,8 @@ export class QuestsController {
     getQuests = async () => {
         const max_id = await this.db.$count(questsTable, sql`${questsTable.type}>1`)
         return this.db.query.questsTable.findMany({
-            where: (quest, {gt, lte, and}) => and(
-                gt(quest.timeAdded, sql`CURRENT_TIMESTAMP`),
+            where: (quest, {lte, and}) => and(
+                lte(quest.timeAdded, sql`CURRENT_TIMESTAMP`),
                 sql`${questsTable.type}>1`,
             ),
             limit: 3,

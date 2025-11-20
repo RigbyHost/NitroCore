@@ -65,7 +65,7 @@ export class GDConnector implements IConnector {
                 4, music.artist,
                 5, music.size.toFixed(2),
                 6, "",
-                10, encodeURI(music.url)
+                10, encodeURIComponent(music.url)
             ].join("~|~").replaceAll("#", "")
         )
     }

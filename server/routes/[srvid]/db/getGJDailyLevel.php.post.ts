@@ -36,7 +36,7 @@ export default defineEventHandler({
         date.setHours(0, 0, 0, 0)
         date.setDate(date.getDate() + (data.type===2 ? 7 : 1))
 
-        const left = Math.max(0, quest.timeAdded.getTime() - Date.now())
+        const left = Math.max(0, quest.timeAdded.getTime() - Date.now()) / 1000
 
         await event.context.connector.quests.getSpecialLevel(
             quest.id,

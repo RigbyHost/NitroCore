@@ -1,6 +1,7 @@
 
 export * from "./account_comments"
 export * from "./actions"
+export * from "./actions_downloads"
 export * from "./comments"
 export * from "./friendreqs"
 export * from "./friendships"
