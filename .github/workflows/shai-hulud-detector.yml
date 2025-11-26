@@ -1,0 +1,23 @@
+name: Shai Hulud Scanner
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "package.json"
+      - "**/package.json"
+      - ".github/workflows/shai-hulud-detector.yml"
+
+jobs:
+  detect-shai-hulud:
+    runs-on: ubuntu-latest
+    name: Detect NPM attacks
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Shai-Hulud Detector
+        run: |
+          git clone https://github.com/Cobenian/shai-hulud-detect /tmp/shai-hulud-detect
+          /tmp/shai-hulud-detect/shai-hulud-detector.sh .
