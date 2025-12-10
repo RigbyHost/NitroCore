@@ -77,7 +77,7 @@ export class SDKMusic {
                     songs: songs
                 },
                 () => provider.getBulkMusicById(songs.map(
-                    s=>s.url.split(":", 1)[1]
+                    s=> s.url.split(/:(.*)/s)[1]
                 ))
             )
             result.push(...meta)
