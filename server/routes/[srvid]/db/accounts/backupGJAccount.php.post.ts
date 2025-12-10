@@ -31,8 +31,8 @@ export default defineEventHandler({
                         .replace("_", "/")
                         .replace("-", "+"),
                     "base64"
-                ).toString("utf-8")
-            ).then(r=>r.toString("utf-8"))
+                )
+            ).then(r => r.toString("utf-8"))
 
             user.$.orbs = Number(
                 saveData.split("</s><k>14</k><s>")[1]
