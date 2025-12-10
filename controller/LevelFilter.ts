@@ -172,8 +172,8 @@ export class LevelFilter {
             case "sent":
                 filters.push(sql`
                     ${levelsTable.id} IN (
-                        SELECT ${sql.raw(`"rateQueue"."lvl_id"`)}
-                        FROM "rateQueue"
+                        SELECT ${rateQueueTable.levelId}
+                        FROM ${rateQueueTable}
                     )
                 `)
                 orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))

@@ -119,11 +119,38 @@ export class ActionController {
             data: data as ActionData,
         })
 
-        // Fully async
-        useSDK().events.emitAction(action, uid, targetId, data as ActionData, {
-            drizzle: this.db,
-            config: useEvent().context.config.config!,
-        })
+        const nitroApp = typeof useNitroApp === "function" ? useNitroApp() : undefined
+        if (nitroApp) {
+            const event = (() => {
+                try {
+                    return useEvent()
+                } catch {
+                    return undefined
+                }
+            })()
+            const srvid = event
+                ? (getRouterParam(event, "srvid") || event.context.config?.config?.ServerConfig.SrvID)
+                : undefined
+            const payload: ActionHookPayload = {
+                action,
+                actionType: type,
+                uid,
+                targetId,
+                data: structuredClone(data) as ActionData,
+                srvid,
+                db: this.db,
+                isModAction: isMod
+            }
+            try {
+                await nitroApp.hooks.callHook("action:registered", payload)
+                if (action === "level_rate")
+                    await nitroApp.hooks.callHook("action:level_rate", payload)
+            } catch (error) {
+                useLogger().warn(
+                    `[ActionController] Failed to dispatch action hooks: ${(error as Error).message}`
+                )
+            }
+        }
     }
 
     /**
@@ -170,4 +197,15 @@ export type AvailableActions = "register_user" | "login_user" | "delete_user" | 
     "list_upload" | "list_delete" | "list_update" | "list_rate" |
     "like_level" | "like_comment" | "like_account_comment" | "like_list"
 
-export type LikeItemType = "level" | "comment" | "account_comment" | "list"
+type ItemType = "level" | "comment" | "account_comment" | "list"
+
+export type ActionHookPayload = {
+    action: AvailableActions,
+    actionType: ActionVariant,
+    uid: number,
+    targetId: number,
+    data: ActionData,
+    srvid?: string,
+    db: Database,
+    isModAction: boolean
+}
