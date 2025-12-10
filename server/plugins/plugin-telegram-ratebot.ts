@@ -116,16 +116,18 @@ const describeDifficulty = (stars: number, demonDifficulty: number): DifficultyD
         return { name: "Insane", stars }
     if (stars >= 10)
         return { name: resolveDemonLabel(demonDifficulty), stars }
-    return { name: `${stars}★`, stars }
+
+    // Fallback should be theoretically unreachable given the cases above cover 0..inf
+    // (ignoring negative numbers which shouldn't exist)
+    return { name: "Unknown", stars }
 }
 
 const resolveDemonLabel = (value: number) => {
     const map: Record<number, string> = {
-        3: "Easy Demon",
-        4: "Medium Demon",
-        0: "Hard Demon",
-        5: "Insane Demon",
-        6: "Extreme Demon",
+        0: "Easy Demon",
+        1: "Medium Demon",
+        2: "Hard Demon",
+        4: "Extreme Demon",
     }
     return map[value] || "Insane Demon"
 }

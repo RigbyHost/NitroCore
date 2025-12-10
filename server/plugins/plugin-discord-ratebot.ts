@@ -156,18 +156,14 @@ const resolveDifficulty = (stars: number, demonDifficulty: number): DifficultyIn
 }
 
 const resolveDemon = (value: number) => {
-    switch (value) {
-        case 0:
-            return "Easy Demon"
-        case 1:
-            return "Medium Demon"
-        case 2:
-            return "Hard Demon"
-        case 4:
-            return "Extreme Demon"
-        default:
-            return "Insane Demon"
+    const map: Record<number, string> = {
+        3: "Easy Demon",
+        4: "Medium Demon",
+        0: "Hard Demon",
+        5: "Insane Demon",
+        6: "Extreme Demon",
     }
+    return map[value] || "Insane Demon"
 }
 
 const resolveEpic = (value: number) => {
