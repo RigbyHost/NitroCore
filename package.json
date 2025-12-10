@@ -20,20 +20,20 @@
     "coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@testcontainers/postgresql": "^11.8.1",
-    "@testcontainers/valkey": "^11.8.1",
+    "@testcontainers/postgresql": "^11.10.0",
+    "@testcontainers/valkey": "^11.10.0",
     "@types/bcrypt": "^6.0.0",
     "@types/clamp": "^1.0.3",
     "@types/pg": "^8.15.6",
-    "@vitest/coverage-v8": "^4.0.14",
-    "drizzle-kit": "^0.31.7",
+    "@vitest/coverage-v8": "^4.0.15",
+    "drizzle-kit": "^0.31.8",
     "h3": "^1.15.4",
     "nitro-test-utils": "^0.10.1",
     "nitropack": "^2.12.9",
     "typescript": "^5.9.3",
-    "unplugin-auto-import": "^20.2.0",
+    "unplugin-auto-import": "^20.3.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.0.14"
+    "vitest": "^4.0.15"
   },
   "dependencies": {
     "@vercel/blob": "^2.0.0",
@@ -44,12 +44,12 @@
     "deep-equal": "^2.2.3",
     "deep-object-diff": "^1.1.9",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.44.7",
+    "drizzle-orm": "^0.45.0",
     "eventemitter3": "^5.0.1",
     "pg": "^8.16.3",
     "tinyrainbow": "^3.0.3",
     "unctx": "^2.4.1",
-    "winston": "^3.18.3",
+    "winston": "^3.19.0",
     "zod": "^4.1.13"
   }
 }
