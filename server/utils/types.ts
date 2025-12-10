@@ -4,3 +4,5 @@ export type Nullable<T> = T | null
 export type MaybeUndefined<T> = T | undefined
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 export type MaybePromise<T> = T | Promise<T>;
+
+export type ArgumentTypes<F> = F extends (...args: infer A) => unknown ? A : never;
