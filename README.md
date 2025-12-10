@@ -137,12 +137,45 @@ class HTTPProvider implements SDKMusicProvider {
 }
 ```
 
-Context type btw:
+Context type:
 ```ts
 type Context = {
     drizzle: Database,
     song?: typeof songsTable.$inferSelect   // provided only when calling getMusicById (for bulk processing use `songs` field)
     songs: typeof songsTable.$inferSelect[] // if getMusicById provided, will contain one song entry
+}
+```
+
+### Adding Event Hooks
+Ever wanted to add ratebot via webhooks or do something on every level upload/rate/etc?
+
+Look no further than Event Hooks:
+- 🚀 They can be asynchronous, so they can continue running after request has ended
+- 🔥 They can work as function hooks that modify data on the fly
+
+Here is an example of a simple ratebot:
+```ts
+// Nitro Plugin will automatically register on boot
+export default defineNitroPlugin(nitro => {
+    const esdk = useSDK().events
+
+    esdk.onAction("level_upload", async (uid, targetId, data) => {
+        const context = useEventContext()
+        const serverid = context.config.ServerConfig.SrvID
+        const moduleSettings = context.config.ServerConfig.ModuleConfig["discord"] as { webhook_url: string }
+
+        if (!moduleSettings.webhook_url) return
+
+        await discord.send(moduleSettings.webhook_url, ...)
+    })
+})
+```
+
+Context type:
+```ts
+type Context = {
+    drizzle: Database,
+    config: ServerConfig
 }
 ```
 
