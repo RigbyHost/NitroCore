@@ -118,6 +118,12 @@ export class ActionController {
             isMod: isMod,
             data: data as ActionData,
         })
+
+        // Fully async
+        useSDK().events.emitAction(action, uid, targetId, data as ActionData, {
+            drizzle: this.db,
+            config: useEvent().context.config.config!,
+        })
     }
 
     /**
@@ -128,7 +134,7 @@ export class ActionController {
      * @param targetId
      */
     isItemLiked = async (
-        itemType: ItemType,
+        itemType: LikeItemType,
         uid: number,
         targetId: number
     ): Promise<boolean> => {
@@ -159,9 +165,9 @@ export class ActionController {
     }
 }
 
-type AvailableActions = "register_user" | "login_user" | "delete_user" | "ban_user" | "unban_user" |
+export type AvailableActions = "register_user" | "login_user" | "delete_user" | "ban_user" | "unban_user" |
     "level_upload" | "level_delete" | "level_update" | "level_rate" |
     "list_upload" | "list_delete" | "list_update" | "list_rate" |
     "like_level" | "like_comment" | "like_account_comment" | "like_list"
 
-type ItemType = "level" | "comment" | "account_comment" | "list"
+export type LikeItemType = "level" | "comment" | "account_comment" | "list"
