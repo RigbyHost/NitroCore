@@ -75,7 +75,7 @@ export default defineEventHandler({
             user.$.extraData.standard_stats.hard = Math.min(user.$.demons - totalLevels, 5)
 
         await user.commit()
-        return await event.context.connector.success("User updated")
+        return await event.context.connector.numberedSuccess(user.$.uid, "User updated")
     }
 })
 

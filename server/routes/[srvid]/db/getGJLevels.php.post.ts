@@ -47,12 +47,6 @@ export default defineEventHandler({
                 result = await filter.searchLevels("latest", data)
                 break
             case 5:
-                // I DO NOT KNOW WHAT IS THE ISSUE, BUT THIS IS A WORKAROUND
-                if (data.uuid === "1" && data.str === "1" && await authHook(event)) {
-                    data.str = event.context.user!.$.uid.toString()
-                }
-                if (!data.uuid && data.str === "1")
-                    data.str = "0"
                 result = await filter.searchUserLevels(data, false)
                 break
             case 6:
