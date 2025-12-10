@@ -14,7 +14,7 @@ export const useServerConfig = async (serverId?: string): Promise<{
     return {config, setConfig}
 }
 
-type ServerConfig = {
+export type ServerConfig = {
     ChestConfig: {
         ChestSmallOrbsMin: number,
         ChestSmallOrbsMax: number,

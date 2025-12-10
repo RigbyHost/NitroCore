@@ -122,7 +122,7 @@ export class ActionController {
         // Fully async
         useSDK().events.emitAction(action, uid, targetId, data as ActionData, {
             drizzle: this.db,
-            config: useEvent().context.config,
+            config: useEvent().context.config.config!,
         })
     }
 

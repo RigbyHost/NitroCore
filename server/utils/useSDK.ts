@@ -12,5 +12,6 @@ export const useSDK = () => sdk
 
 export {useCommandContext} from "~~/sdk/commands/context"
 export {useMusicContext} from "~~/sdk/music/context"
+export {useEventContext} from "~~/sdk/events/context"
 
 export type {SDKMusicProvider} from "~~/sdk/music/types"

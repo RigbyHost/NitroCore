@@ -12,5 +12,5 @@ export const useEventContext = ctx.use
 
 export type Context = {
     drizzle: Database,
-    config: H3EventContext['config']
+    config: ServerConfig
 }
