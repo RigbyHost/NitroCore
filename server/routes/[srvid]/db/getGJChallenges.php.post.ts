@@ -30,7 +30,7 @@ export default defineEventHandler({
 export const requestSchema = z.object({
     chk: z.string().transform(
         value => useGeometryDashTooling().doXOR(
-            Buffer.from(value.slice(5), "base64").toString("utf-8"),
+            Buffer.from(value.slice(5), "base64").toString("latin1"),
             "19847"
         )
     ),

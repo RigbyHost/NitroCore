@@ -38,7 +38,7 @@ export const GDConnectorQuests: IConnector["quests"] = {
         ].join(":")
 
         out = Buffer
-            .from(useGeometryDashTooling().doXOR(out, "59182"))
+            .from(useGeometryDashTooling().doXOR(out, "59182"), "binary")
             .toString("base64")
             .replaceAll("/", "_")
             .replaceAll("+", "-")
