@@ -343,7 +343,7 @@ export class LevelFilter {
 
         if (data.str) {
             const strSchema = z.string().nonempty()
-                .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
+                .regex(/^(\d+(?:,\d+)*|-)$/) // x,y,z... or - (empty)
                 .optional().transform(
                     value => value === "-" ? "" : value
                 )
