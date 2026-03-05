@@ -45,7 +45,7 @@ export default defineEventHandler({
 
 
 export const requestSchema = z.object({
-    listID: z.coerce.number().positive().optional(),
+    listID: z.coerce.number().nonnegative().optional(),
     listName: z.string().optional().default("Unnamed").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
