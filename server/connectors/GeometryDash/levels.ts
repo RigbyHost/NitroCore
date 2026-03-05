@@ -3,6 +3,15 @@ import {Level, LevelWithUser} from "~~/controller/Level";
 import {List, ListWithUser} from "~~/controller/List";
 
 
+function hexToRgb(color: string): string {
+    if (!color.startsWith("#")) return color
+    const hex = color.slice(1)
+    const r = parseInt(hex.slice(0, 2), 16)
+    const g = parseInt(hex.slice(2, 4), 16)
+    const b = parseInt(hex.slice(4, 6), 16)
+    return `${r},${g},${b}`
+}
+
 export const GDConnectorLevels = {
     getMapPacks: async (
         mappacks: typeof levelpacksTable.$inferSelect[],
@@ -14,6 +23,7 @@ export const GDConnectorLevels = {
             mappack => {
                 const id = mappack.id.toString()
                 hashstr += `${id[0]}${id[id.length - 1]}${mappack.packStars}${mappack.packCoins}`
+                const rgb = hexToRgb(mappack.packColor)
                 return [
                     1, mappack.id,
                     2, mappack.packName,
@@ -21,8 +31,8 @@ export const GDConnectorLevels = {
                     4, mappack.packStars,
                     5, mappack.packCoins,
                     6, mappack.packDifficulty,
-                    7, mappack.packColor,
-                    8, mappack.packColor
+                    7, rgb,
+                    8, rgb
                 ].join(":")
             }
         ).join("|")
