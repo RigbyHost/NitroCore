@@ -1,9 +1,14 @@
 // https://nitro.build/config
 export default defineNitroConfig({
     compatibilityDate: "2025-10-10",
-    srcDir: "server",
+    serverDir: "server",
     routeRules: {
         "/**": {cors: true}
+    },
+    imports: {},
+    typescript: {
+        generateRuntimeConfigTypes: true,
+        generateTsConfig: true
     },
     experimental: {
         asyncContext: true,

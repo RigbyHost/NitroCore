@@ -10,6 +10,11 @@ export default defineNitroConfig({
     routeRules: {
         "/**": {cors: true}
     },
+    imports: {},
+    typescript: {
+        generateRuntimeConfigTypes: true,
+        generateTsConfig: true
+    },
     runtimeConfig: {
         platform: "standalone"
     },

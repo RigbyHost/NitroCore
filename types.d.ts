@@ -11,7 +11,7 @@ declare module 'h3' {
     }
 }
 
-declare module 'nitropack' {
+declare module 'nitro' {
     interface NitroRuntimeConfig {
         platform?: string
     }

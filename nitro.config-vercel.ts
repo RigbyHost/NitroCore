@@ -1,9 +1,14 @@
 // https://nitro.build/config
 export default defineNitroConfig({
-    compatibilityDate: "2025-10-10",
+    compatibilityDate: "2026-04-01",
     srcDir: "server",
     routeRules: {
         "/**": {cors: true}
+    },
+    imports: {},
+    typescript: {
+        generateRuntimeConfigTypes: true,
+        generateTsConfig: true
     },
     runtimeConfig: {
         platform: "vercel"

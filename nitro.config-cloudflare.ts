@@ -2,13 +2,18 @@
 export default defineNitroConfig({
     compatibilityDate: "2025-10-10",
     srcDir: "server",
-    preset: "cloudflare-worker",
+    preset: "cloudflare_module",
     cloudflare: {
         deployConfig: true,
         nodeCompat: true
     },
     routeRules: {
         "/**": {cors: true}
+    },
+    imports: {},
+    typescript: {
+        generateRuntimeConfigTypes: true,
+        generateTsConfig: true
     },
     runtimeConfig: {
         platform: "cloudflare"

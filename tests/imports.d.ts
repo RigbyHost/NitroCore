@@ -13,7 +13,7 @@ declare global {
   const beforeEach: typeof import('vitest')['beforeEach']
   const chai: typeof import('vitest')['chai']
   const defaultConfig: typeof import('../server/utils/useDrizzle')['defaultConfig']
-  const defineNitroConfig: typeof import('nitropack/config')['defineNitroConfig']
+  const defineNitroConfig: typeof import('nitro/config')['defineNitroConfig']
   const describe: typeof import('vitest')['describe']
   const expect: typeof import('vitest')['expect']
   const it: typeof import('vitest')['it']

@@ -9,7 +9,7 @@ export default defineConfig({
             imports: [
                 "vitest",
                 {
-                    "nitropack/config": ["defineNitroConfig"]
+                    "nitro/config": ["defineNitroConfig"]
                 }
             ],
             dirs: ['./server/utils', "./tests/mocks"],

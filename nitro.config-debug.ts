@@ -5,6 +5,11 @@ export default defineNitroConfig({
     routeRules: {
         "/**": {cors: true}
     },
+    imports: {},
+    typescript: {
+        generateRuntimeConfigTypes: true,
+        generateTsConfig: true
+    },
     experimental: {
         asyncContext: true,
         database: true,

@@ -1,6 +1,6 @@
 {
   // https://nitro.build/guide/typescript
-  "extends": "./.nitro/types/tsconfig.json",
+  "extends": "./node_modules/.nitro/types/tsconfig.json",
   "compilerOptions": {
     "strict": true
   }
