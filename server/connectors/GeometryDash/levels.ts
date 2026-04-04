@@ -36,9 +36,7 @@ export const GDConnectorLevels = {
                 ].join(":")
             }
         ).join("|")
-        await send(
-            useEvent(),
-            `${data}#${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(hashstr)}`
+        return `${data}#${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(hashstr)}`
         )
     },
 
@@ -56,9 +54,7 @@ export const GDConnectorLevels = {
             }
         ).join("|")
 
-        await send(
-            useEvent(),
-            `${data}#${useGeometryDashTooling().hashSolo2(hashstr)}`
+        return `${data}#${useGeometryDashTooling().hashSolo2(hashstr)}`
         )
     },
 
@@ -130,9 +126,7 @@ export const GDConnectorLevels = {
             suffix = `#${level.$.ownerUid}:${level.$.author?.username || "[DELETED]"}:${level.$.ownerUid}`
         }
 
-        await send(
-            useEvent(),
-            data.join(":")
+        return data.join(":")
                 .concat(
                     "#", useGeometryDashTooling().hashSolo(level.$.stringLevel || ""),
                     "#", useGeometryDashTooling().hashSolo2(hashstr),
@@ -209,9 +203,7 @@ export const GDConnectorLevels = {
             )
         })
 
-        await send(
-            useEvent(),
-            `${levelsOutput.join("|")}#` +
+        return `${levelsOutput.join("|")}#` +
             `${userMeta.join("|")}#` +
             `${songMeta}#` +
             `${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(levelHashMeta.join(""))}`
@@ -254,9 +246,7 @@ export const GDConnectorLevels = {
             )
         })
 
-        await send(
-            useEvent(),
-            `${listOutput.join("|")}#` +
+        return `${listOutput.join("|")}#` +
             `${userMeta.join("|")}#` +
             `${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2("All hackers gain epic")}`
         )

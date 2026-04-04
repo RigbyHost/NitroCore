@@ -42,9 +42,7 @@ export const GDConnectorQuests: IConnector["quests"] = {
             .toString("base64")
             .replaceAll("/", "_")
             .replaceAll("+", "-")
-        await send(
-            useEvent(),
-            useGeometryDashTooling().generateRandomString(5)
+        return useGeometryDashTooling().generateRandomString(5)
                 .concat(out, "|", useGeometryDashTooling().hashSolo4(out)
                 )
         )
@@ -75,18 +73,14 @@ export const GDConnectorQuests: IConnector["quests"] = {
             .replaceAll("/", "_")
             .replaceAll("+", "-")
 
-        await send(
-            useEvent(),
-            useGeometryDashTooling().generateRandomString(5)
+        return useGeometryDashTooling().generateRandomString(5)
                 .concat(out, "|", useGeometryDashTooling().hashSolo3(out)
                 )
         )
     },
 
     getSpecialLevel: async (id: number, left: number) => {
-        await send(
-            useEvent(),
-            `${id}|${left}`
+        return `${id}|${left}`
         )
     }
 }

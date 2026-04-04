@@ -15,31 +15,34 @@ export class GDConnector implements IConnector {
     }
 
     success = async (message: string) => {
-        setHeader(useEvent(), "X-Message", message)
+        const event = useEvent()
+        event.res.headers.set("X-Message", message)
         console.log(`↳ ${message}`)
-        await send(useEvent(), "1")
+        return "1"
     }
 
     numberedSuccess = async (code: number, message: string) => {
-        setHeader(useEvent(), "X-Message", message)
+        const event = useEvent()
+        event.res.headers.set("X-Message", message)
         console.log(`↳ ${message} (code: ${code})`)
-        await send(useEvent(), code.toString())
+        return code.toString()
     }
 
     error = async (code: number, message: string) => {
-        setHeader(useEvent(), "X-Message", message)
+        const event = useEvent()
+        event.res.headers.set("X-Message", message)
         console.log(`↳ ${message} (code: ${code})`)
-        await send(useEvent(), "-1")
+        return "-1"
     }
 
     account = {
         sync: async (savedata: string) => {
             // savedata already has `savedata;gameVersion;binaryVersion`
-            await send(useEvent(), `${savedata};a;a`)
+            return `${savedata};a;a`
         },
 
         login: async (uid: number) => {
-            await send(useEvent(), `${uid},${uid}`)
+            return `${uid},${uid}`
         }
     }
 
@@ -56,9 +59,7 @@ export class GDConnector implements IConnector {
     profile = GDConnectorProfile
 
     getSongInfo = async (music: typeof songsTable.$inferSelect) => {
-        await send(
-            useEvent(),
-            [
+        return [
                 1, music.id,
                 2, music.name,
                 3, 1,
@@ -71,9 +72,7 @@ export class GDConnector implements IConnector {
     }
 
     getTopArtists = async (artists: string[], page: number, total: number) => {
-        await send(
-            useEvent(),
-            artists.map(artist => `4:${artist}`).join("|")
+        return artists.map(artist => `4:${artist}`).join("|")
         )
     }
 }

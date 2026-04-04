@@ -8,9 +8,7 @@ export const GDConnectorProfile = {
         count: number,
         page: number
     ) => {
-        await send(
-            useEvent(),
-            requests.map(
+        return requests.map(
                 request => {
                     const user = mode === "sent" ? request.receiver : request.sender
                     if (!user)
@@ -33,13 +31,10 @@ export const GDConnectorProfile = {
             )
                 .join("|")
                 .concat(`#${count}:${page * 10}:10`)
-        )
     },
 
     getUserSearch: async(users: Array<User>, page: number, total: number) => {
-        await send(
-            useEvent(),
-            users.map(
+        return users.map(
                 user => [
                     1, user.$.username,
                     2, user.$.uid,
@@ -58,7 +53,6 @@ export const GDConnectorProfile = {
                 ].join(":")
             ).join("|")
             .concat(`#${total}:${page * 10}:10`)
-        )
     },
 
     getUserInfo: async (
@@ -106,9 +100,7 @@ export const GDConnectorProfile = {
             user.$.extraData?.platformer_stats.insane || 0,
         ].join(",")
 
-        await send(
-            useEvent(),
-            [
+        return [
                 1, user.$.username,
                 2, user.$.uid,
                 3, user.$.stars,
@@ -161,9 +153,7 @@ export const GDConnectorProfile = {
     },
 
     getUsersList: async (users: Array<User>) => {
-        await send(
-            useEvent(),
-            users.map(
+        return users.map(
                 user => [
                     1, user.$.username,
                     2, user.$.uid,

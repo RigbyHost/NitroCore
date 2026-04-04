@@ -7,9 +7,7 @@ export const GDConnectorMessages = {
         user: typeof usersTable.$inferSelect,
     ) => {
         const uidx = message.uidDest === user.uid ? message.uidSrc : message.uidDest
-        await send(
-            useEvent(),
-            [
+        return [
                 1, message.id,
                 2, uidx,
                 3, uidx,
@@ -29,9 +27,7 @@ export const GDConnectorMessages = {
         count: number,
         page: number
     ) => {
-        await send(
-            useEvent(),
-            messages.map(
+        return messages.map(
                 message => {
                     const uidx = mode === "sent" ? message.uidDest : message.uidSrc
                     return [
@@ -49,6 +45,5 @@ export const GDConnectorMessages = {
             )
                 .join("|")
                 .concat(`#${count}:${page * 10}:10`)
-        )
     }
 }

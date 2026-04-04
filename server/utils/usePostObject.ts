@@ -1,4 +1,4 @@
-import {H3Event} from "h3";
+import {H3Event} from "nitro/h3";
 
 export const usePostObject = <T = unknown>(form: FormData): T => {
     const o: Record<string, unknown> = {}
@@ -8,6 +8,6 @@ export const usePostObject = <T = unknown>(form: FormData): T => {
 
 export const withPreparsedForm = async (event: H3Event) => {
     if (!event.context._preparsedBody)
-        event.context._preparsedBody = await readFormData(event)
+        event.context._preparsedBody = await event.req.formData()
     return event.context._preparsedBody
 }

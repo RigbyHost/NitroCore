@@ -9,12 +9,10 @@ export const GDConnectorComments = {
         page: number
     ) => {
         if (comments.length === 0)
-            return await send(useEvent(), "#0:0:0")
+            return "#0:0:0"
 
 
-        await send(
-            useEvent(),
-            comments.map(
+        return comments.map(
                 comment => [
                     2, comment.comment,
                     // 3, comment.uid,
@@ -28,7 +26,6 @@ export const GDConnectorComments = {
             )
                 .join("|")
                 .concat(`#${count}:${page * 10}:10`)
-        )
     },
 
     getLevelComments: async (
@@ -37,11 +34,9 @@ export const GDConnectorComments = {
         page: number
     ) => {
         if (comments.length === 0)
-            return await send(useEvent(), "#0:0:0")
+            return "#0:0:0"
 
-        await send(
-            useEvent(),
-            comments.map(
+        return comments.map(
                 comment => {
                     if (!comment.author)
                         return ""
@@ -77,7 +72,6 @@ export const GDConnectorComments = {
             )
                 .join("|")
                 .concat(`#${count}:${page * 10}:10`)
-        )
     },
     getCommentHistory: async (
         comments: typeof commentsTable.$inferSelect[],
@@ -87,11 +81,9 @@ export const GDConnectorComments = {
         page: number
     ) => {
         if (comments.length === 0)
-            return await send(useEvent(), "#0:0:0")
+            return "#0:0:0"
 
-        await send(
-            useEvent(),
-            comments.map(
+        return comments.map(
                 comment => {
                     const author = new User({$db:null} as any, user)
                     const v = [
@@ -123,10 +115,9 @@ export const GDConnectorComments = {
             )
                 .join("|")
                 .concat(`#${count}:${page * 10}:10`)
-        )
     },
 
     commentCommandResult: async (result: string) => {
-        await send(useEvent(), `temp_1_${result}`)
+        return `temp_1_${result}`
     },
 }

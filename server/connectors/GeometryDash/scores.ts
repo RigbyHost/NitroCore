@@ -5,9 +5,7 @@ import {ScoresController} from "~~/controller/ScoresController";
 export const GDConnectorScores = {
     getLeaderboard: async (users: User[]) => {
 
-        await send(
-            useEvent(),
-            users.map(
+        return users.map(
                 (user, pos) => [
                     1, user.$.username,
                     2, user.$.uid,
@@ -45,9 +43,7 @@ export const GDConnectorScores = {
         // return "1:" + acc.Uname + ":2:" + s(acc.Uid) + ":3:" + s(score.Percent) + ":6:" + s(score.Ranking) + ":9:" + s(acc.GetShownIcon()) +
         // 		":10:" + s(acc.ColorPrimary) + ":11:" + s(acc.ColorSecondary) + ":13:" + s(score.Coins) + ":14:" + s(acc.IconType) + ":15:" + s(acc.Special) +
         // 		":16:" + s(acc.Uid) + ":42:" + age + "|"
-        await send(
-            useEvent(),
-            scores.map(
+        return scores.map(
                 score => [
                     1, score.user.username,
                     2, score.uid,
