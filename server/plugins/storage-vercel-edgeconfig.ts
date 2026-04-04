@@ -1,5 +1,7 @@
 import {defineDriver, normalizeKey, joinKeys} from "unstorage";
-import {EdgeConfigClient, createClient} from "@vercel/edge-config"
+import {createClient} from "@vercel/edge-config"
+
+type EdgeConfigClient = ReturnType<typeof createClient>
 
 export default defineNitroPlugin(() => {
     if (useRuntimeConfig().platform === "vercel")

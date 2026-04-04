@@ -6,48 +6,49 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const afterAll: typeof import('vitest')['afterAll']
-  const afterEach: typeof import('vitest')['afterEach']
-  const assert: typeof import('vitest')['assert']
-  const beforeAll: typeof import('vitest')['beforeAll']
-  const beforeEach: typeof import('vitest')['beforeEach']
-  const chai: typeof import('vitest')['chai']
-  const defaultConfig: typeof import('../server/utils/useDrizzle')['defaultConfig']
-  const defineNitroConfig: typeof import('nitro/config')['defineNitroConfig']
-  const describe: typeof import('vitest')['describe']
-  const expect: typeof import('vitest')['expect']
-  const it: typeof import('vitest')['it']
+  const afterAll: typeof import('vitest').afterAll
+  const afterEach: typeof import('vitest').afterEach
+  const assert: typeof import('vitest').assert
+  const beforeAll: typeof import('vitest').beforeAll
+  const beforeEach: typeof import('vitest').beforeEach
+  const chai: typeof import('vitest').chai
+  const defaultConfig: typeof import('../server/utils/useDrizzle').defaultConfig
+  const defineNitroConfig: typeof import('nitro/config').defineNitroConfig
+  const describe: typeof import('vitest').describe
+  const expect: typeof import('vitest').expect
+  const it: typeof import('vitest').it
   const makeCommitable: typeof import('../server/utils/useCommit')['makeCommitable']
   const setupCommitListener: typeof import('../server/utils/useCommitFabric')['setupCommitListener']
-  const suite: typeof import('vitest')['suite']
-  const test: typeof import('vitest')['test']
-  const useCommandContext: typeof import('../server/utils/useSDK')['useCommandContext']
+  const suite: typeof import('vitest').suite
+  const test: typeof import('vitest').test
+  const useCommandContext: typeof import('../server/utils/useSDK').useCommandContext
   const useCommit: typeof import('../server/utils/useCommit')['useCommit']
   const useCommitFabric: typeof import('../server/utils/useCommitFabric')['useCommitFabric']
   const useCommitMiddleware: typeof import('../server/utils/useCommit')['useCommitMiddleware']
-  const useCrypto: typeof import('../server/utils/useCrypto')['useCrypto']
-  const useDrizzle: typeof import('../server/utils/useDrizzle')['useDrizzle']
-  const useDrizzlePoolManager: typeof import('../server/utils/useDrizzle')['useDrizzlePoolManager']
-  const useFabric: typeof import('../server/utils/useFabric')['useFabric']
-  const useGeometryDashTooling: typeof import('../server/utils/useGeometryDashTooling')['useGeometryDashTooling']
-  const useGzip: typeof import('../server/utils/useGzip')['useGzip']
-  const useLogger: typeof import('../server/utils/useLogger')['useLogger']
-  const useMusicContext: typeof import('../server/utils/useSDK')['useMusicContext']
-  const usePerformance: typeof import('../server/utils/usePerformance')['usePerformance']
-  const usePostObject: typeof import('../server/utils/usePostObject')['usePostObject']
-  const useRuntimeConfig: typeof import('./mocks/useRuntimeConfig')['useRuntimeConfig']
-  const useSDK: typeof import('../server/utils/useSDK')['useSDK']
-  const useServerConfig: typeof import('../server/utils/useServerConfig')['useServerConfig']
-  const useStorage: typeof import('./mocks/useStorage')['useStorage']
-  const useTemporalFabric: typeof import('../server/utils/useFabric')['useTemporalFabric']
-  const vi: typeof import('vitest')['vi']
-  const vitest: typeof import('vitest')['vitest']
-  const withPreparsedForm: typeof import('../server/utils/usePostObject')['withPreparsedForm']
+  const useCrypto: typeof import('../server/utils/useCrypto').useCrypto
+  const useDrizzle: typeof import('../server/utils/useDrizzle').useDrizzle
+  const useDrizzlePoolManager: typeof import('../server/utils/useDrizzle').useDrizzlePoolManager
+  const useEventContext: typeof import('../server/utils/useSDK').useEventContext
+  const useFabric: typeof import('../server/utils/useFabric').useFabric
+  const useGeometryDashTooling: typeof import('../server/utils/useGeometryDashTooling').useGeometryDashTooling
+  const useGzip: typeof import('../server/utils/useGzip').useGzip
+  const useLogger: typeof import('../server/utils/useLogger').useLogger
+  const useMusicContext: typeof import('../server/utils/useSDK').useMusicContext
+  const usePerformance: typeof import('../server/utils/usePerformance').usePerformance
+  const usePostObject: typeof import('../server/utils/usePostObject').usePostObject
+  const useRuntimeConfig: typeof import('./mocks/useRuntimeConfig').useRuntimeConfig
+  const useSDK: typeof import('../server/utils/useSDK').useSDK
+  const useServerConfig: typeof import('../server/utils/useServerConfig').useServerConfig
+  const useStorage: typeof import('./mocks/useStorage').useStorage
+  const useTemporalFabric: typeof import('../server/utils/useFabric').useTemporalFabric
+  const vi: typeof import('vitest').vi
+  const vitest: typeof import('vitest').vitest
+  const withPreparsedForm: typeof import('../server/utils/usePostObject').withPreparsedForm
 }
 // for type re-export
 declare global {
   // @ts-ignore
-  export type { Maybe, Nullable, MaybeUndefined, MakeOptional, MaybePromise } from '../server/utils/types'
+  export type { Maybe, Nullable, MaybeUndefined, MakeOptional, MaybePromise, ArgumentTypes } from '../server/utils/types'
   import('../server/utils/types')
   // @ts-ignore
   export type { Database } from '../server/utils/useDrizzle'
@@ -55,4 +56,7 @@ declare global {
   // @ts-ignore
   export type { SDKMusicProvider } from '../server/utils/useSDK'
   import('../server/utils/useSDK')
+  // @ts-ignore
+  export type { ServerConfig } from '../server/utils/useServerConfig'
+  import('../server/utils/useServerConfig')
 }
