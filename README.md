@@ -181,3 +181,8 @@ type Context = {
 
 ## License
 Distributed under the GPLv3 License. See [LICENSE](https://github.com/RigbyHost/RigbyCore/blob/main/LICENSE) for more information.
+
+## developer mental health
+gone 💀
+
+![gone](https://media1.tenor.com/m/XGouDAiIKn4AAAAC/bocchi-the-rock-hitori-gotoh.gif)
