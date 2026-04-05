@@ -17,7 +17,7 @@ import {defineEventHandler, createError, type H3Event} from 'nitro/h3';
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 export default definePlugin((nitro: any) => {
@@ -48,7 +48,7 @@ export default definePlugin((nitro: any) => {
                     }>
                     return {
                         motd: switcherc?.motd || "GDPS Server powered by NitroCore",
-                        icon: switcherc?.icon || "https://cdn?.rigby.host/default_gdps.jpeg",
+                        icon: switcherc?.icon || "https://cdn.rigby.host/default_gdps.jpeg",
                         version: 1
                     }
                 } else {

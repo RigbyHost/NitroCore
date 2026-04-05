@@ -13,17 +13,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// https://nitro.build/config
 import {fileURLToPath} from 'node:url'
 
+// https://nitro.build/config
 export default defineNitroConfig({
-    compatibilityDate: "2025-10-10",
-    serverDir: "server",
+    compatibilityDate: "2026-04-01",
+    srcDir: "server",
     alias: {
-        "~~": fileURLToPath(new URL('.', import.meta.url)),
+        "~~": fileURLToPath(new URL('./', import.meta.url)),
         "~": fileURLToPath(new URL('./server', import.meta.url))
     },
     routeRules: {
@@ -32,15 +32,10 @@ export default defineNitroConfig({
     imports: {},
     typescript: {
         generateRuntimeConfigTypes: true,
-        generateTsConfig: true,
-        tsConfig: {
-            compilerOptions: {
-                paths: {
-                    "~~/*": ["./*"],
-                    "~/*": ["./server/*"]
-                }
-            }
-        }
+        generateTsConfig: true
+    },
+    runtimeConfig: {
+        platform: "vercel"
     },
     experimental: {
         asyncContext: true,
@@ -49,28 +44,23 @@ export default defineNitroConfig({
     },
     storage: {
         savedata: {
-            driver: "s3",
-            accessKeyId: process.env.S3_ACCESS_KEY,
-            secretAccessKey: process.env.S3_SECRET,
-            endpoint: process.env.S3_URL,
-            bucket: process.env.S3_BUCKET,
-            region: process.env.S3_REGION || "us-east-1",
+            driver: "vercel-blob",
+            access: "public", // DO NOT CHANGE, THIS IS MANDATORY AND IS NOT A BUG: https://unstorage.unjs.io/drivers/vercel#vercel-blob
+            // token: process.env.BLOB_READ_WRITE_TOKEN, // Optional
         },
-        config: {
-            driver: "redis",
-            url: process.env.REDIS_URL,
-        }
+        // This driver doesn't exist in upstream unstorage, so it is loaded dynamically as storage plugin asn always
+        // needs process.env.EDGE_CONFIG
+        // config: {
+        //     driver: "storage-vercel-edgeconfig",
+        //     // url: process.env.EDGE_CONFIG // Optional
+        // }
     },
-    devStorage: {
-        savedata: {
-            driver: "fs-lite",
-            base: "./_savedata"
-        },
-        config: { // DO NOT REMOVE: AUTOPOPULATED BY VITEST
-            driver: "redis",
-            host: process.env.STORAGE_HOST || 'valkey',
-            port: Number(process.env.STORAGE_PORT) || 6379,
-            password: process.env.STORAGE_PASSWORD || ''
-        }
+    scheduledTasks: {
+        "0 0 * * *": [
+            "nightly:refresh_sfx",
+            "nightly:count_music_downloads",
+            "nightly:reset_user_limits",
+            "nightly:train_level_model"
+        ]
     }
 });

@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import {fileURLToPath} from 'node:url'
@@ -45,7 +45,7 @@ export default defineNitroConfig({
     storage: {
         savedata: {
             driver: "vercel-blob",
-            access: "public", // DO NOT CHANGE, THIS IS MANDATORY AND IS NOT A BUG: https://unstorage?.unjs.io/drivers/vercel#vercel-blob
+            access: "public", // DO NOT CHANGE, THIS IS MANDATORY AND IS NOT A BUG: https://unstorage.unjs.io/drivers/vercel#vercel-blob
             // token: process.env.BLOB_READ_WRITE_TOKEN, // Optional
         },
         // This driver doesn't exist in upstream unstorage, so it is loaded dynamically as storage plugin asn always

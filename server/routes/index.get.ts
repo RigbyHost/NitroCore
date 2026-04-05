@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import {defineEventHandler, type H3Event} from 'nitro/h3';
 
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event: H3Event) => {
     <head>
         <meta charset="UTF-8">
         <title>NitroCore</title>
-        <script src="https://cdn?.tailwindcss.com"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-black h-screen flex flex-col justify-center items-center text-white">
         <img src="/logo.png" class="w-32" />
