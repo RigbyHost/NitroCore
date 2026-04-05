@@ -1,5 +1,7 @@
 import { definePlugin } from "nitro";
-export default definePlugin(() => {
+import {initMiddleware} from "~/gdps_middleware/init_gdps";
+import {defineEventHandler, createError, type H3Event} from 'nitro/h3';
+
 /**
  * NitroCore - GDPS (Geometry Dash Private Server) implementation
  * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
@@ -18,10 +20,7 @@ export default definePlugin(() => {
  * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
  */
 
-import {initMiddleware} from "~/gdps_middleware/init_gdps";
-import {defineEventHandler, createError, type H3Event} from 'nitro/h3';;
-
-export default defineNitroPlugin((nitro: any) => {
+export default definePlugin((nitro: any) => {
     nitro?.router.get(
         "/:srvid/db/switcher/getInfo.php",
         defineEventHandler(async (event) => {
@@ -54,4 +53,4 @@ export default defineNitroPlugin((nitro: any) => {
                 }
             })
         )
-})})
+})

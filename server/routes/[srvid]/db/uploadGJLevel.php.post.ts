@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
 
         const levelConfig = {
             ownerUid: event.context.user!.$.uid,
-            versionGame: await useGeometryDashTooling().getGDVersionFromBody(form),
+            versionGame: await useGeometryDashTooling().getGDVersionFromBody(event, form),
             versionBinary: data?.binaryVersion,
             stringLevel: data?.levelString,
             name: data?.levelName,

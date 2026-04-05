@@ -58,16 +58,17 @@ describe("useGeometryDashTooling()", () => {
 
     it ("Parses GD Version correctly", async () => {
         const form = new FormData()
-        expect(await t.getGDVersionFromBody(form)).toBe(21)
+        const mockEvent = {} as any
+        expect(await t.getGDVersionFromBody(mockEvent, form)).toBe(21)
         form.set("gameVersion", "10")
-        expect(await t.getGDVersionFromBody(form)).toBe(10)
+        expect(await t.getGDVersionFromBody(mockEvent, form)).toBe(10)
         form.set("gameVersion", "20")
         form.set("binaryVersion", "27")
-        expect(await t.getGDVersionFromBody(form)).toBe(20)
+        expect(await t.getGDVersionFromBody(mockEvent, form)).toBe(20)
         form.set("binaryVersion", "28")
-        expect(await t.getGDVersionFromBody(form)).toBe(21)
+        expect(await t.getGDVersionFromBody(mockEvent, form)).toBe(21)
         form.set("gameVersion", "21")
         form.set("binaryVersion", "37")
-        expect(await t.getGDVersionFromBody(form)).toBe(22)
+        expect(await t.getGDVersionFromBody(mockEvent, form)).toBe(22)
     })
 })

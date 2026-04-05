@@ -21,6 +21,7 @@ import { LevelController } from "~~/controller/LevelController";
 import type { LevelWithUser } from "~~/controller/Level";
 import type { MaybeUndefined } from "~/utils/types";
 import type { ActionData } from "~~/drizzle";
+import { useEventContext } from "~~/sdk/events/context";
 
 type DiscordRateBotModuleConfig = {
     webhookUrl: string,
@@ -46,21 +47,21 @@ const difficultyPalette: Record<string, number> = {
 }
 
 const resolveDifficulty = (stars: number, demonDifficulty: number): DifficultyInfo => {
-    if (stars === 0) return { label: "Unrated", color: difficultyPalette.unrated }
-    if (stars === 1) return { label: "Auto", color: difficultyPalette.auto }
-    if (stars <= 3) return { label: "Easy", color: difficultyPalette.easy }
-    if (stars <= 6) return { label: "Normal", color: difficultyPalette.normal }
-    if (stars <= 8) return { label: "Hard", color: difficultyPalette.hard }
-    if (stars === 9) return { label: "Harder", color: difficultyPalette.harder }
+    if (stars === 0) return { label: "Unrated", color: difficultyPalette.unrated! }
+    if (stars === 1) return { label: "Auto", color: difficultyPalette.auto! }
+    if (stars <= 3) return { label: "Easy", color: difficultyPalette.easy! }
+    if (stars <= 6) return { label: "Normal", color: difficultyPalette.normal! }
+    if (stars <= 8) return { label: "Hard", color: difficultyPalette.hard! }
+    if (stars === 9) return { label: "Harder", color: difficultyPalette.harder! }
     if (stars === 10) {
-        if (demonDifficulty === 3) return { label: "Easy Demon", color: difficultyPalette.demon }
-        if (demonDifficulty === 4) return { label: "Medium Demon", color: difficultyPalette.demon }
-        if (demonDifficulty === 5) return { label: "Hard Demon", color: difficultyPalette.demon }
-        if (demonDifficulty === 6) return { label: "Insane Demon", color: difficultyPalette.demon }
-        if (demonDifficulty === 7) return { label: "Extreme Demon", color: difficultyPalette.demon }
-        return { label: "Demon", color: difficultyPalette.demon }
+        if (demonDifficulty === 3) return { label: "Easy Demon", color: difficultyPalette.demon! }
+        if (demonDifficulty === 4) return { label: "Medium Demon", color: difficultyPalette.demon! }
+        if (demonDifficulty === 5) return { label: "Hard Demon", color: difficultyPalette.demon! }
+        if (demonDifficulty === 6) return { label: "Insane Demon", color: difficultyPalette.demon! }
+        if (demonDifficulty === 7) return { label: "Extreme Demon", color: difficultyPalette.demon! }
+        return { label: "Demon", color: difficultyPalette.demon! }
     }
-    return { label: "Insane", color: difficultyPalette.insane }
+    return { label: "Insane", color: difficultyPalette.insane! }
 }
 
 const resolveEpic = (epicness: number): string => {
@@ -119,7 +120,7 @@ const createWebhookBody = (
             fields: [
                 {
                     name: "Level Info",
-                    value: `**Creator:** ${level.user?.username || "Unknown"}\n**Difficulty:** ${difficulty.label}\n**Stars:** ${rating}`,
+                    value: `**Creator:** ${level.author?.username || "Unknown"}\n**Difficulty:** ${difficulty.label}\n**Stars:** ${rating}`,
                     inline: true
                 },
                 {
@@ -141,19 +142,20 @@ const createWebhookBody = (
 
 export default definePlugin(() => {
     useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
-        const config = useServerConfig()?.modules?.discordRateBot as MaybeUndefined<DiscordRateBotModuleConfig>
+        const context = useEventContext()
+        const config = (context.config as any)?.modules?.discordRateBot as MaybeUndefined<DiscordRateBotModuleConfig>
         if (!config?.webhookUrl) return
 
         try {
-            const levelController = new LevelController()
-            const level = await levelController.getLevelByIdWithUser(targetId)
+            const levelController = new LevelController(context.drizzle)
+            const level = await levelController.getOneLevel(targetId, true)
             if (!level) return
 
             const actionType = (data as any)?.type as string
             const moderator = (data as any)?.uname as string
 
-            await sendWebhook(config, level, {
-                serverId: useServerConfig()?.serverId,
+            await sendWebhook(config, level.$, {
+                serverId: (context.config as any)?.ServerConfig?.SrvID,
                 moderator: moderator || "Unknown",
                 actionDescriptor: actionType || "Level rated"
             })

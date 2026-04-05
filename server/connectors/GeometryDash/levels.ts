@@ -208,7 +208,7 @@ export const GDConnectorLevels = {
             const levelIdStr = level.$.id?.toString() || "0"
             levelHashMeta.push(
                 levelIdStr[0] +
-                levelIdStr[levelIdStr.length - 1] +
+                levelIdStr[levelIdStr.length - 1]! +
                 (level.$.starsGot || 0) +
                 ((level.$.coins || 0) > 0 ? 1 : 0)
             )

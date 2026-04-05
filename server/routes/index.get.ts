@@ -15,18 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
  */
-import {defineEventHandler, type H3Event} from 'nitro/h3';;
+import {defineEventHandler, type H3Event} from 'nitro/h3';
 
 
 export default defineEventHandler(async (event: H3Event) => {
-    const getBranding = () => {
-        switch (useRuntimeConfig().platform) {
-            case "vercel": return "▲ Vercel"
-            case "cloudflare": return "☁️ Cloudflare"
-            case "standalone": return "⊟ Self-hosted"
-            default: return "⚡ RigbyHost"
-        }
-    }
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -38,7 +30,7 @@ export default defineEventHandler(async (event: H3Event) => {
     <body class="bg-black h-screen flex flex-col justify-center items-center text-white">
         <img src="/logo.png" class="w-32" />
         <a href="https://github.com/rigbyhost/nitrocore" class="text-4xl font-semibold cursor-pointer hover:underline">NitroCore</a>
-        <p>Running on ${getBranding()}</p>
+        <p>is alive (maybe)</p>
     </body>
 </html>
 `

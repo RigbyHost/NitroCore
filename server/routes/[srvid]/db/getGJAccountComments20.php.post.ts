@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
 
         const commentController = new CommentController(event.context?.drizzle)
 
-        const comments = await commentController.getAllAccountComments(uid, data?.page || 0)
+        const comments = await commentController.getAllAccountComments(uid!, data?.page || 0)
         const count = await commentController.countUserComments(uid)
 
         return await event.context.connector?.comments.getAccountComments(comments, count, data?.page || 0)

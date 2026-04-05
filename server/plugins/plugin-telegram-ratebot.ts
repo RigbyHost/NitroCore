@@ -21,6 +21,7 @@ import { LevelController } from "~~/controller/LevelController";
 import type { LevelWithUser } from "~~/controller/Level";
 import type { MaybeUndefined } from "~/utils/types";
 import type { ActionData } from "~~/drizzle";
+import { useEventContext } from "~~/sdk/events/context";
 
 type TelegramRateBotModuleConfig = {
     botToken: string,
@@ -103,7 +104,7 @@ const createTelegramMessage = (level: LevelWithUser, meta: {
     return `
 🎮 <b>${meta.actionDescriptor}: ${level.name}</b>
 
-👤 <b>Creator:</b> ${level.user?.username || "Unknown"}
+👤 <b>Creator:</b> ${level.author?.username || "Unknown"}
 ${difficulty} (<b>${rating}</b> ⭐)
 
 ${featureState}
@@ -117,19 +118,20 @@ ${epicTier}
 
 export default definePlugin(() => {
     useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
-        const config = useServerConfig()?.modules?.telegramRateBot as MaybeUndefined<TelegramRateBotModuleConfig>
+        const context = useEventContext()
+        const config = (context.config as any)?.modules?.telegramRateBot as MaybeUndefined<TelegramRateBotModuleConfig>
         if (!config?.botToken || !config?.chatId) return
 
         try {
-            const levelController = new LevelController()
-            const level = await levelController.getLevelByIdWithUser(targetId)
+            const levelController = new LevelController(context.drizzle)
+            const level = await levelController.getOneLevel(targetId, true)
             if (!level) return
 
             const actionType = (data as any)?.type as string
             const moderator = (data as any)?.uname as string
 
-            await sendTelegramMessage(config, level, {
-                serverId: useServerConfig()?.serverId,
+            await sendTelegramMessage(config, level.$, {
+                serverId: (context.config as any)?.ServerConfig?.SrvID,
                 moderator: moderator || "Unknown",
                 actionDescriptor: actionType || "Level rated"
             })

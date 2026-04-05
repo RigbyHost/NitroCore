@@ -17,7 +17,7 @@
  */
 
 import { definePlugin } from "nitro";
-import type { SDKMusicProvider } from "~~/sdk/music/MusicProvider";
+import type { SDKMusicProvider } from "~~/sdk/music/types";
 
 class HTTPProvider implements SDKMusicProvider {
     getMusicById = async (id: string) => {

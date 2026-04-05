@@ -23,8 +23,9 @@ import {createClient} from "@vercel/edge-config"
 type EdgeConfigClient = ReturnType<typeof createClient>
 
 export default definePlugin(() => {
-    if (useRuntimeConfig().platform === "vercel")
-        useStorage().mount("config", storageDriver({ edgeConfigToken: process.env.EDGE_CONFIG_TOKEN || "" }))
+    const platform = useRuntimeConfig().platform as unknown as string | undefined
+    if (platform === "vercel")
+        useStorage("").mount("config", storageDriver({ url: process.env.EDGE_CONFIG_TOKEN || "" }))
 })
 
 const storageDriver = defineDriver<{

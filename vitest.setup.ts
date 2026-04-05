@@ -20,44 +20,45 @@ import {getRedis, seedRedis} from "./tests/core/redis";
 import {getPostgres, seedDatabase} from "./tests/core/database";
 import c from "tinyrainbow"
 import {AbstractStartedContainer} from "testcontainers";
-import type {GlobalSetupContext} from "vitest";
+import type { TestProject } from 'vitest/node';
 
 const PREFIX = c.bgBlue(c.white(" SETUP "))
 
 let containers: AbstractStartedContainer[] = []
 
-export const setup = async (ctx: GlobalSetupContext) => {
+export default async (project: TestProject) => {
     if (containers.length)
         return
+
     console.log(`${PREFIX} Starting containers...`)
     const redis = await getRedis().start()
     const postgres = await getPostgres().start()
-    console.log(`${PREFIX} Containers started. Waiting 5s for them to be ready...`)
+    console.log(`${PREFIX} Containers started. Waiting 5s...`)
     await new Promise(resolve => setTimeout(resolve, 5000))
-    console.log(`${PREFIX} Seeding redis...` )
+    console.log(`${PREFIX} Seeding redis...`)
     await seedRedis(redis)
     console.log(`${PREFIX} Seeding database...`)
     await seedDatabase(postgres)
 
     containers = [redis, postgres]
 
-    ctx.provide("config", {
+    project.provide("config", {
         host: redis.getHost(),
         port: redis.getPort(),
         password: redis.getPassword()
     })
-    ctx.provide("database", {
+    project.provide("database", {
         host: postgres.getHost(),
         port: postgres.getPort(),
         user: postgres.getUsername(),
         password: postgres.getPassword()
     })
-}
 
-export const teardown = async () => {
-    console.log(`${PREFIX} Stopping containers...`)
-    for (const container of containers) {
-        await container.stop()
+    return async () => {
+        console.log(`${PREFIX} Stopping containers...`)
+        for (const container of containers) {
+            await container.stop()
+        }
     }
 }
 
