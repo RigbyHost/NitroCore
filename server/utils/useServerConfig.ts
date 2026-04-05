@@ -21,6 +21,8 @@
  * Gets the server config for a specific server from {@link H3Event} router param `srvid`
  */
 import {getRouterParam, type H3Event} from 'nitro/h3';
+import {useStorage} from 'nitro/storage';
+
 export const useServerConfig = async (event: H3Event, serverId?: string): Promise<{
     config: Nullable<ServerConfig>,
     setConfig: (config: ServerConfig) => Promise<void>

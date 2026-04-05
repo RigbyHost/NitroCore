@@ -32,7 +32,7 @@ export default defineConfig({
                 }
             ],
             dirs: ['./server/utils', "./tests/mocks"],
-            dts: "./tests/imports?.d.ts"
+            dts: "./tests/auto-imports.d.ts"
         })
     ],
     resolve: {
@@ -43,7 +43,7 @@ export default defineConfig({
     },
     test: {
         setupFiles: ["./tests/core/injector.ts"],
-        globalSetup: ["./vitest?.setup.ts"],
+        globalSetup: ["./vitest.setup.ts"],
         coverage: {
             include: [
                 "controller",

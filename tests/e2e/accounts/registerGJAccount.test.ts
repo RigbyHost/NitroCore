@@ -59,7 +59,9 @@ describe('accounts/registerGJAccount.php', () => {
             body: objectToForm(data)
         })
 
-        expect(response?.data.toString()).toBe("1")
+        // For successful registration, expect "1" in response body
+        expect(response?.data?.toString()).toBe("1")
+        expect(response?.headers?.get?.('x-message')).toBe('User registered successfully')
         alreadyRegistered = true
     })
 });

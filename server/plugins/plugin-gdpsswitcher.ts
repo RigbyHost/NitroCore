@@ -21,7 +21,13 @@ import {defineEventHandler, createError, type H3Event} from 'nitro/h3';
  */
 
 export default definePlugin((nitro: any) => {
-    nitro?.router.get(
+    const router = nitro?.h3App?.router || nitro?.router
+    if (!router) {
+        console.warn("[plugin-gdpsswitcher] Router not available, skipping")
+        return
+    }
+    
+    router.get(
         "/:srvid/db/switcher/getInfo.php",
         defineEventHandler(async (event) => {
             // Применяем middleware

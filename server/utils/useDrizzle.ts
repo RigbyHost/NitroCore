@@ -21,6 +21,7 @@ import {Pool} from 'pg';
 import * as schema from "~~/drizzle"
 import type {H3Event} from 'nitro/h3';
 import {getRouterParam} from 'nitro/h3';
+import {useRuntimeConfig} from 'nitro/runtime-config';
 let privatePool: NodePgDatabase<any>
 const pools: Map<string, Pool> = new Map()
 

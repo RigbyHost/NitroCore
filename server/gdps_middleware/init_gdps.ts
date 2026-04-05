@@ -23,11 +23,11 @@ import {getDrizzleMiddleware} from "~/gdps_middleware/helpers/get_drizzle";
 import {initConnectorMiddleware} from "~/gdps_middleware/helpers/init_connector";
 import {defineEventHandler, type H3Event} from 'nitro/h3';;
 
-export const initMiddleware = defineEventHandler((event: H3Event) => {
+export const initMiddleware = defineEventHandler(async (event: H3Event) => {
     // Run middleware in sequence
-    validateSrvIdMiddleware(event)
-    getServerConfigMiddleware(event) 
-    checkIPBansMiddleware(event)
-    getDrizzleMiddleware(event)
-    initConnectorMiddleware(event)
+    await validateSrvIdMiddleware(event)
+    await getServerConfigMiddleware(event) 
+    await checkIPBansMiddleware(event)
+    await getDrizzleMiddleware(event)
+    await initConnectorMiddleware(event)
 })

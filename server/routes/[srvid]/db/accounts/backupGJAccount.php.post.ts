@@ -19,7 +19,8 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
-import {defineEventHandler, type H3Event} from 'nitro/h3';;
+import {defineEventHandler, type H3Event} from 'nitro/h3';
+import {useStorage} from 'nitro/storage';
 
 export default defineEventHandler(async (event) => {
     // Apply middleware

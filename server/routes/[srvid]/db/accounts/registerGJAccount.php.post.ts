@@ -42,11 +42,11 @@ export default defineEventHandler(async (event) => {
         }, ip, event.context.config.config!.SecurityConfig?.AutoActivate)
 
         if (code > 0) {
-            await event.context.connector.success(event, "User registered successfully")
             await new ActionController(event.context?.drizzle)
                 .registerAction(event, "register_user", 0, code, {uname: data?.userName, email: data?.email})
+            return await event.context.connector.success(event, "User registered successfully")
         } else {
-            await event.context.connector.error(event, code, "Failed to register user")
+            return await event.context.connector.error(event, code, "Failed to register user")
         }
     }
 )

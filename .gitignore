@@ -16,7 +16,7 @@ coverage
 
 # Temporary files
 *.cjs
-fix_*.js
-build_output.txt
-final_errors.txt
-errors.txt
+
+# Auto-generated files
+tests/auto-imports.d.ts
+tests/imports.d.ts

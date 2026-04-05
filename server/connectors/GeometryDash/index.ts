@@ -23,7 +23,7 @@ import {GDConnectorMessages} from "~/connectors/GeometryDash/messages";
 import {GDConnectorLevels} from "~/connectors/GeometryDash/levels";
 import {GDConnectorScores} from "~/connectors/GeometryDash/scores";
 import {GDConnectorQuests} from "~/connectors/GeometryDash/quests";
-import {type H3Event} from "nitro/h3";
+import {type H3Event, setResponseHeader} from "nitro/h3";
 import {songsTable} from "~~/drizzle";
 import {GDConnectorProfile} from "~/connectors/GeometryDash/profile";
 export class GDConnector implements IConnector {
@@ -32,19 +32,19 @@ export class GDConnector implements IConnector {
     }
 
     success = async (event: H3Event, message: string) => {
-        event.res.headers.set("X-Message", message)
+        setResponseHeader(event, "X-Message", message)
         console.log(`↳ ${message}`)
         return "1"
     }
 
     numberedSuccess = async (event: H3Event, code: number, message: string) => {
-        event.res.headers.set("X-Message", message)
+        setResponseHeader(event, "X-Message", message)
         console.log(`↳ ${message} (code: ${code})`)
         return code.toString()
     }
 
     error = async (event: H3Event, code: number, message: string) => {
-        event.res.headers.set("X-Message", message)
+        setResponseHeader(event, "X-Message", message)
         console.log(`↳ ${message} (code: ${code})`)
         return "-1"
     }
