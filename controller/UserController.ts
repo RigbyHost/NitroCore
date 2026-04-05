@@ -18,6 +18,7 @@
 
 import {type Database} from "~/utils/useDrizzle";
 import {rolesTable, usersTable} from "~~/drizzle";
+import {eq} from "drizzle-orm";
 import {User, type UserWithRole} from "~~/controller/User";
 import {sql} from "drizzle-orm";
 import {union} from "drizzle-orm/pg-core";
@@ -84,30 +85,42 @@ export class UserController {
         withRole = false,
     ): Promise<Nullable<User<UserWithRole>>> => {
         let user: MaybeUndefined<UserWithRole>
-        if (uid)
-            user = await this.db.query?.usersTable
-                .findFirst({
-                    where: (user, {eq}) => eq(user?.uid, uid),
-                    with: {
-                        role: withRole || undefined,
-                    }
-                })
-        if (username)
-            user = await this.db.query?.usersTable
-                .findFirst({
-                    where: (user, {eq}) => eq(user?.username, username),
-                    with: {
-                        role: withRole || undefined,
-                    }
-                })
-        if (email)
-            user = await this.db.query?.usersTable
-                .findFirst({
-                    where: (user, {eq}) => eq(user?.email, email),
-                    with: {
-                        role: withRole || undefined,
-                    }
-                })
+        if (uid) {
+            const result = await this.db.select()
+                .from(usersTable)
+                .leftJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+                .where(eq(usersTable.uid, uid))
+                .limit(1)
+            
+            user = result[0] ? {
+                ...result[0].users,
+                role: result[0].roles
+            } : undefined
+        }
+        if (username) {
+            const result = await this.db.select()
+                .from(usersTable)
+                .leftJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+                .where(eq(usersTable.username, username))
+                .limit(1)
+            
+            user = result[0] ? {
+                ...result[0].users,
+                role: result[0].roles
+            } : undefined
+        }
+        if (email) {
+            const result = await this.db.select()
+                .from(usersTable)
+                .leftJoin(rolesTable, eq(usersTable.roleId, rolesTable.id))
+                .where(eq(usersTable.email, email))
+                .limit(1)
+            
+            user = result[0] ? {
+                ...result[0].users,
+                role: result[0].roles
+            } : undefined
+        }
         if (!user)
             return null
         return new User<UserWithRole>(this, user)

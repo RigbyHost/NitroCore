@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
         if(!success)
             return await event.context.connector.error(event, -1, "Bad request")
 
-        const userController = new UserController(event.context?.drizzle)
+        const userController = new UserController(event.context.drizzle)
         const {code} = await userController.register({
             username: data?.userName,
             password: data?.password,

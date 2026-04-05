@@ -21,7 +21,7 @@ import {fileURLToPath} from 'node:url'
 // https://nitro.build/config
 export default defineNitroConfig({
     compatibilityDate: "2026-04-01",
-    srcDir: "server",
+    serverDir: "server",
     alias: {
         "~~": fileURLToPath(new URL('./', import.meta.url)),
         "~": fileURLToPath(new URL('./server', import.meta.url))
@@ -32,10 +32,15 @@ export default defineNitroConfig({
     imports: {},
     typescript: {
         generateRuntimeConfigTypes: true,
-        generateTsConfig: true
-    },
-    runtimeConfig: {
-        platform: "vercel"
+        generateTsConfig: true,
+        tsConfig: {
+            compilerOptions: {
+                paths: {
+                    "~~/*": ["./*"],
+                    "~/*": ["./server/*"]
+                }
+            }
+        }
     },
     experimental: {
         asyncContext: true,
@@ -54,6 +59,18 @@ export default defineNitroConfig({
         //     driver: "storage-vercel-edgeconfig",
         //     // url: process.env.EDGE_CONFIG // Optional
         // }
+    },
+    devStorage: {
+        savedata: {
+            driver: "fs-lite",
+            base: "./_savedata"
+        },
+        config: { // DO NOT REMOVE: AUTOPOPULATED BY VITEST
+            driver: "redis",
+            host: process.env.STORAGE_HOST || 'valkey',
+            port: Number(process.env.STORAGE_PORT) || 6379,
+            password: process.env.STORAGE_PASSWORD || ''
+        }
     },
     scheduledTasks: {
         "0 0 * * *": [

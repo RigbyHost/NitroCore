@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import {defineEventHandler, type H3Event} from 'nitro/h3';;
+import {defineEventHandler, type H3Event} from 'nitro/h3';
 
 
 export const getDrizzleMiddleware = defineEventHandler(async event => {
