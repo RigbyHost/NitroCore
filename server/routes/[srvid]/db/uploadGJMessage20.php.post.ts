@@ -1,37 +1,58 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
 import {MessageController} from "~~/controller/MessageController";
+import {defineEventHandler, type H3Event} from 'nitro/h3';;
 
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authMiddleware],
-
-    handler: async (event) => {
+export default defineEventHandler(async (event) => {
+    // Apply middleware
+    await initMiddleware(event);
+    await authMiddleware(event);
+    
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success, error} = requestSchema.safeParse(post)
         if (!success) {
             useLogger().warn(JSON.stringify(z.treeifyError(error)))
-            return await event.context.connector.error(-1, "Bad Request")
+            return await event.context.connector.error(event, -1, "Bad Request")
         }
 
-        const messageController = new MessageController(event.context.drizzle)
+        const messageController = new MessageController(event.context?.drizzle)
         const user = event.context.user!
 
         if(await messageController.sendMessage({
             uidSrc: user.$.uid,
-            uidDest: data.toAccountID,
-            message: data.body,
-            subject: data.subject,
+            uidDest: data?.toAccountID,
+            message: data?.body,
+            subject: data?.subject,
         }))
-            return await event.context.connector.success("Message sent")
+            return await event.context.connector.success(event, "Message sent")
         else
-            return await event.context.connector.error(-1, "Message failed")
+            return await event.context.connector.error(event, -1, "Message failed")
     }
-})
+)
+
 
 export const requestSchema = z.object({
-    toAccountID: z.coerce.number().positive(),
+    toAccountID: z?.coerce.number().positive(),
     body: z.string().nonempty(),
     subject: z.string().optional().default(""),
 })

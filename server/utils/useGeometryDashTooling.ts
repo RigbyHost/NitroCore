@@ -1,3 +1,24 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import {withPreparsedForm} from "~/utils/usePostObject";
+import type {H3Event} from 'nitro/h3';
+
 
 
 /**
@@ -5,14 +26,14 @@
  * @author Cvolton
  */
 const clearGDRequest = (request: string) => {
-    return request.trim()
-        .split(":")[0]
-        .split("|")[0]
-        .split("~")[0]
-        .split("#")[0]
-        .split(")")[0]
-        .replace("\0","")
-        .trim()
+    return request?.trim()
+        ?.split(":")?.[0]
+        ?.split("|")?.[0]
+        ?.split("~")?.[0]
+        ?.split("#")?.[0]
+        ?.split(")")?.[0]
+        ?.replace("\0","")
+        ?.trim() || ""
 }
 
 /**
@@ -20,8 +41,8 @@ const clearGDRequest = (request: string) => {
  */
 const doXOR = (data: string, key: string) => {
     let result = "";
-    for (let i = 0; i < data.length; i++) {
-        result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    for (let i = 0; i < data?.length; i++) {
+        result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key?.length));
     }
     return result;
 }
@@ -80,9 +101,9 @@ const doGJP2 = (password: string) => {
  *
  * @returns The Geometry Dash version: "1.9","2.0", "2.1", "2.2"
  */
-const getGDVersionFromBody = async (postData?: FormData) => {
+const getGDVersionFromBody = async (event: H3Event, postData?: FormData) => {
     /* v8 ignore next 2 */
-    const post = postData || await withPreparsedForm(useEvent())
+    const post = postData || await withPreparsedForm(event)
     let version = 21
     if (post.has("gameVersion")) {
         const parsed = post.get("gameVersion") as string
@@ -105,7 +126,7 @@ const getGDVersionFromBody = async (postData?: FormData) => {
 const generateRandomString = (length: number) => {
     let result = "";
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const charactersLength = characters.length;
+    const charactersLength = characters?.length;
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }

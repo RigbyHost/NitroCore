@@ -1,3 +1,21 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {and, eq, gte, inArray, SQL, sql} from "drizzle-orm";
 import {scoresTable} from "~~/drizzle";
 import {UserController} from "~~/controller/UserController";
@@ -20,15 +38,15 @@ export class ScoresController {
 
     existsScore = async (levelId: number, uid: number) => {
         return await this.db.$count(scoresTable, and(
-            eq(scoresTable.levelId, levelId),
-            eq(scoresTable.uid, uid)
+            eq(scoresTable?.levelId, levelId),
+            eq(scoresTable?.uid, uid)
         )) > 0
     }
 
 
     getOneScore = async (scoreId: number) => {
-        const data = await this.db.query.scoresTable.findFirst({
-            where: (score, {eq}) => eq(score.id, scoreId)
+        const data = await this.db.query?.scoresTable.findFirst({
+            where: (score, {eq}) => eq(score?.id, scoreId)
         })
         return data || null
     }
@@ -44,14 +62,14 @@ export class ScoresController {
             switch (mode) {
                 case "regular": return scoresTable.percent
                 case "platformer": return scoresTable.percent
-                case "platformer_coins": return scoresTable.coins
+                case "platformer_coins": return scoresTable?.coins
             }
         })()
         switch (type) {
             case "week":
                 // TODO: Clarify how the fuck should this work: DATE - 7 days or like really this week
                 filter = gte(
-                    scoresTable.postedTime,
+                    scoresTable?.postedTime,
                     sql`CURRENT_DATE - INTERVAL '1 day' * (EXTRACT(DOW FROM CURRENT_DATE)::INT - 1)` // This week's monday
                 )
                 break
@@ -59,12 +77,12 @@ export class ScoresController {
                 const friendshipController = new FriendshipController(this.db)
                 const friends = await friendshipController.getAccountFriendsIds(uid || 0)
                 if (!friends) return []
-                filter = inArray(scoresTable.uid, friends)
+                filter = inArray(scoresTable?.uid, friends)
                 break
         }
-        const data = await this.db.query.scoresTable.findMany({
+        const data = await this.db.query?.scoresTable.findMany({
             where: (level, {and, eq}) => and(
-                eq(level.levelId, levelId), filter
+                eq(level?.levelId, levelId), filter
             ),
             with: {
                 user: true
@@ -87,7 +105,7 @@ export class ScoresController {
     updateScore = async (
         data: typeof scoresTable.$inferInsert
     ) => this.db.update(scoresTable).set(data).where(and(
-        eq(scoresTable.levelId, scoresTable.levelId),
-        eq(scoresTable.uid, scoresTable.uid)
+        eq(scoresTable?.levelId, scoresTable?.levelId),
+        eq(scoresTable?.uid, scoresTable?.uid)
     ))
 }

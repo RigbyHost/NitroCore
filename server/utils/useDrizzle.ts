@@ -1,13 +1,32 @@
-import {drizzle, NodePgDatabase} from "drizzle-orm/node-postgres";
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import {drizzle, type NodePgDatabase} from "drizzle-orm/node-postgres";
 import {Pool} from 'pg';
 import * as schema from "~~/drizzle"
-
+import type {H3Event} from 'nitro/h3';
+import {getRouterParam} from 'nitro/h3';
 let privatePool: NodePgDatabase<any>
 const pools: Map<string, Pool> = new Map()
 
 export const defaultConfig = {
     host: process.env.POSTGRES_HOST || "localhost",
-    port: Number(process.env.POSTGRES_PORT) || 5432,
+    port: Number(process.env?.POSTGRES_PORT) || 5432,
     user: process.env.POSTGRES_USER || "postgres",
     password: process.env.POSTGRES_PASSWORD || "postgres",
     max: 10, // max number of clients in the pool
@@ -20,19 +39,19 @@ export const defaultConfig = {
  *
  * @returns Drizzle instance for the specified server
  */
-export const useDrizzle = async (database?: string) => {
+export const useDrizzle = async (event: H3Event, database?: string) => {
     /* v8 ignore next */
-    const srvid = database || getRouterParam(useEvent(), "srvid")!
+    const srvid = database || getRouterParam(event, "srvid")!
 
     if (useRuntimeConfig().platform) {
         if (!privatePool) {
-            if (process.env.DATABASE_URL) {
+            if (process.env?.DATABASE_URL) {
                 console.log("Detected possible Postgres Neon")
-                privatePool = drizzle(process.env.DATABASE_URL, {schema, logger: !!process.env.VERBOSE})
+                privatePool = drizzle(process.env?.DATABASE_URL, {schema, logger: !!process.env?.VERBOSE})
             }
-            if (process.env.POSTGRES_URL) {
+            if (process.env?.POSTGRES_URL) {
                 console.log("Detected possible Supabase")
-                privatePool = drizzle(process.env.POSTGRES_URL, {schema, logger: !!process.env.VERBOSE})
+                privatePool = drizzle(process.env?.POSTGRES_URL, {schema, logger: !!process.env?.VERBOSE})
             }
         }
         return privatePool as NodePgDatabase<typeof schema>
@@ -47,7 +66,7 @@ export const useDrizzle = async (database?: string) => {
         pools.set(srvid, pool);
     }
 
-    return drizzle(pools.get(srvid)!, {schema, logger: !!process.env.VERBOSE})
+    return drizzle(pools.get(srvid)!, {schema, logger: !!process.env?.VERBOSE})
 }
 
 export const useDrizzlePoolManager = () => {

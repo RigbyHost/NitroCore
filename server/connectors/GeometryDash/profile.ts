@@ -1,5 +1,23 @@
-import {IFriendRequest} from "~/connectors/IConnector";
-import {User, UserWithRole} from "~~/controller/User";
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import {type IFriendRequest} from "~/connectors/IConnector";
+import {type UserWithRole, User} from "~~/controller/User";
 
 export const GDConnectorProfile = {
     getFriendRequests: async (
@@ -14,17 +32,17 @@ export const GDConnectorProfile = {
                     if (!user)
                         return ""
                     return [
-                        1, user.username,
-                        2, user.uid,
+                        1, user?.username,
+                        2, user?.uid,
                         9, new User({$db:null} as any, user).getShownIcon(),
-                        10, user.vessels.clr_primary,
-                        11, user.vessels.clr_secondary,
-                        14, user.iconType,
-                        15, user.special,
-                        16, user.uid,
-                        32, request.id,
-                        35, request.comment,
-                        37, useGeometryDashTooling().getDateAgo(request.uploadDate.getTime()),
+                        10, user.vessels?.clr_primary,
+                        11, user.vessels?.clr_secondary,
+                        14, user?.iconType,
+                        15, user?.special,
+                        16, user?.uid,
+                        32, request?.id,
+                        35, request?.comment,
+                        37, useGeometryDashTooling().getDateAgo(request?.uploadDate.getTime()),
                         41, request.isNew ? 1 : 0,
                     ].join(":")
                 }
@@ -42,8 +60,8 @@ export const GDConnectorProfile = {
                     4, user.$.demons,
                     8, user.$.creatorPoints,
                     9, user.getShownIcon(),
-                    10, user.$.vessels.clr_primary,
-                    11, user.$.vessels.clr_secondary,
+                    10, user.$.vessels?.clr_primary,
+                    11, user.$.vessels?.clr_secondary,
                     13, user.$.coins,
                     14, user.$.iconType,
                     15, user.$.special,
@@ -66,16 +84,16 @@ export const GDConnectorProfile = {
     ) => {
 
         const demonStat = [
-            user.$.extraData?.demon_stats.standard.easy || 0,
-            user.$.extraData?.demon_stats.standard.medium || 0,
-            user.$.extraData?.demon_stats.standard.hard || 0,
-            user.$.extraData?.demon_stats.standard.insane || 0,
-            user.$.extraData?.demon_stats.standard.extreme || 0,
-            user.$.extraData?.demon_stats.platformer.easy || 0,
-            user.$.extraData?.demon_stats.platformer.medium || 0,
-            user.$.extraData?.demon_stats.platformer.hard || 0,
-            user.$.extraData?.demon_stats.platformer.insane || 0,
-            user.$.extraData?.demon_stats.platformer.extreme || 0,
+            user.$.extraData?.demon_stats?.standard.easy || 0,
+            user.$.extraData?.demon_stats?.standard.medium || 0,
+            user.$.extraData?.demon_stats?.standard.hard || 0,
+            user.$.extraData?.demon_stats?.standard.insane || 0,
+            user.$.extraData?.demon_stats?.standard.extreme || 0,
+            user.$.extraData?.demon_stats?.platformer.easy || 0,
+            user.$.extraData?.demon_stats?.platformer.medium || 0,
+            user.$.extraData?.demon_stats?.platformer.hard || 0,
+            user.$.extraData?.demon_stats?.platformer.insane || 0,
+            user.$.extraData?.demon_stats?.platformer.extreme || 0,
             user.$.extraData?.demon_stats.weekly || 0,
             user.$.extraData?.demon_stats.gauntlet || 0,
         ].join(",")
@@ -109,47 +127,45 @@ export const GDConnectorProfile = {
                 7, user.$.uid,
                 8, user.$.creatorPoints,
                 9, user.getShownIcon(),
-                10, user.$.vessels.clr_primary,
-                11, user.$.vessels.clr_secondary,
+                10, user.$.vessels?.clr_primary,
+                11, user.$.vessels?.clr_secondary,
                 13, user.$.coins,
                 14, user.$.iconType,
                 15, user.$.special,
                 16, user.$.uid,
                 17, user.$.userCoins,
-                18, user.$.settings.mS,
-                19, user.$.settings.frS,
-                20, user.$.settings.youtube,
-                21, user.$.vessels.cube,
-                22, user.$.vessels.ship,
-                23, user.$.vessels.ball,
-                24, user.$.vessels.ufo,
-                25, user.$.vessels.wave,
-                26, user.$.vessels.robot,
-                28, user.$.vessels.trace,
+                18, user.$.settings?.mS,
+                19, user.$.settings?.frS,
+                20, user.$.settings?.youtube,
+                21, user.$.vessels?.cube,
+                22, user.$.vessels?.ship,
+                23, user.$.vessels?.ball,
+                24, user.$.vessels?.ufo,
+                25, user.$.vessels?.wave,
+                26, user.$.vessels?.robot,
+                28, user.$.vessels?.trace,
                 29, 1,
                 30, rank,
                 31, isFriend ? 1 : 0,
-                43, user.$.vessels.spider,
-                44, user.$.settings.twitter,
-                45, user.$.settings.twitch,
+                43, user.$.vessels?.spider,
+                44, user.$.settings?.twitter,
+                45, user.$.settings?.twitch,
                 46, user.$.diamonds,
-                48, user.$.vessels.death,
+                48, user.$.vessels?.death,
                 49, user.$.role?.modLevel||0,
-                50, user.$.settings.cS,
-                51, user.$.vessels.clr_glow,
+                50, user.$.settings?.cS,
+                51, user.$.vessels?.clr_glow,
                 52, user.$.moons,
-                53, user.$.vessels.swing,
-                54, user.$.vessels.jetpack,
+                53, user.$.vessels?.swing,
+                54, user.$.vessels?.jetpack,
                 55, demonStat,
                 56, standardStat,
                 57, platformerStat,
 
-                38, counters.messages,
-                39, counters.friend_requests,
+                38, counters?.messages,
+                39, counters?.friend_requests,
                 40, 0,
             ].join(":")
-
-        )
     },
 
     getUsersList: async (users: Array<User>) => {
@@ -158,15 +174,14 @@ export const GDConnectorProfile = {
                     1, user.$.username,
                     2, user.$.uid,
                     9, user.getShownIcon(),
-                    10, user.$.vessels.clr_primary,
-                    11, user.$.vessels.clr_secondary,
+                    10, user.$.vessels?.clr_primary,
+                    11, user.$.vessels?.clr_secondary,
                     14, user.$.iconType,
                     15, user.$.special,
                     16, user.$.uid,
-                    18, user.$.settings.mS,
+                    18, user.$.settings?.mS,
                     41, 0,
                 ].join(":")
             ).join("|")
-        )
     }
 }

@@ -1,8 +1,26 @@
-import {Database} from "~/utils/useDrizzle";
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import {type Database} from "~/utils/useDrizzle";
 import {levelsTable, usersTable} from "~~/drizzle";
 import {eq, getTableColumns} from "drizzle-orm";
-import {MakeOptional} from "~/utils/types";
-import {Level, LevelWithUser} from "~~/controller/Level";
+import {type MakeOptional} from "~/utils/types";
+import {Level, type LevelWithUser} from "~~/controller/Level";
 import clamp from "clamp"
 import {LevelFilter} from "~~/controller/LevelFilter";
 
@@ -25,8 +43,8 @@ export class LevelController {
         full = false,
     ): Promise<Nullable<Level<LevelWithUser>>> => {
         if (full) {
-            const data = await this.db.query.levelsTable.findFirst({
-                where: (level, {eq}) => eq(level.id, levelId),
+            const data = await this.db.query?.levelsTable.findFirst({
+                where: (level, {eq}) => eq(level?.id, levelId),
                 with: {
                     author: {
                         columns: {
@@ -45,8 +63,8 @@ export class LevelController {
             type Col = keyof typeof columns
             const colS = {} as Record<Col, true>
             Object.keys(columns).forEach(key => colS[key as Col] = true)
-            const data = await this.db.query.levelsTable.findFirst({
-                where: (level, {eq}) => eq(level.id, levelId),
+            const data = await this.db.query?.levelsTable.findFirst({
+                where: (level, {eq}) => eq(level?.id, levelId),
                 columns: colS,
                 with: {
                     author: {
@@ -67,8 +85,8 @@ export class LevelController {
         ids: number[],
         withUser = false,
     ): Promise<Level<LevelWithUser>[]> => {
-        const levels = await this.db.query.levelsTable.findMany({
-            where: (level, {inArray}) => inArray(level.id, ids),
+        const levels = await this.db.query?.levelsTable.findMany({
+            where: (level, {inArray}) => inArray(level?.id, ids),
             with: {
                 author: withUser ? {
                     columns: {
@@ -86,40 +104,40 @@ export class LevelController {
     }
 
     recalculateCreatorPoints = async (uid: number) => {
-        const levels = await this.db.query.levelsTable.findMany({
+        const levels = await this.db.query?.levelsTable.findMany({
             columns: {
                 starsGot: true,
                 isFeatured: true,
                 epicness: true,
                 collab: true,
             },
-            where: (level, {eq}) => eq(level.ownerUid, uid)
+            where: (level, {eq}) => eq(level?.ownerUid, uid)
         })
         let cpoints = 0
         levels.forEach(level => {
-            if (level.starsGot)
+            if (level?.starsGot)
                 cpoints++
-            if (level.isFeatured)
+            if (level?.isFeatured)
                 cpoints++
-            if (level.epicness)
-                cpoints += clamp(level.epicness, 1, 3)
+            if (level?.epicness)
+                cpoints += clamp(level?.epicness, 1, 3)
         })
         await this.db.update(usersTable).set({
             creatorPoints: cpoints
-        }).where(eq(usersTable.uid, uid))
+        }).where(eq(usersTable?.uid, uid))
     }
 
     getFilter = () => new LevelFilter(this)
 
     countDemonStats = async (levelIds: number[]): Promise<CountDemonStatsReturnType> => {
-        const levels = await this.db.query.levelsTable.findMany({
+        const levels = await this.db.query?.levelsTable.findMany({
             columns: {
                 demonDifficulty: true,
                 length: true
             },
             where: (level, {inArray, and, gte}) => and(
-                inArray(level.id, levelIds),
-                gte(level.demonDifficulty, 0)
+                inArray(level?.id, levelIds),
+                gte(level?.demonDifficulty, 0)
             )
         })
 
@@ -144,39 +162,39 @@ export class LevelController {
 
         levels.forEach(level => {
             if (level.length < 5) {
-                switch(level.demonDifficulty) {
+                switch(level?.demonDifficulty) {
                     case 3:
-                        ret.standard.easy++
+                        if (ret?.standard) ret.standard.easy++
                         break
                     case 4:
-                        ret.standard.medium++
+                        if (ret?.standard) ret.standard.medium++
                         break
                     case 5:
-                        ret.standard.insane++
+                        if (ret?.standard) ret.standard.insane++
                         break
                     case 6:
-                        ret.standard.extreme++
+                        if (ret?.standard) ret.standard.extreme++
                         break
                     default:
-                        ret.standard.hard++
+                        if (ret?.standard) ret.standard.hard++
                         break
                 }
             } else {
-                switch(level.demonDifficulty) {
+                switch(level?.demonDifficulty) {
                     case 3:
-                        ret.platformer.easy++
+                        if (ret?.platformer) ret.platformer.easy++
                         break
                     case 4:
-                        ret.platformer.medium++
+                        if (ret?.platformer) ret.platformer.medium++
                         break
                     case 5:
-                        ret.platformer.insane++
+                        if (ret?.platformer) ret.platformer.insane++
                         break
                     case 6:
-                        ret.platformer.extreme++
+                        if (ret?.platformer) ret.platformer.extreme++
                         break
                     default:
-                        ret.platformer.hard++
+                        if (ret?.platformer) ret.platformer.hard++
                         break
                 }
             }

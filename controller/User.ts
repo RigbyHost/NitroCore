@@ -1,4 +1,22 @@
-import {Database} from "~/utils/useDrizzle";
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import {type Database} from "~/utils/useDrizzle";
 import {rolesTable, usersTable} from "~~/drizzle";
 import {diff} from "deep-object-diff";
 import {and, eq, gte, sql} from "drizzle-orm";
@@ -34,8 +52,8 @@ export class User<T extends UserType = UserType> {
     fetchRole = async () => {
         if (!this.$.roleId)
             return null
-        const role = await this.db.query.rolesTable.findFirst({
-            where: (role, {eq}) => eq(role.id, this.$.roleId)
+        const role = await this.db.query?.rolesTable.findFirst({
+            where: (role, {eq}) => eq(role?.id, this.$.roleId)
         });
         return role || null
     }
@@ -45,19 +63,19 @@ export class User<T extends UserType = UserType> {
      */
     commit = async () => {
         const deltas = diff(this.original, this.$) as typeof usersTable.$inferSelect
-        if (deltas.extraData)
+        if (deltas?.extraData)
             deltas.extraData = this.$.extraData
-        if (deltas.protectMeta)
+        if (deltas?.protectMeta)
             deltas.protectMeta = this.$.protectMeta
-        if (deltas.vessels)
+        if (deltas?.vessels)
             deltas.vessels = this.$.vessels
-        if (deltas.chests)
+        if (deltas?.chests)
             deltas.chests = this.$.chests
-        if (deltas.settings)
+        if (deltas?.settings)
             deltas.settings = this.$.settings
-        if (deltas.friendshipIds)
+        if (deltas?.friendshipIds)
             deltas.friendshipIds = this.$.friendshipIds
-        if (deltas.blacklistedUsers)
+        if (deltas?.blacklistedUsers)
             deltas.blacklistedUsers = this.$.blacklistedUsers
 
         await this.db.update(usersTable)
@@ -65,7 +83,7 @@ export class User<T extends UserType = UserType> {
                 ...deltas,
                 accessDate: sql`CURRENT_TIMESTAMP`
             })
-            .where(eq(usersTable.uid, this.$.uid))
+            .where(eq(usersTable?.uid, this.$.uid))
     }
 
     blacklist = {
@@ -127,15 +145,15 @@ export class User<T extends UserType = UserType> {
             case 7:
                 return this.$.vessels.swing
             default:
-                return this.$.vessels.cube
+                return this.$.vessels?.cube
         }
     }
 
     getLeaderboardRank = async () => this.db.$count(
         usersTable,
         and(
-            gte(usersTable.stars, this.$.stars),
-            eq(usersTable.isBanned, 0)
+            gte(usersTable?.stars, this.$.stars),
+            eq(usersTable?.isBanned, 0)
         )
     )
 }

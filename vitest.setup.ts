@@ -1,14 +1,32 @@
-import {getRedis, seedRedis} from "~~/tests/core/redis";
-import {getPostgres, seedDatabase} from "~~/tests/core/database";
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import {getRedis, seedRedis} from "./tests/core/redis";
+import {getPostgres, seedDatabase} from "./tests/core/database";
 import c from "tinyrainbow"
 import {AbstractStartedContainer} from "testcontainers";
-import {TestProject} from "vitest/node";
+import type {GlobalSetupContext} from "vitest";
 
 const PREFIX = c.bgBlue(c.white(" SETUP "))
 
 let containers: AbstractStartedContainer[] = []
 
-export const setup = async (p: TestProject) => {
+export const setup = async (ctx: GlobalSetupContext) => {
     if (containers.length)
         return
     console.log(`${PREFIX} Starting containers...`)
@@ -23,12 +41,12 @@ export const setup = async (p: TestProject) => {
 
     containers = [redis, postgres]
 
-    p.provide("config", {
+    ctx.provide("config", {
         host: redis.getHost(),
         port: redis.getPort(),
         password: redis.getPassword()
     })
-    p.provide("database", {
+    ctx.provide("database", {
         host: postgres.getHost(),
         port: postgres.getPort(),
         user: postgres.getUsername(),

@@ -2,6 +2,10 @@
   // https://nitro.build/guide/typescript
   "extends": "./node_modules/.nitro/types/tsconfig.json",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "paths": {
+      "~~/*": ["./*"],
+      "~/*": ["./server/*"]
+    }
   }
 }

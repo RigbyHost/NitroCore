@@ -1,10 +1,29 @@
-import {Database} from "~/utils/useDrizzle";
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import {type Database} from "~/utils/useDrizzle";
 import {rolesTable, usersTable} from "~~/drizzle";
-import {User, UserWithRole} from "~~/controller/User";
+import {User, type UserWithRole} from "~~/controller/User";
 import {sql} from "drizzle-orm";
 import {union} from "drizzle-orm/pg-core";
 import {z} from "zod";
 import type {MaybeUndefined, Nullable} from "~/utils/types";
+import {type H3Event} from "nitro/h3";
 
 /**
  * Controller for user management
@@ -38,13 +57,13 @@ export class UserController {
     searchUsers = async (search: string, page: number): Promise<User[]> => {
         const searchId = Number(search) || 0
         if (!searchId && search.length < 3) return []
-        const results = await this.db.query.usersTable
+        const results = await this.db.query?.usersTable
             .findMany({
                 where: (user, {or, eq, ilike}) => or(
-                    eq(user.uid, searchId),
-                    ilike(user.username, `%${search}%`)
+                    eq(user?.uid, searchId),
+                    ilike(user?.username, `%${search}%`)
                 ),
-                orderBy: (user, {desc}) => desc(user.stars),
+                orderBy: (user, {desc}) => desc(user?.stars),
                 limit: 10,
                 offset: page * 10
             })
@@ -66,25 +85,25 @@ export class UserController {
     ): Promise<Nullable<User<UserWithRole>>> => {
         let user: MaybeUndefined<UserWithRole>
         if (uid)
-            user = await this.db.query.usersTable
+            user = await this.db.query?.usersTable
                 .findFirst({
-                    where: (user, {eq}) => eq(user.uid, uid),
+                    where: (user, {eq}) => eq(user?.uid, uid),
                     with: {
                         role: withRole || undefined,
                     }
                 })
         if (username)
-            user = await this.db.query.usersTable
+            user = await this.db.query?.usersTable
                 .findFirst({
-                    where: (user, {eq}) => eq(user.username, username),
+                    where: (user, {eq}) => eq(user?.username, username),
                     with: {
                         role: withRole || undefined,
                     }
                 })
         if (email)
-            user = await this.db.query.usersTable
+            user = await this.db.query?.usersTable
                 .findFirst({
-                    where: (user, {eq}) => eq(user.email, email),
+                    where: (user, {eq}) => eq(user?.email, email),
                     with: {
                         role: withRole || undefined,
                     }
@@ -103,9 +122,9 @@ export class UserController {
         ids: number[],
         withRole = false,
     ): Promise<User<UserWithRole>[]> => {
-        const users = await this.db.query.usersTable
+        const users = await this.db.query?.usersTable
             .findMany({
-                where: (user, {inArray}) => inArray(user.uid, ids),
+                where: (user, {inArray}) => inArray(user?.uid, ids),
                 with: {
                     role: withRole || undefined,
                 }
@@ -119,10 +138,10 @@ export class UserController {
      * @internal Do not use this method directly
      */
     getUidByUsername = async (username: string): Promise<Nullable<number>> => {
-        const user = await this.db.query.usersTable
+        const user = await this.db.query?.usersTable
             .findFirst({
                 columns: {uid: true},
-                where: (user, {eq}) => eq(user.username, username)
+                where: (user, {eq}) => eq(user?.username, username)
             })
         return user?.uid || null
     }
@@ -148,30 +167,30 @@ export class UserController {
 
         switch (type) {
             case "stars":
-                users = await this.db.query.usersTable
+                users = await this.db.query?.usersTable
                     .findMany({
                         where: (user, {and, gt, eq}) => and(
-                            eq(user.isBanned, 0),
-                            gt(user.stars, 0)
+                            eq(user?.isBanned, 0),
+                            gt(user?.stars, 0)
                         ),
                         orderBy: (user, {desc, asc}) => [
-                            desc(user.stars),
-                            asc(user.username)
+                            desc(user?.stars),
+                            asc(user?.username)
                         ],
                         limit: limit
                     })
                     .then(users => users.map(user => new User(this, user)))
                 break
             case "cpoints":
-                users = await this.db.query.usersTable
+                users = await this.db.query?.usersTable
                     .findMany({
                         where: (user, {and, gt, eq}) => and(
-                            eq(user.isBanned, 0),
-                            gt(user.creatorPoints, 0)
+                            eq(user?.isBanned, 0),
+                            gt(user?.creatorPoints, 0)
                         ),
                         orderBy: (user, {desc, asc}) => [
-                            desc(user.creatorPoints),
-                            asc(user.username)
+                            desc(user?.creatorPoints),
+                            asc(user?.username)
                         ],
                         limit: limit
                     })
@@ -181,30 +200,30 @@ export class UserController {
                 const leaderboardBetter = this.db
                     .select()
                     .from(usersTable)
-                    .where(sql`${usersTable.stars}>${globalStars} AND ${usersTable.isBanned}=0`)
-                    .orderBy(sql`${usersTable.stars} DESC`)
+                    .where(sql`${usersTable?.stars}>${globalStars} AND ${usersTable?.isBanned}=0`)
+                    .orderBy(sql`${usersTable?.stars} DESC`)
                     .limit(50)
                 const leaderboardWorse = this.db
                     .select()
                     .from(usersTable)
-                    .where(sql`${usersTable.stars}>0 AND ${usersTable.stars}<=${globalStars} AND ${usersTable.isBanned}=0`)
-                    .orderBy(sql`${usersTable.stars} DESC`)
+                    .where(sql`${usersTable?.stars}>0 AND ${usersTable?.stars}<=${globalStars} AND ${usersTable?.isBanned}=0`)
+                    .orderBy(sql`${usersTable?.stars} DESC`)
                     .limit(50)
                 users = await union(leaderboardBetter, leaderboardWorse)
-                    .orderBy(sql`${usersTable.stars} DESC, ${usersTable.username} ASC`)
+                    .orderBy(sql`${usersTable?.stars} DESC, ${usersTable?.username} ASC`)
                     .then(users => users.map(user => new User(this, user)))
                 break
             case "friends":
-                users = await this.db.query.usersTable
+                users = await this.db.query?.usersTable
                     .findMany({
                         where: (user, {and, gt, eq, inArray}) => and(
-                            eq(user.isBanned, 0),
-                            gt(user.stars, 0),
-                            inArray(user.uid, friendsIds!)
+                            eq(user?.isBanned, 0),
+                            gt(user?.stars, 0),
+                            inArray(user?.uid, friendsIds!)
                         ),
                         orderBy: (user, {desc, asc}) => [
-                            desc(user.creatorPoints),
-                            asc(user.username)
+                            desc(user?.creatorPoints),
+                            asc(user?.username)
                         ],
                         limit: limit
                     })
@@ -276,7 +295,7 @@ export class UserController {
     ): Promise<{ code: number }> => {
         const parsed = registerValidators.safeParse(data)
         if (!parsed.success)
-            return {code: Number(parsed.error!.issues[0].message) || -1}
+            return {code: Number(parsed.error?.issues?.[0]?.message) || -1}
 
         let user = await this.getOneUser({username: parsed.data.username})
         if (user)
@@ -286,20 +305,20 @@ export class UserController {
             return {code: -3}
 
         const crypto = useCrypto()
-        const passwordHash = crypto.bcrypt$10.hash(parsed.data.password)
+        const passwordHash = crypto.bcrypt$10.hash(parsed.data?.password)
 
         const res = await this.db.insert(usersTable)
             .values({
-                username: parsed.data.username,
+                username: parsed.data?.username,
                 passwordHash,
-                gjpHash: useGeometryDashTooling().doGJP2(parsed.data.password),
-                email: parsed.data.email,
+                gjpHash: useGeometryDashTooling().doGJP2(parsed.data?.password),
+                email: parsed.data?.email,
                 isBanned: autoVerify ? 0 : 1,
                 lastIP: ip,
             })
-            .returning({uid: usersTable.uid})
+            .returning({uid: usersTable?.uid})
 
-        return {code: res[0].uid}
+        return {code: res[0]?.uid || -1}
     }
 
     /**
@@ -335,13 +354,12 @@ export class UserController {
     /**
      * Performs GJP authentication, determining the version and credentials from {@link H3Event}. Used in middleware
      */
-    performGJPAuth = async (): Promise<Nullable<User>> => {
-        const event = useEvent()
+    performGJPAuth = async (event: H3Event): Promise<Nullable<User>> => {
         const ip = event.context.clientAddress!
         const post = await withPreparsedForm(event)
         const tooling = useGeometryDashTooling()
 
-        if (await tooling.getGDVersionFromBody(post) === 22)
+        if (await tooling.getGDVersionFromBody(event, post) === 22)
             return this.verifySession(
                 Number(post.get("accountID")) || 0,
                 ip,

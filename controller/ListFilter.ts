@@ -1,9 +1,27 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {ListController} from "~~/controller/ListController";
 import {requestSchema} from "~/routes/[srvid]/db/getGJLevelLists.php.post"
 import {inArray, gt, SQL, gte, eq, desc, sql, ilike, and} from "drizzle-orm";
 import {z} from "zod";
 import {listsTable} from "~~/drizzle";
-import {List, ListWithUser} from "~~/controller/List";
+import {List, type ListWithUser} from "~~/controller/List";
 
 export class ListFilter {
     private controller: ListController
@@ -21,19 +39,19 @@ export class ListFilter {
         // The difficulty face for the list:
         // -1 = N/A, 0 = Auto, 1 = Easy, 2 = Normal, 3 = Hard, 4 = Harder, 5 = Insane,
         // 6 = Easy Demon, 7 = Medium Demon, 8 = Hard Demon, 9 = Insane Demon, 10 = Extreme Demon
-        if (data.diff.length) {
+        if (data.diff?.length) {
             if (data.demonFilter !== undefined) {
                 if (data.demonFilter === 0)
-                    filters.push(gte(listsTable.difficulty, 6))
+                    filters.push(gte(listsTable?.difficulty, 6))
                 else
-                    filters.push(eq(listsTable.difficulty, 5+data.demonFilter))
+                    filters.push(eq(listsTable?.difficulty, 5+data?.demonFilter))
             } else {
-                filters.push(inArray(listsTable.difficulty, data.diff))
+                filters.push(inArray(listsTable?.difficulty, data?.diff))
             }
         }
 
-        if (data.star)
-            filters.push(gt(listsTable.diamonds, 0))
+        if (data?.star)
+            filters.push(gt(listsTable?.diamonds, 0))
 
         return {filters, orderBy}
     }
@@ -49,47 +67,47 @@ export class ListFilter {
 
         switch (mode) {
             case "mostliked":
-                orderBy.push(desc(listsTable.likes), desc(listsTable.downloads))
+                orderBy.push(desc(listsTable?.likes), desc(listsTable?.downloads))
                 break
             case "mostdownloaded":
-                orderBy.push(desc(listsTable.downloads), desc(listsTable.likes))
+                orderBy.push(desc(listsTable?.downloads), desc(listsTable?.likes))
                 break
             case "trending":
-                filters.push(sql`${listsTable.uploadDate} > (CURRENT_DATE - INTERVAL '7' DAY)`)
-                orderBy.push(desc(listsTable.likes), desc(listsTable.downloads))
+                filters.push(sql`${listsTable?.uploadDate} > (CURRENT_DATE - INTERVAL '7' DAY)`)
+                orderBy.push(desc(listsTable?.likes), desc(listsTable?.downloads))
                 break
             case "latest":
-                orderBy.push(desc(listsTable.uploadDate), desc(listsTable.downloads))
+                orderBy.push(desc(listsTable?.uploadDate), desc(listsTable?.downloads))
                 break
             case "awarded":
-                filters.push(eq(listsTable.isFeatured, true), gt(listsTable.diamonds, 0))
-                orderBy.push(desc(listsTable.uploadDate), desc(listsTable.downloads))
+                filters.push(eq(listsTable?.isFeatured, true), gt(listsTable?.diamonds, 0))
+                orderBy.push(desc(listsTable?.uploadDate), desc(listsTable?.downloads))
                 break
             case "sent":
-                filters.push(eq(listsTable.isFeatured, false), eq(listsTable.diamonds, 0))
-                orderBy.push(desc(listsTable.uploadDate), desc(listsTable.downloads))
+                filters.push(eq(listsTable?.isFeatured, false), eq(listsTable?.diamonds, 0))
+                orderBy.push(desc(listsTable?.uploadDate), desc(listsTable?.downloads))
                 break
             default:
                 return {lists: [], total: 0}
         }
 
-        if (data.str) {
+        if (data?.str) {
             // Search logic
-            const id = Number(data.str)
+            const id = Number(data?.str)
             if (!isNaN(id)) {
-                filters.push(eq(listsTable.id, id))
+                filters.push(eq(listsTable?.id, id))
             } else {
                 filters.push(
-                    eq(listsTable.isUnlisted, false),
-                    ilike(listsTable.name, `%${data.str}%`)
+                    eq(listsTable?.isUnlisted, false),
+                    ilike(listsTable?.name, `%${data?.str}%`)
                 )
             }
         } else {
             // The return of Clowner the clown
-            filters.push(eq(listsTable.isUnlisted, false))
+            filters.push(eq(listsTable?.isUnlisted, false))
         }
 
-        const lists = await this.db.query.listsTable.findMany({
+        const lists = await this.db.query?.listsTable.findMany({
             with: {
                 author: {
                     columns: {
@@ -121,33 +139,33 @@ export class ListFilter {
     }> => {
         const {filters, orderBy} = this.filterParser(data)
 
-        if (data.str) {
-            const id = Number(data.str)
-            if (followMode && data.followed) {
+        if (data?.str) {
+            const id = Number(data?.str)
+            if (followMode && data?.followed) {
                 if (!isNaN(id)) {
-                    filters.push(eq(listsTable.id, id))
+                    filters.push(eq(listsTable?.id, id))
                 } else {
                     filters.push(
-                        eq(listsTable.isUnlisted, false),
-                        ilike(listsTable.name, `%${data.str}%`)
+                        eq(listsTable?.isUnlisted, false),
+                        ilike(listsTable?.name, `%${data?.str}%`)
                     )
                 }
-                filters.push(inArray(listsTable.ownerId, data.followed))
+                filters.push(inArray(listsTable?.ownerId, data?.followed))
             } else {
                 if (!isNaN(id)) {
-                    filters.push(eq(listsTable.ownerId, id))
+                    filters.push(eq(listsTable?.ownerId, id))
                 }
             }
         } else {
-            if (followMode && data.followed) {
+            if (followMode && data?.followed) {
                 filters.push(
-                    eq(listsTable.isUnlisted, false),
-                    inArray(listsTable.ownerId, data.followed)
+                    eq(listsTable?.isUnlisted, false),
+                    inArray(listsTable?.ownerId, data?.followed)
                 )
             }
         }
 
-        const lists = await this.db.query.listsTable.findMany({
+        const lists = await this.db.query?.listsTable.findMany({
             where: and(...filters),
             with: {
                 author: {

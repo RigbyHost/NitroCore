@@ -1,7 +1,26 @@
-import {Database} from "~/utils/useDrizzle";
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import type {Database} from "~/utils/useDrizzle";
 import {accountCommentsTable, commentsTable} from "~~/drizzle";
 import {and, eq, sql} from "drizzle-orm";
 import {ActionController} from "~~/controller/ActionController";
+import {type H3Event} from 'nitro/h3';
 
 /**
  * Controller for comment management
@@ -25,13 +44,13 @@ export class CommentController {
     }
 
     countLevelComments = async (levelId?: number) =>
-        this.db.$count(commentsTable, levelId ? eq(commentsTable.levelId, levelId) : undefined)
+        this.db.$count(commentsTable, levelId ? eq(commentsTable?.levelId, levelId) : undefined)
 
     countUserComments = async (uid?: number) =>
-        this.db.$count(accountCommentsTable, uid ? eq(accountCommentsTable.uid, uid) : undefined)
+        this.db.$count(accountCommentsTable, uid ? eq(accountCommentsTable?.uid, uid) : undefined)
 
     countCommentHistory = async (uid: number) =>
-        this.db.$count(commentsTable, eq(commentsTable.uid, uid))
+        this.db.$count(commentsTable, eq(commentsTable?.uid, uid))
 
     /**
      * Get a single level comment by ID
@@ -39,8 +58,8 @@ export class CommentController {
      * @param id
      */
     getOneLevelComment = async (id: number) => {
-        const comment = await this.db.query.commentsTable.findFirst({
-            where: (comment, {eq}) => eq(comment.id, id)
+        const comment = await this.db.query?.commentsTable.findFirst({
+            where: (comment, {eq}) => eq(comment?.id, id)
         })
         return comment || null
     }
@@ -51,8 +70,8 @@ export class CommentController {
      * @param id
      */
     getOneAccountComment = async (id: number) => {
-        const comment = await this.db.query.accountCommentsTable.findFirst({
-            where: (comment, {eq}) => eq(comment.id, id)
+        const comment = await this.db.query?.accountCommentsTable.findFirst({
+            where: (comment, {eq}) => eq(comment?.id, id)
         })
         return comment || null
     }
@@ -64,9 +83,9 @@ export class CommentController {
      * @param page
      */
     getAllAccountComments = async (uid: number, page = 0) =>
-        this.db.query.accountCommentsTable.findMany({
-            where: (comment, {eq}) => eq(comment.uid, uid),
-            orderBy: (comment, {desc}) => [desc(comment.postedTime)],
+        this.db.query?.accountCommentsTable.findMany({
+            where: (comment, {eq}) => eq(comment?.uid, uid),
+            orderBy: (comment, {desc}) => [desc(comment?.postedTime)],
             limit: 10,
             offset: page * 10
         })
@@ -83,9 +102,9 @@ export class CommentController {
         sortBy: "likes" | "postedTime" = "postedTime",
         page = 0,
     ) =>
-        this.db.query.commentsTable.findMany({
-            where: (comment, {eq}) => eq(comment.levelId, levelId),
-            orderBy: (comment, {desc}) => [desc(sortBy === "likes" ? comment.likes : comment.postedTime)],
+        this.db.query?.commentsTable.findMany({
+            where: (comment, {eq}) => eq(comment?.levelId, levelId),
+            orderBy: (comment, {desc}) => [desc(sortBy === "likes" ? comment.likes : comment?.postedTime)],
             with: {
                 author: {
                     with: {role: true}
@@ -107,9 +126,9 @@ export class CommentController {
         sortBy: "likes" | "postedTime" = "postedTime",
         page = 0
     ) =>
-        this.db.query.commentsTable.findMany({
-            where: (comment, {eq}) => eq(comment.uid, uid),
-            orderBy: (comment, {desc}) => [desc(sortBy === "likes" ? comment.likes : comment.postedTime)],
+        this.db.query?.commentsTable.findMany({
+            where: (comment, {eq}) => eq(comment?.uid, uid),
+            orderBy: (comment, {desc}) => [desc(sortBy === "likes" ? comment.likes : comment?.postedTime)],
             limit: 10,
             offset: page * 10
         })
@@ -154,26 +173,26 @@ export class CommentController {
 
     deleteLevelComment = async (commentId: number, uid: number) => {
         await this.db.delete(commentsTable).where(and(
-            eq(commentsTable.id, commentId),
-            eq(commentsTable.uid, uid)
+            eq(commentsTable?.id, commentId),
+            eq(commentsTable?.uid, uid)
         ))
     }
 
     deleteAccountComment = async (commentId: number, uid: number) => {
         await this.db.delete(accountCommentsTable).where(and(
-            eq(accountCommentsTable.id, commentId),
-            eq(accountCommentsTable.uid, uid)
+            eq(accountCommentsTable?.id, commentId),
+            eq(accountCommentsTable?.uid, uid)
         ))
     }
 
     deleteLevelCommentByOwner = async (commentId: number, levelId: number) => {
         await this.db.delete(commentsTable).where(and(
-            eq(commentsTable.id, commentId),
-            eq(commentsTable.levelId, levelId)
+            eq(commentsTable?.id, commentId),
+            eq(commentsTable?.levelId, levelId)
         ))
     }
 
-    likeAccountComment = async (commentId: number, uid: number, action: "like" | "dislike") => {
+    likeAccountComment = async (event: H3Event, commentId: number, uid: number, action: "like" | "dislike") => {
         const actionController = new ActionController(this.db)
         if (await actionController.isItemLiked("account_comment", uid, commentId))
             return false
@@ -181,20 +200,21 @@ export class CommentController {
         await this.db.update(accountCommentsTable)
             .set({
                 likes: action === "like"
-                    ? sql`${accountCommentsTable.likes} + 1`
-                    : sql`${accountCommentsTable.likes} - 1`
+                    ? sql`${accountCommentsTable?.likes} + 1`
+                    : sql`${accountCommentsTable?.likes} - 1`
             })
-            .where(eq(accountCommentsTable.id, commentId))
+            .where(eq(accountCommentsTable?.id, commentId))
 
         await actionController.registerAction(
+            event,
             "like_account_comment",
             uid,
             commentId,
-            {action: action[0].toUpperCase() + action.slice(1)}
+            {action: action.charAt(0).toUpperCase() + action.slice(1)}
         )
     }
 
-    likeLevelComment = async (commentId: number, uid: number, action: "like" | "dislike") => {
+    likeLevelComment = async (event: H3Event, commentId: number, uid: number, action: "like" | "dislike") => {
         const actionController = new ActionController(this.db)
         if (await actionController.isItemLiked("comment", uid, commentId))
             return false
@@ -202,16 +222,12 @@ export class CommentController {
         await this.db.update(commentsTable)
             .set({
                 likes: action === "like"
-                    ? sql`${commentsTable.likes} + 1`
-                    : sql`${commentsTable.likes} - 1`
+                    ? sql`${commentsTable?.likes} + 1`
+                    : sql`${commentsTable?.likes} - 1`
             })
-            .where(eq(commentsTable.id, commentId))
+            .where(eq(commentsTable?.id, commentId))
 
-        await actionController.registerAction(
-            "like_comment",
-            uid,
-            commentId,
-            {action: action[0].toUpperCase() + action.slice(1)}
+        await actionController.registerAction(event, "like_comment", uid, commentId, {action: action.charAt(0).toUpperCase() + action.slice(1)}
         )
     }
 }

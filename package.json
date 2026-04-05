@@ -1,5 +1,6 @@
 {
   "name": "nitro-app",
+  "type": "module",
   "version": "0.7",
   "scripts": {
     "prepare": "nitro prepare",

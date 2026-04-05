@@ -1,3 +1,21 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
@@ -5,29 +23,30 @@ import {FriendshipController} from "~~/controller/FriendshipController";
 import {authHook} from "~/gdps_middleware/user_auth";
 import {ListController} from "~~/controller/ListController";
 import {MusicController} from "~~/controller/MusicController";
-import {Level, LevelWithUser} from "~~/controller/Level";
+import {Level, type LevelWithUser} from "~~/controller/Level";
+import {defineEventHandler, type H3Event} from 'nitro/h3';;
 
 const metrics = usePerformance()
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
-    onBeforeResponse: [
-        () => console.warn(metrics.getSteps())
-    ],
-
-    handler: async (event) => {
-        metrics.reset()
-        metrics.step("Read & parse body")
-        const form = await withPreparsedForm(event)
+export default defineEventHandler(async (event) => {
+    // Apply middleware
+    await initMiddleware(event);
+    
+    // TODO: Add metrics handling back for performance monitoring
+    // console.warn(metrics.getSteps())
+    
+    // metrics.reset()
+    // metrics.step("Read & parse body")
+    const form = await withPreparsedForm(event)
         const post = usePostObject<z.infer<typeof requestSchema>>(form)
         const {data, success, error} = requestSchema.safeParse(post)
         if (!success) {
             useLogger().warn(JSON.stringify(z.treeifyError(error)))
-            return await event.context.connector.error(-1, "Bad Request")
+            return await event.context.connector.error(event, -1, "Bad Request")
         }
 
 
-        const levelController = new LevelController(event.context.drizzle)
+        const levelController = new LevelController(event.context?.drizzle)
         const filter = levelController.getFilter()
 
         metrics.step("Search levels")
@@ -36,7 +55,7 @@ export default defineEventHandler({
             levels: Level<LevelWithUser>[],
             total: number
         } = {levels: [], total: 0}
-        switch (data.type) {
+        switch (data?.type) {
             case 1:
                 result = await filter.searchLevels("mostdownloaded", data)
                 break
@@ -71,9 +90,9 @@ export default defineEventHandler({
             case 13:
                 // Friend levels
                 if (!await authHook(event))
-                    return await event.context.connector.error(-1, "Not logged in")
-                const friendshipController = new FriendshipController(event.context.drizzle)
-                const friends = await friendshipController.getAccountFriendsIds(0, event.context.user)
+                    return await event.context.connector.error(event, -1, "Not logged in")
+                const friendshipController = new FriendshipController(event.context?.drizzle)
+                const friends = await friendshipController.getAccountFriendsIds(0, event.context?.user)
                 data.followed = friends
                 result = await filter.searchUserLevels(data, true)
                 break
@@ -90,8 +109,8 @@ export default defineEventHandler({
                 result = await filter.searchLevels("safe_event", data)
                 break
             case 25:
-                const listController = new ListController(event.context.drizzle)
-                const id = Number(data.str)
+                const listController = new ListController(event.context?.drizzle)
+                const id = Number(data?.str)
                 if (isNaN(id))
                     break
                 const list = await listController.getOneList(id)
@@ -114,31 +133,32 @@ export default defineEventHandler({
                 result = await filter.searchLevels("mostliked", data)
         }
 
-        if (result.levels.length === 0)
-            return await event.context.connector.error(-2, "No levels found")
+        if (result?.levels.length === 0)
+            return await event.context.connector.error(event, -2, "No levels found")
 
         metrics.step("Get levels data")
 
         metrics.step("Get music")
-        const musicController = new MusicController(event.context.drizzle)
+        const musicController = new MusicController(event.context?.drizzle)
         const music = await musicController.getSongBulk(
-            result.levels
+            event,
+            result?.levels
                 .filter(level => level.$.songId>0)
                 .map(level => level.$.songId)
         )
         metrics.step("Send response")
-        return await event.context.connector.levels.getSearchedLevels(
-            result.levels, music, result.total, data.page, post.gauntlet>0
+        return await event.context.connector?.levels.getSearchedLevels(
+            result?.levels, music, result?.total, data?.page, post.gauntlet>0
         )
 
     }
-})
+)
 
 export const requestSchema = z.object({
     uuid: z.string().optional(),
-    type: z.coerce.number().optional().default(0),
-    page: z.coerce.number().nonnegative().optional().default(0),
-    gameVersion: z.coerce.number().optional().default(1),
+    type: z?.coerce.number().optional().default(0),
+    page: z?.coerce.number().nonnegative().optional().default(0),
+    gameVersion: z?.coerce.number().optional().default(1),
     str: z.string().optional().default("").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
@@ -152,7 +172,7 @@ export const requestSchema = z.object({
                 .filter(v=>v.trim()) // Cleans empty values
                 .map(v=>parseInt(v))
         ),
-    demonFilter: z.coerce.number().nonnegative().optional(),
+    demonFilter: z?.coerce.number().nonnegative().optional(),
     len: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
         .optional().default("")
@@ -163,8 +183,8 @@ export const requestSchema = z.object({
                 .filter(v=>v.trim()) // Cleans empty values
                 .map(v=>parseInt(v))
         ),
-    uncompleted: z.coerce.number().optional().default(0),
-    onlyCompleted: z.coerce.number().optional().default(0),
+    uncompleted: z?.coerce.number().optional().default(0),
+    onlyCompleted: z?.coerce.number().optional().default(0),
     completedLevels: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
         .optional().default("")
@@ -175,18 +195,18 @@ export const requestSchema = z.object({
                 .filter(v=>v.trim()) // Cleans empty values
                 .map(v=>parseInt(v))
         ),
-    featured: z.coerce.number().optional().default(0),
-    epic: z.coerce.number().optional().default(0),
-    mythic: z.coerce.number().optional().default(0),
-    legendary: z.coerce.number().optional().default(0),
-    original: z.coerce.number().optional().default(0),
-    twoPlayer: z.coerce.number().optional().default(0),
-    coins: z.coerce.number().optional().default(0),
-    star: z.coerce.number().optional().default(0),
-    noStar: z.coerce.number().optional().default(0),
-    song: z.coerce.number().optional(),
-    songCustom: z.coerce.number().optional(),
-    gauntlet: z.coerce.number().optional().default(0),
+    featured: z?.coerce.number().optional().default(0),
+    epic: z?.coerce.number().optional().default(0),
+    mythic: z?.coerce.number().optional().default(0),
+    legendary: z?.coerce.number().optional().default(0),
+    original: z?.coerce.number().optional().default(0),
+    twoPlayer: z?.coerce.number().optional().default(0),
+    coins: z?.coerce.number().optional().default(0),
+    star: z?.coerce.number().optional().default(0),
+    noStar: z?.coerce.number().optional().default(0),
+    song: z?.coerce.number().optional(),
+    songCustom: z?.coerce.number().optional(),
+    gauntlet: z?.coerce.number().optional().default(0),
     followed: z.string().nonempty()
         .regex(/^(\d(?:,\d)*|-)$/) // x,y,z... or - (empty)
         .optional().default("")

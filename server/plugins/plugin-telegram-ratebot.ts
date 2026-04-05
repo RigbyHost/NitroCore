@@ -1,154 +1,140 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import { definePlugin } from "nitro";
 import { LevelController } from "~~/controller/LevelController";
 import type { LevelWithUser } from "~~/controller/Level";
 import type { MaybeUndefined } from "~/utils/types";
-import { ActionData } from "~~/drizzle";
+import type { ActionData } from "~~/drizzle";
 
-type TelegramRateBotConfig = {
+type TelegramRateBotModuleConfig = {
     botToken: string,
-    chatId: number | string,
-    disableNotification?: boolean,
-    threadId?: number,
-    apiBaseUrl?: string
+    chatId: string,
+    threadId?: string
 }
 
-type DifficultyDescriptor = {
-    name: string,
-    stars: number
-}
-
-export default defineNitroPlugin(() => {
-    useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
-        try {
-            await sendTelegramRateNotification(targetId, uid, data)
-        } catch (error) {
-            useLogger().warn(`[TelegramRateBot] ${(error as Error).message}`)
-        }
-    })
-})
-
-const sendTelegramRateNotification = async (targetId: number, uid: number, data: ActionData) => {
-    const actionType = data.type || ""
-    if (!actionType.startsWith("Rate:"))
-        return
-
-    const suffix = actionType.slice(5).toLowerCase()
-    if (!suffix || suffix === "reset")
-        return
-
-    const { config: serverConfig, drizzle } = useEventContext()
-
-    if (!serverConfig.ServerConfig.EnableModules?.["telegram_ratebot"])
-        return
-
-    const moduleConfig = serverConfig.ServerConfig.ModuleConfig?.["telegram_ratebot"] as MaybeUndefined<TelegramRateBotConfig>
-    if (!moduleConfig?.botToken || !moduleConfig.chatId)
-        return
-
-    const telegramBase = (moduleConfig.apiBaseUrl || "https://api.telegram.org").replace(/\/$/, "")
-    const levelController = new LevelController(drizzle)
-    const level = await levelController.getOneLevel(targetId)
-    if (!level)
-        return
-
-    const message = buildTelegramMessage(level.$, {
-        moderator: data.uname || `Пользователь #${uid}`, // data.uname is in ActionData
-        serverId: serverConfig.ServerConfig.SrvID
-    })
-
-    const body: Record<string, unknown> = {
-        chat_id: moduleConfig.chatId,
-        text: message,
-        disable_notification: moduleConfig.disableNotification ?? false,
+const resolveDifficulty = (stars: number, demonDifficulty: number): string => {
+    if (stars === 0) return "⚪ Unrated"
+    if (stars === 1) return "🔵 Auto"
+    if (stars <= 3) return "🟢 Easy"
+    if (stars <= 6) return "🟡 Normal"
+    if (stars <= 8) return "🟠 Hard"
+    if (stars === 9) return "🔴 Harder"
+    if (stars === 10) {
+        if (demonDifficulty === 3) return "👹 Easy Demon"
+        if (demonDifficulty === 4) return "👹 Medium Demon"
+        if (demonDifficulty === 5) return "👹 Hard Demon"
+        if (demonDifficulty === 6) return "👹 Insane Demon"
+        if (demonDifficulty === 7) return "👹 Extreme Demon"
+        return "👹 Demon"
     }
-    if (moduleConfig.threadId)
-        body.message_thread_id = moduleConfig.threadId
+    return "🟣 Insane"
+}
 
+const resolveEpic = (epicness: number): string => {
+    if (epicness === 0) return "❌ Not epic"
+    if (epicness === 1) return "⭐ Epic"
+    if (epicness === 2) return "🏆 Legendary"
+    if (epicness === 3) return "💎 Mythic"
+    return `⭐ Epic tier ${epicness}`
+}
+
+const sendTelegramMessage = async (cfg: TelegramRateBotModuleConfig, level: LevelWithUser, meta: {
+    serverId?: string,
+    moderator: string,
+    actionDescriptor: string
+}) => {
     try {
-        await $fetch(`${telegramBase}/bot${moduleConfig.botToken}/sendMessage`, {
-            method: "POST" as any,
-            body
+        const message = createTelegramMessage(level, meta)
+        
+        const url = `https://api.telegram.org/bot${cfg.botToken}/sendMessage`
+        const params = new URLSearchParams({
+            chat_id: cfg.chatId,
+            text: message,
+            parse_mode: "HTML",
+            disable_web_page_preview: "true"
+        })
+
+        if (cfg.threadId) {
+            params.append("message_thread_id", cfg.threadId)
+        }
+
+        await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: params.toString()
         })
     } catch (error) {
         useLogger().error(`[TelegramRateBot] Failed to send message: ${(error as Error).message}`)
     }
 }
 
-const buildTelegramMessage = (
-    level: LevelWithUser,
-    meta: { moderator: string, serverId?: string }
-) => {
-    const difficulty = describeDifficulty(level.starsGot ?? 0, level.demonDifficulty ?? -1)
-    const creator = level.author?.username || `Пользователь #${level.ownerUid}`
-    const coins = formatCoins(level.coins ?? 0, level.userCoins ?? 0)
-    const feature = level.isFeatured ? "Да" : "Нет"
-    const epic = resolveEpic(level.epicness ?? 0)
+const createTelegramMessage = (level: LevelWithUser, meta: {
+    serverId?: string,
+    moderator: string,
+    actionDescriptor: string
+}): string => {
+    const rating = Math.max(level.starsGot ?? 0, 0)
+    const difficulty = resolveDifficulty(rating, level.demonDifficulty ?? -1)
+    const featureState = level.isFeatured ? "✅ Featured" : "❌ Not featured"
+    const epicTier = resolveEpic(level.epicness ?? 0)
 
-    const lines = [
-        `⭐ Оценка уровня от ${meta.moderator}`,
-        `• Название: ${level.name}`,
-        `• ID: ${level.id}`,
-        `• Автор: ${creator}`,
-        `• Сложность: ${difficulty.name}`,
-        `• Звёзды: ${difficulty.stars}`,
-        `• Фича: ${feature}`,
-        ...(epic !== "Нет" ? [`• Эпик: ${epic}`] : []),
-        `• Монеты: ${coins}`,
-        meta.serverId ? `• Сервер: ${meta.serverId}` : undefined,
-    ].filter(Boolean)
+    const levelUrl = meta.serverId 
+        ? `https://${meta.serverId}.geometrydash.dev/level/${level.id}`
+        : `Level ID: ${level.id}`
 
-    return lines.join("\n")
+    return `
+🎮 <b>${meta.actionDescriptor}: ${level.name}</b>
+
+👤 <b>Creator:</b> ${level.user?.username || "Unknown"}
+${difficulty} (<b>${rating}</b> ⭐)
+
+${featureState}
+${epicTier}
+
+👮‍♂️ <b>Moderator:</b> ${meta.moderator}
+
+🔗 ${levelUrl}
+    `.trim()
 }
 
-const describeDifficulty = (stars: number, demonDifficulty: number): DifficultyDescriptor => {
-    if (!stars)
-        return { name: "Unrated", stars: 0 }
-    if (stars === 1)
-        return { name: "Auto", stars }
-    if (stars === 2)
-        return { name: "Easy", stars }
-    if (stars === 3)
-        return { name: "Normal", stars }
-    if (stars === 4 || stars === 5)
-        return { name: "Hard", stars }
-    if (stars === 6 || stars === 7)
-        return { name: "Harder", stars }
-    if (stars === 8 || stars === 9)
-        return { name: "Insane", stars }
-    if (stars >= 10)
-        return { name: resolveDemonLabel(demonDifficulty), stars }
+export default definePlugin(() => {
+    useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
+        const config = useServerConfig()?.modules?.telegramRateBot as MaybeUndefined<TelegramRateBotModuleConfig>
+        if (!config?.botToken || !config?.chatId) return
 
-    // Fallback should be theoretically unreachable given the cases above cover 0..inf
-    // (ignoring negative numbers which shouldn't exist)
-    return { name: "Unknown", stars }
-}
+        try {
+            const levelController = new LevelController()
+            const level = await levelController.getLevelByIdWithUser(targetId)
+            if (!level) return
 
-const resolveDemonLabel = (value: number) => {
-    const map: Record<number, string> = {
-        0: "Easy Demon",
-        1: "Medium Demon",
-        2: "Hard Demon",
-        4: "Extreme Demon",
-    }
-    return map[value] || "Insane Demon"
-}
+            const actionType = (data as any)?.type as string
+            const moderator = (data as any)?.uname as string
 
-const resolveEpic = (value: number) => {
-    switch (value) {
-        case 1:
-            return "Эпик"
-        case 2:
-            return "Легендарный"
-        case 3:
-            return "Мифический"
-        default:
-            return "Нет"
-    }
-}
-
-const formatCoins = (verified: number, userCoins: number) => {
-    if (!userCoins)
-        return "Нет пользовательских монет"
-    if (verified >= userCoins)
-        return `${userCoins}/${userCoins} подтверждены`
-    return `${verified}/${userCoins} подтверждены`
-}
+            await sendTelegramMessage(config, level, {
+                serverId: useServerConfig()?.serverId,
+                moderator: moderator || "Unknown",
+                actionDescriptor: actionType || "Level rated"
+            })
+        } catch (error) {
+            useLogger().error(`[TelegramRateBot] Error processing level rate: ${(error as Error).message}`)
+        }
+    })
+})

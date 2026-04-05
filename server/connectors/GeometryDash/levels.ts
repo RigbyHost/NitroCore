@@ -1,6 +1,24 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {levelpacksTable, songsTable} from "~~/drizzle";
-import {Level, LevelWithUser} from "~~/controller/Level";
-import {List, ListWithUser} from "~~/controller/List";
+import {type LevelWithUser, Level} from "~~/controller/Level";
+import {type ListWithUser, List} from "~~/controller/List";
 
 
 function hexToRgb(color: string): string {
@@ -21,23 +39,22 @@ export const GDConnectorLevels = {
         let hashstr = ""
         const data = mappacks.map(
             mappack => {
-                const id = mappack.id.toString()
-                hashstr += `${id[0]}${id[id.length - 1]}${mappack.packStars}${mappack.packCoins}`
-                const rgb = hexToRgb(mappack.packColor)
+                const id = mappack?.id.toString()
+                hashstr += `${id[0]}${id[id.length - 1]}${mappack?.packStars}${mappack?.packCoins}`
+                const rgb = hexToRgb(mappack?.packColor)
                 return [
-                    1, mappack.id,
-                    2, mappack.packName,
-                    3, mappack.levels.join(","),
-                    4, mappack.packStars,
-                    5, mappack.packCoins,
-                    6, mappack.packDifficulty,
+                    1, mappack?.id,
+                    2, mappack?.packName,
+                    3, mappack?.levels.join(","),
+                    4, mappack?.packStars,
+                    5, mappack?.packCoins,
+                    6, mappack?.packDifficulty,
                     7, rgb,
                     8, rgb
                 ].join(":")
             }
         ).join("|")
         return `${data}#${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(hashstr)}`
-        )
     },
 
     getGauntlets: async (
@@ -46,16 +63,15 @@ export const GDConnectorLevels = {
         let hashstr = ""
         const data = gauntlets.map(
             gauntlet => {
-                hashstr += `${gauntlet.packName}${gauntlet.levels.join(",")}`
+                hashstr += `${gauntlet?.packName}${gauntlet?.levels.join(",")}`
                 return [
-                    1, gauntlet.packName,
-                    3, gauntlet.levels.join(","),
+                    1, gauntlet?.packName,
+                    3, gauntlet?.levels.join(","),
                 ].join(":")
             }
         ).join("|")
 
         return `${data}#${useGeometryDashTooling().hashSolo2(hashstr)}`
-        )
     },
 
     getFullLevel: async (
@@ -132,7 +148,6 @@ export const GDConnectorLevels = {
                     "#", useGeometryDashTooling().hashSolo2(hashstr),
                     suffix
                 )
-        )
     },
 
     getSearchedLevels: async (
@@ -147,13 +162,13 @@ export const GDConnectorLevels = {
         const userMeta: Array<string> = []
         const songMeta = songs.map(
             song => [
-                1, song.id,
-                2, song.name,
+                1, song?.id,
+                2, song?.name,
                 3, 1,
-                4, song.artist,
-                5, song.size.toFixed(2),
+                4, song?.artist,
+                5, song?.size.toFixed(2),
                 6, "",
-                10, encodeURI(song.url)
+                10, encodeURI(song?.url)
             ].join("~|~").replaceAll("#", "")
         ).join("~:~")
 
@@ -190,11 +205,12 @@ export const GDConnectorLevels = {
             if (gauntlet)
                 levelArr.push(44, 1)
             levelsOutput.push(levelArr.join(":"))
+            const levelIdStr = level.$.id?.toString() || "0"
             levelHashMeta.push(
-                level.$.id.toString()[0] +
-                level.$.id.toString()[level.$.id.toString().length - 1] +
-                level.$.starsGot +
-                (level.$.coins > 0 ? 1 : 0)
+                levelIdStr[0] +
+                levelIdStr[levelIdStr.length - 1] +
+                (level.$.starsGot || 0) +
+                ((level.$.coins || 0) > 0 ? 1 : 0)
             )
             userMeta.push(
                 level.$.ownerUid + ":" +
@@ -207,7 +223,6 @@ export const GDConnectorLevels = {
             `${userMeta.join("|")}#` +
             `${songMeta}#` +
             `${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(levelHashMeta.join(""))}`
-        )
     },
 
     getSearchedLists: async (
@@ -249,7 +264,6 @@ export const GDConnectorLevels = {
         return `${listOutput.join("|")}#` +
             `${userMeta.join("|")}#` +
             `${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2("All hackers gain epic")}`
-        )
 
     }
 }

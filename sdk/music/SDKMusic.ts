@@ -1,7 +1,25 @@
-import {SDKMusicProvider, SDKMusicReturn} from "./types";
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
+import {type SDKMusicProvider, type SDKMusicReturn} from "./types";
 import {songsTable} from "~~/drizzle";
 import {ctx} from "./context";
-
+import {type H3Event} from "nitro/h3";
 export class SDKMusic {
     private providers: Map<string, SDKMusicProvider> = new Map()
 
@@ -23,15 +41,18 @@ export class SDKMusic {
     }
 
     // type:id => [PROVIDER:type] => results
-    getMusic = async (id: number): Promise<Nullable<typeof songsTable.$inferSelect>> => {
-        const db = useEvent().context.drizzle
+    getMusic = async (event: H3Event, id: number): Promise<Nullable<typeof songsTable.$inferSelect>> => {
+        const db = event.context.drizzle
         const music = await db.query.songsTable.findFirst({
-            where: (song, {eq}) => eq(song.id, id)
+            where: (song, {eq}) => eq(song?.id, id)
         })
         if (!music) return null
 
         const arn = music.url.split(/:(.*)/s)
-        const provider = this.providers.get(arn[0])
+        const providerId = arn?.[0]
+        if (!providerId) return null
+        
+        const provider = this.providers.get(providerId)
         if (!provider) return null
 
         return {
@@ -42,25 +63,28 @@ export class SDKMusic {
                     song: music,
                     songs: [music]
                 },
-                () => provider.getMusicById(arn[1])
+                () => provider.getMusicById(arn?.[1] || "")
             )
         }
     }
 
     // [type:id][] => Parallel[type] => [PROVIDER:type] => results => Aggregate [results]
     //                               ↘  [PROVIDER:type] => results ↗
-    getMusicBulk = async (ids: number[]): Promise<typeof songsTable.$inferSelect[]> => {
-        const db = useEvent().context.drizzle
+    getMusicBulk = async (event: H3Event, ids: number[]): Promise<typeof songsTable.$inferSelect[]> => {
+        const db = event.context.drizzle
         const music = await db.query.songsTable.findMany({
-            where: (song, {inArray}) => inArray(song.id, ids)
+            where: (song, {inArray}) => inArray(song?.id, ids)
         })
-        if (!music.length) return []
+        if (!music?.length) return []
 
         const sortedTracks = new Map<string, typeof music>()
         music.forEach((track) => {
-            const arn = track.url.split(/:(.*)/s)
-            const arr = sortedTracks.get(arn[0]) || []
-            sortedTracks.set(arn[0], arr.concat(track))
+            const arn = track?.url.split(/:(.*)/s)
+            const providerId = arn?.[0]
+            if (!providerId) return // Skip tracks without valid provider
+            
+            const arr = sortedTracks.get(providerId) || []
+            sortedTracks.set(providerId, arr.concat(track))
         })
 
         const result: SDKMusicReturn[] = []
@@ -77,15 +101,15 @@ export class SDKMusic {
                     songs: songs
                 },
                 () => provider.getBulkMusicById(songs.map(
-                    s=> s.url.split(/:(.*)/s)[1]
-                ))
+                    s=> s?.url.split(/:(.*)/s)[1]
+                ).filter((id): id is string => Boolean(id)))
             )
             result.push(...meta)
         }
 
         return music.map(
             mus => {
-                const resolved = result.find(r => r.originalUrl === mus.url)
+                const resolved = result.find(r => r.originalUrl === mus?.url)
                 if (!resolved) return mus
                 return {
                     ...mus,

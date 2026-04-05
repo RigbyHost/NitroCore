@@ -1,3 +1,21 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {
     accountCommentsTable,
     commentsTable,
@@ -6,52 +24,53 @@ import {
     rolesTable, songsTable,
     usersTable
 } from "~~/drizzle";
-import {Level, LevelWithUser} from "~~/controller/Level";
-import {User, UserWithRole} from "~~/controller/User";
+import type {H3Event} from 'nitro/h3'
+import {type LevelWithUser, Level} from "~~/controller/Level";
+import {type UserWithRole, User} from "~~/controller/User";
 import {ScoresController} from "~~/controller/ScoresController";
-import {List, ListWithUser} from "~~/controller/List";
+import {type ListWithUser, List} from "~~/controller/List";
 
 export interface IConnector {
 
-    error: (code: number, message: string) => Promise<void>,
-    success: (message: string) => Promise<void>,
-    numberedSuccess: (code: number, message: string) => Promise<void>,
+    error: (event: H3Event, code: number, message: string) => Promise<string>,
+    success: (event: H3Event, message: string) => Promise<string>,
+    numberedSuccess: (event: H3Event, code: number, message: string) => Promise<string>,
     account: {
-        sync: (savedata: string) => Promise<void>,
-        login: (uid: number) => Promise<void>,
+        sync: (savedata: string) => Promise<string>,
+        login: (uid: number) => Promise<string>,
     },
     comments: {
         getAccountComments: (
             comments: typeof accountCommentsTable.$inferSelect[],
             count: number,
             page: number
-        ) => Promise<void>,
+        ) => Promise<string>,
         getLevelComments: (
             comments: ILevelComment[],
             count: number,
             page: number
-        ) => Promise<void>,
+        ) => Promise<string>,
         getCommentHistory: (
             comments: typeof commentsTable.$inferSelect[],
             user: typeof usersTable.$inferSelect,
             role: MaybeUndefined<typeof rolesTable.$inferSelect>,
             count: number,
             page: number
-        ) => Promise<void>,
-        commentCommandResult: (result: string) => Promise<void>,
+        ) => Promise<string>,
+        commentCommandResult: (result: string) => Promise<string>,
     },
 
     messages: {
         getOneMessage: (
             message: typeof messagesTable.$inferSelect,
             user: typeof usersTable.$inferSelect,
-        ) => Promise<void>,
+        ) => Promise<string>,
         getAllMessages: (
             messages: IMessage[],
             mode: "sent" | "received",
             count: number,
             page: number
-        ) => Promise<void>
+        ) => Promise<string>
     },
 
     profile: {
@@ -60,9 +79,9 @@ export interface IConnector {
             mode: "sent" | "received",
             count: number,
             page: number
-        ) => Promise<void>,
+        ) => Promise<string>,
 
-        getUserSearch: (users: Array<User>, page: number, total: number) => Promise<void>,
+        getUserSearch: (users: Array<User>, page: number, total: number) => Promise<string>,
 
         getUserInfo: (
             user: User<UserWithRole>,
@@ -72,9 +91,9 @@ export interface IConnector {
                 friend_requests: number,
                 messages: number
             }
-        ) => Promise<void>,
+        ) => Promise<string>,
 
-        getUsersList: (users: Array<User>) => Promise<void>,
+        getUsersList: (users: Array<User>) => Promise<string>,
     },
 
     levels: {
@@ -82,18 +101,18 @@ export interface IConnector {
             mappacks: typeof levelpacksTable.$inferSelect[],
             count: number,
             page: number
-        ) => Promise<void>,
+        ) => Promise<string>,
 
         getGauntlets: (
             gauntlets: typeof levelpacksTable.$inferSelect[],
-        ) => Promise<void>,
+        ) => Promise<string>,
 
         getFullLevel: (
             level: Level<LevelWithUser>,
             password: string,
             passwordHashable: string,
             questID?: number,
-        ) => Promise<void>,
+        ) => Promise<string>,
 
         getSearchedLevels: (
             levels: Array<Level<LevelWithUser>>,
@@ -101,13 +120,13 @@ export interface IConnector {
             count: number,
             page: number,
             gauntlet: boolean
-        ) => Promise<void>,
+        ) => Promise<string>,
 
         getSearchedLists: (
             lists: Array<List<ListWithUser>>,
             count: number,
             page: number,
-        ) => Promise<void>
+        ) => Promise<string>
     },
 
     quests: {
@@ -116,30 +135,31 @@ export interface IConnector {
             uid: number,
             chk: string,
             udid: string
-        ) => Promise<void>,
+        ) => Promise<string>,
 
         getRewards: (
+            event: H3Event,
             user: User,
             udid: string,
             chk: string,
             smallLeft: number,
             bigLeft: number,
             chestType: number
-        ) => Promise<void>,
+        ) => Promise<string>,
 
-        getSpecialLevel: (id: number, left: number) => Promise<void>
+        getSpecialLevel: (id: number, left: number) => Promise<string>
     },
 
     scores: {
-        getLeaderboard: (users: User[]) => Promise<void>,
+        getLeaderboard: (users: User[]) => Promise<string>,
         getScoresForLevel: (
             scores: Awaited<ReturnType<ScoresController["getScoresForLevel"]>>,
             mode: "coins" | "attempts" | "default"
-        ) => Promise<void>
+        ) => Promise<string>
     },
 
-    getSongInfo: (music: typeof songsTable.$inferSelect) => Promise<void>,
-    getTopArtists: (artists: string[], page: number, total: number) => Promise<void>
+    getSongInfo: (music: typeof songsTable.$inferSelect) => Promise<string>,
+    getTopArtists: (artists: string[], page: number, total: number) => Promise<string>
 }
 
 export type ILevelComment = typeof commentsTable.$inferSelect & {

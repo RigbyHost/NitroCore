@@ -1,3 +1,21 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {LevelController} from "~~/controller/LevelController";
 import {
     eq,
@@ -17,7 +35,7 @@ import {
 import {levelsTable, mappingValues} from "~~/drizzle";
 import {z} from "zod";
 import {requestSchema} from "~/routes/[srvid]/db/getGJLevels.php.post";
-import {Level, LevelWithUser} from "~~/controller/Level";
+import {Level, type LevelWithUser} from "~~/controller/Level";
 
 
 export class LevelFilter {
@@ -30,15 +48,15 @@ export class LevelFilter {
     }
 
     private filterParser = (data: z.infer<typeof requestSchema>) => {
-        let filters: SQL[] = [lte(levelsTable.versionGame, data.gameVersion)]
+        let filters: SQL[] = [lte(levelsTable?.versionGame, data?.gameVersion)]
         let orderBy: SQL[] = []
 
-        if (data.diff.length) {
+        if (data.diff?.length) {
             const diffs: number[] = []
-            data.diff.forEach(diff => {
+            data?.diff.forEach(diff => {
                 switch (diff) {
                     case -2:
-                        switch (data.demonFilter) {
+                        switch (data?.demonFilter) {
                             case 1:
                                 data.demonFilter = 3
                                 return
@@ -75,63 +93,66 @@ export class LevelFilter {
 
             if (data.demonFilter !== undefined) {
                 if (data.demonFilter === 0)
-                    filters.push(gte(levelsTable.demonDifficulty, 0))
+                    filters.push(gte(levelsTable?.demonDifficulty, 0))
                 else
-                    filters.push(eq(levelsTable.demonDifficulty, data.demonFilter))
+                    filters.push(eq(levelsTable?.demonDifficulty, data?.demonFilter))
             } else {
                 filters.push(
-                    eq(levelsTable.demonDifficulty, -1),
-                    inArray(levelsTable.difficulty, diffs)
+                    eq(levelsTable?.demonDifficulty, -1),
+                    inArray(levelsTable?.difficulty, diffs)
                 )
             }
         }
 
-        if (data.len.length)
-            filters.push(inArray(levelsTable.length, data.len))
+        if (data.len?.length)
+            filters.push(inArray(levelsTable?.length, data?.len))
 
-        if (data.onlyCompleted || data.uncompleted) {
-            if (data.completedLevels) {
+        if (data.onlyCompleted || data?.uncompleted) {
+            if (data?.completedLevels) {
                 const fn = data.uncompleted ? notInArray : inArray
-                filters.push(fn(levelsTable.id, data.completedLevels))
+                filters.push(fn(levelsTable?.id, data?.completedLevels))
             }
         }
 
         const rateFilters: SQL<unknown>[] = []
-        if (data.featured)
-            rateFilters.push(eq(levelsTable.isFeatured, true))
-        if (data.epic)
-            rateFilters.push(eq(levelsTable.epicness, 1))
-        if (data.mythic)
-            rateFilters.push(eq(levelsTable.epicness, 2))
-        if (data.legendary)
-            rateFilters.push(eq(levelsTable.epicness, 3))
+        if (data?.featured)
+            rateFilters.push(eq(levelsTable?.isFeatured, true))
+        if (data?.epic)
+            rateFilters.push(eq(levelsTable?.epicness, 1))
+        if (data?.mythic)
+            rateFilters.push(eq(levelsTable?.epicness, 2))
+        if (data?.legendary)
+            rateFilters.push(eq(levelsTable?.epicness, 3))
 
         if (rateFilters.length > 0) {
-            if (rateFilters.length === 1)
-                filters.push(rateFilters[0])
-            else
-                filters.push(or(...rateFilters)!)
+            if (rateFilters.length === 1) {
+                const filter = rateFilters[0]
+                if (filter) filters.push(filter)
+            } else {
+                const combinedFilter = or(...rateFilters)
+                if (combinedFilter) filters.push(combinedFilter)
+            }
         }
 
-        if (data.coins)
-            filters.push(gt(levelsTable.coins, 0))
+        if (data?.coins)
+            filters.push(gt(levelsTable?.coins, 0))
 
-        if (data.star || data.noStar) {
+        if (data.star || data?.noStar) {
             const fn = data.noStar ? eq : gt
-            filters.push(fn(levelsTable.starsGot, 0))
+            filters.push(fn(levelsTable?.starsGot, 0))
         }
 
         // TODO: check if this works correctly
         if (data.song !== undefined) {
-            if (data.songCustom) {
+            if (data?.songCustom) {
                 // For custom songs, songId is 0 and trackId is (song + 1)
                 filters.push(
-                    eq(levelsTable.songId, 0),
-                    eq(levelsTable.trackId, data.song + 1)
+                    eq(levelsTable?.songId, 0),
+                    eq(levelsTable?.trackId, data.song + 1)
                 )
             } else {
                 // For official songs, use the song ID directly
-                filters.push(eq(levelsTable.songId, data.song))
+                filters.push(eq(levelsTable?.songId, data?.song))
             }
         }
 
@@ -149,38 +170,38 @@ export class LevelFilter {
 
         switch (mode) {
             case "mostliked":
-                orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
+                orderBy.push(desc(levelsTable?.likes), desc(levelsTable?.downloads))
                 break
             case "mostdownloaded":
-                orderBy.push(desc(levelsTable.downloads), desc(levelsTable.likes))
+                orderBy.push(desc(levelsTable?.downloads), desc(levelsTable?.likes))
                 break
             case "trending":
-                filters.push(sql`${levelsTable.uploadDate} > (CURRENT_DATE - INTERVAL '7' DAY)`)
-                orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
+                filters.push(sql`${levelsTable?.uploadDate} > (CURRENT_DATE - INTERVAL '7' DAY)`)
+                orderBy.push(desc(levelsTable?.likes), desc(levelsTable?.downloads))
                 break
             case "latest":
-                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                orderBy.push(desc(levelsTable?.uploadDate), desc(levelsTable?.downloads))
                 break
             case "magic":
                 filters.push(
-                    gte(levelsTable.objects, 10_000),
-                    gte(levelsTable.length, 3),
-                    eq(levelsTable.originalId, 0)
+                    gte(levelsTable?.objects, 10_000),
+                    gte(levelsTable?.length, 3),
+                    eq(levelsTable?.originalId, 0)
                 )
-                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                orderBy.push(desc(levelsTable?.uploadDate), desc(levelsTable?.downloads))
                 break
             case "sent":
                 filters.push(sql`
-                    ${levelsTable.id} IN (
+                    ${levelsTable?.id} IN (
                         SELECT ${sql.raw(`"rateQueue"."lvl_id"`)}
                         FROM "rateQueue"
                     )
                 `)
-                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                orderBy.push(desc(levelsTable?.uploadDate), desc(levelsTable?.downloads))
                 break
             case "hall":
-                filters.push(gte(levelsTable.epicness, 1))
-                orderBy.push(desc(levelsTable.likes), desc(levelsTable.downloads))
+                filters.push(gte(levelsTable?.epicness, 1))
+                orderBy.push(desc(levelsTable?.likes), desc(levelsTable?.downloads))
                 break
             // SAFE
             case "safe_daily":
@@ -188,52 +209,52 @@ export class LevelFilter {
                     EXISTS (
                         SELECT 1
                         FROM "quests"
-                        WHERE "quests"."lvl_id" = ${levelsTable.id}
-                          AND "quests"."type" = ${mappingValues.daily}
+                        WHERE "quests"."lvl_id" = ${levelsTable?.id}
+                          AND "quests"."type" = ${mappingValues?.daily}
                     )
                 `)
-                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                orderBy.push(desc(levelsTable?.uploadDate), desc(levelsTable?.downloads))
                 break
             case "safe_weekly":
                 filters.push(sql`
                     EXISTS (
                         SELECT 1
                         FROM "quests"
-                        WHERE "quests"."lvl_id" = ${levelsTable.id}
-                          AND "quests"."type" = ${mappingValues.weekly}
+                        WHERE "quests"."lvl_id" = ${levelsTable?.id}
+                          AND "quests"."type" = ${mappingValues?.weekly}
                     )
                 `)
-                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                orderBy.push(desc(levelsTable?.uploadDate), desc(levelsTable?.downloads))
                 break
             case "safe_event":
                 filters.push(sql`
                     EXISTS (
                         SELECT 1
                         FROM "quests"
-                        WHERE "quests"."lvl_id" = ${levelsTable.id}
-                          AND "quests"."type" = ${mappingValues.event}
+                        WHERE "quests"."lvl_id" = ${levelsTable?.id}
+                          AND "quests"."type" = ${mappingValues?.event}
                     )
                 `)
-                orderBy.push(desc(levelsTable.uploadDate), desc(levelsTable.downloads))
+                orderBy.push(desc(levelsTable?.uploadDate), desc(levelsTable?.downloads))
                 break
             default:
                 return {levels: [], total: 0}
         }
 
-        if (data.str) {
+        if (data?.str) {
             // Search logic
-            const id = Number(data.str)
+            const id = Number(data?.str)
             if (!isNaN(id)) {
-                filters.push(eq(levelsTable.id, id))
+                filters.push(eq(levelsTable?.id, id))
             } else {
                 filters.push(
-                    eq(levelsTable.unlistedType, 0),
-                    ilike(levelsTable.name, `%${data.str}%`)
+                    eq(levelsTable?.unlistedType, 0),
+                    ilike(levelsTable?.name, `%${data?.str}%`)
                 )
             }
         } else {
             // Just clowning around
-            filters.push(eq(levelsTable.unlistedType, 0))
+            filters.push(eq(levelsTable?.unlistedType, 0))
         }
 
         // Copied from LevelController. In theory should prevent sorting issues
@@ -244,7 +265,7 @@ export class LevelFilter {
         const colS = {} as Record<Col, true>
         Object.keys(columns).forEach(key => colS[key as Col] = true)
 
-        const levels = await this.db.query.levelsTable.findMany({
+        const levels = await this.db.query?.levelsTable.findMany({
             columns: colS,
             with: {
                 author: {
@@ -276,28 +297,28 @@ export class LevelFilter {
     }> => {
         const {filters, orderBy} = this.filterParser(data)
 
-        if (data.str) {
-            const id = Number(data.str)
-            if (followMode && data.followed) {
+        if (data?.str) {
+            const id = Number(data?.str)
+            if (followMode && data?.followed) {
                 if (!isNaN(id)) {
-                    filters.push(eq(levelsTable.id, id))
+                    filters.push(eq(levelsTable?.id, id))
                 } else {
                     filters.push(
-                        eq(levelsTable.unlistedType, 0),
-                        ilike(levelsTable.name, `%${data.str}%`)
+                        eq(levelsTable?.unlistedType, 0),
+                        ilike(levelsTable?.name, `%${data?.str}%`)
                     )
                 }
-                filters.push(inArray(levelsTable.ownerUid, data.followed))
+                filters.push(inArray(levelsTable?.ownerUid, data?.followed))
             } else {
                 if (!isNaN(id)) {
-                    filters.push(eq(levelsTable.ownerUid, id))
+                    filters.push(eq(levelsTable?.ownerUid, id))
                 }
             }
         } else {
-            if (followMode && data.followed) {
+            if (followMode && data?.followed) {
                 filters.push(
-                    eq(levelsTable.unlistedType, 0),
-                    inArray(levelsTable.ownerUid, data.followed)
+                    eq(levelsTable?.unlistedType, 0),
+                    inArray(levelsTable?.ownerUid, data?.followed)
                 )
             }
         }
@@ -310,7 +331,7 @@ export class LevelFilter {
         const colS = {} as Record<Col, true>
         Object.keys(columns).forEach(key => colS[key as Col] = true)
 
-        const levels = await this.db.query.levelsTable.findMany({
+        const levels = await this.db.query?.levelsTable.findMany({
             columns: colS,
             where: and(...filters),
             with: {
@@ -341,16 +362,16 @@ export class LevelFilter {
     }> => {
         const {filters, orderBy} = this.filterParser(data)
 
-        if (data.str) {
+        if (data?.str) {
             const strSchema = z.string().nonempty()
                 .regex(/^(\d+(?:,\d+)*|-)$/) // x,y,z... or - (empty)
                 .optional().transform(
                     value => value === "-" ? "" : value
                 )
 
-            if (strSchema.safeParse(data.str).success) {
-                const ids = data.str.split(",").map(id => Number(id))
-                filters.push(inArray(levelsTable.id, ids))
+            if (strSchema.safeParse(data?.str).success) {
+                const ids = data?.str.split(",").map(id => Number(id))
+                filters.push(inArray(levelsTable?.id, ids))
 
                 // Copied from LevelController. In theory should prevent sorting issues
                 // I can't think of cleaner way to do this with query API
@@ -360,7 +381,7 @@ export class LevelFilter {
                 const colS = {} as Record<Col, true>
                 Object.keys(columns).forEach(key => colS[key as Col] = true)
 
-                const levels = await this.db.query.levelsTable.findMany({
+                const levels = await this.db.query?.levelsTable.findMany({
                     columns: colS,
                     where: and(...filters),
                     with: {

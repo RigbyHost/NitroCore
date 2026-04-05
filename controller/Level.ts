@@ -1,10 +1,29 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {LevelController} from "~~/controller/LevelController";
 import {commentsTable, downloadsTable, levelsTable, rateQueueTable, usersTable} from "~~/drizzle";
 import {diff} from "deep-object-diff";
 import {and, eq, sql} from "drizzle-orm";
-import {MakeOptional} from "~/utils/types";
+import {type MakeOptional} from "~/utils/types";
 import {z} from "zod";
 import {ActionController} from "~~/controller/ActionController";
+import type {H3Event} from "nitro/h3";
 export type LevelType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
 export type LevelWithUser = LevelType & {
     author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">
@@ -95,26 +114,22 @@ export class Level<T extends LevelType = LevelType> {
         this.$.epicness = variative.indexOf(type)
     }
 
-    likeLevel = async (uid: number, action: "like" | "dislike") => {
+    likeLevel = async (event: H3Event, uid: number, action: "like" | "dislike") => {
         const actionController = new ActionController(this.db)
         if (await actionController.isItemLiked("level", uid, this.$.id))
             throw new Error("You have already liked/disliked this level")
         if (action === "like") {
             await this.db.update(levelsTable)
-                .set({likes: sql`${levelsTable.likes}+1`})
-                .where(eq(levelsTable.id, this.$.id))
+                .set({likes: sql`${levelsTable?.likes}+1`})
+                .where(eq(levelsTable?.id, this.$.id))
             this.$.likes++
         } else {
             await this.db.update(levelsTable)
-                .set({likes: sql`${levelsTable.likes}-1`})
-                .where(eq(levelsTable.id, this.$.id))
+                .set({likes: sql`${levelsTable?.likes}-1`})
+                .where(eq(levelsTable?.id, this.$.id))
             this.$.likes--
         }
-        await actionController.registerAction(
-            "like_level",
-            uid,
-            this.$.id,
-            {type: action === "like" ? "Like" : "Dislike"}
+        await actionController.registerAction(event, "like_level", uid, this.$.id, {type: action === "like" ? "Like" : "Dislike"}
         )
     }
 
@@ -133,8 +148,8 @@ export class Level<T extends LevelType = LevelType> {
 
     requestRateByModerator = async (modUid: number, stars: number, featured: boolean) => {
         const cnt = await this.db.$count(rateQueueTable, and(
-            eq(rateQueueTable.modUid, modUid),
-            eq(rateQueueTable.levelId, this.$.id),
+            eq(rateQueueTable?.modUid, modUid),
+            eq(rateQueueTable?.levelId, this.$.id),
         ))
         if (cnt > 0)
             throw new Error("You have already requested a rating for this level")
@@ -153,11 +168,11 @@ export class Level<T extends LevelType = LevelType> {
             id: this.$.id,
             ip: ip
         }).onConflictDoNothing().returning()
-        if (!verify.length)
+        if (!verify?.length)
             return
         await this.db.update(levelsTable)
-            .set({downloads: sql`${levelsTable.downloads}+1`})
-            .where(eq(levelsTable.id, this.$.id))
+            .set({downloads: sql`${levelsTable?.downloads}+1`})
+            .where(eq(levelsTable?.id, this.$.id))
     }
 
     validate = () => {
@@ -168,28 +183,29 @@ export class Level<T extends LevelType = LevelType> {
     create = async () => {
         const id = await this.db.insert(levelsTable)
             .values(this.$ as typeof levelsTable.$inferInsert)
-            .returning({id: levelsTable.id})
+            .returning({id: levelsTable?.id})
+        if (!id[0]?.id) throw new Error("Failed to create level")
         this.$.id = id[0].id
         return this.$.id
     }
 
     commit = async () => {
         const deltas = diff(this.original, this.$) as typeof levelsTable.$inferSelect
-        if (deltas.expandableStore)
+        if (deltas?.expandableStore)
             deltas.expandableStore = this.$.expandableStore
         await this.db.update(levelsTable)
             .set(deltas)
-            .where(eq(levelsTable.id, this.$.id))
+            .where(eq(levelsTable?.id, this.$.id))
     }
 
     delete = async () => {
         // TODO: Implement relations for CASCADE delete
         await this.db.delete(levelsTable)
-            .where(eq(levelsTable.id, this.$.id))
+            .where(eq(levelsTable?.id, this.$.id))
         await this.db.delete(rateQueueTable)
-            .where(eq(rateQueueTable.levelId, this.$.id))
+            .where(eq(rateQueueTable?.levelId, this.$.id))
         await this.db.delete(commentsTable)
-            .where(eq(commentsTable.levelId, this.$.id))
+            .where(eq(commentsTable?.levelId, this.$.id))
     }
 }
 
@@ -208,11 +224,11 @@ const validateSchema = z.object({
     starsRequested: z.number().gte(0).lte(10),
     userCoins: z.number().gte(0).lte(3),
 }).check(evt => {
-    if (evt.value.objects < 100 && !ALLOW_LESS_THAN_100_OBJECTS)
-        evt.issues.push({
+    if (evt?.value.objects < 100 && !ALLOW_LESS_THAN_100_OBJECTS)
+        evt?.issues.push({
             code: "custom",
             message: "Objects must be at least 100",
-            input: evt.value
+            input: evt?.value
         })
 })
 

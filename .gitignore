@@ -9,3 +9,14 @@ dist
 .env.local
 coverage
 .DS_Store
+
+# Ignore JS files compiled from TS (except in node_modules)
+*.js
+!node_modules/**/*.js
+
+# Temporary files
+*.cjs
+fix_*.js
+build_output.txt
+final_errors.txt
+errors.txt

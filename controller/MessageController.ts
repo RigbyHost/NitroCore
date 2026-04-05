@@ -1,3 +1,21 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {messagesTable} from "~~/drizzle";
 import {and, eq, or} from "drizzle-orm";
 import {z} from "zod";
@@ -17,8 +35,8 @@ export class MessageController {
     }
 
     getOneMessage = async (id: number, withUsers = false) => {
-        const message = await this.db.query.messagesTable.findFirst({
-            where: (message, operators) => operators.eq(message.id, id),
+        const message = await this.db.query?.messagesTable.findFirst({
+            where: (message, operators) => operators.eq(message?.id, id),
             with: withUsers ? {
                 sender: {columns: {username: true}},
                 receiver: {columns: {username: true}}
@@ -31,7 +49,7 @@ export class MessageController {
         total: number,
         messages: (typeof messagesTable.$inferSelect & {username: string})[]
     }> => {
-        const filter = type === "sent" ? eq(messagesTable.uidSrc, uid) : eq(messagesTable.uidDest, uid)
+        const filter = type === "sent" ? eq(messagesTable?.uidSrc, uid) : eq(messagesTable?.uidDest, uid)
 
         const count = await this.db.$count(messagesTable, filter)
         if (!count)
@@ -40,9 +58,9 @@ export class MessageController {
                 messages: []
             }
 
-        const messages = await this.db.query.messagesTable.findMany({
+        const messages = await this.db.query?.messagesTable.findMany({
             where: filter,
-            orderBy: (message, operators) => operators.desc(message.postedTime), // TODO: Need to check
+            orderBy: (message, operators) => operators.desc(message?.postedTime), // TODO: Need to check
             limit: 10,
             offset: page*10,
             with: {
@@ -55,7 +73,7 @@ export class MessageController {
             total: count,
             messages: messages.map(m => ({
                 ...m,
-                username: (type === "sent" ? m.sender.username : m.receiver.username) || "[DELETED]",
+                username: (type === "sent" ? m?.sender.username : m.receiver?.username) || "[DELETED]",
                 sender: undefined,
                 receiver: undefined
             }))
@@ -63,11 +81,11 @@ export class MessageController {
     }
 
     countMessages = async (uid: number, isNew: boolean) => {
-        const filter = eq(messagesTable.uidDest, uid)
+        const filter = eq(messagesTable?.uidDest, uid)
         return this.db.$count(
             messagesTable,
             isNew
-                ? and(filter, eq(messagesTable.isNew, true))
+                ? and(filter, eq(messagesTable?.isNew, true))
                 : filter
         )
     }
@@ -75,8 +93,8 @@ export class MessageController {
     deleteMessage = async (id: number, uid: number) => {
         await this.db.delete(messagesTable).where(
             and(
-                eq(messagesTable.id, id),
-                or(eq(messagesTable.uidDest, uid), eq(messagesTable.uidSrc, uid))
+                eq(messagesTable?.id, id),
+                or(eq(messagesTable?.uidDest, uid), eq(messagesTable?.uidSrc, uid))
             )
         )
     }
@@ -88,15 +106,15 @@ export class MessageController {
 
         const userController = new UserController(this.db)
         const friendshipController = new FriendshipController(this.db)
-        const receiver = await userController.getOneUser({uid: message.uidDest})
+        const receiver = await userController.getOneUser({uid: message?.uidDest})
         if (!receiver)
             return false
 
-        if (receiver.$.settings.mS === 2 || receiver.$.blacklistedUsers?.includes(message.uidSrc))
+        if (receiver.$.settings.mS === 2 || receiver.$.blacklistedUsers?.includes(message?.uidSrc))
             return false
 
         if (receiver.$.settings.mS === 2) {
-            if (!await friendshipController.isAlreadyFriends(message.uidSrc, message.uidDest))
+            if (!await friendshipController.isAlreadyFriends(message?.uidSrc, message?.uidDest))
                 return false
         }
 

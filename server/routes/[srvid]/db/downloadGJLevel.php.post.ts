@@ -1,37 +1,56 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
 import {UserController} from "~~/controller/UserController";
 import {QuestsController} from "~~/controller/QuestsController";
+import {defineEventHandler, type H3Event} from 'nitro/h3';;
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
-
-    handler: async (event) => {
-        const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
+export default defineEventHandler(async (event) => {
+    // Apply middleware
+    await initMiddleware(event);
+    
+    const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success, error} = requestSchema.safeParse(post)
         if (!success) {
             useLogger().warn(JSON.stringify(z.treeifyError(error)))
-            return await event.context.connector.error(-1, "Bad Request")
+            return await event.context.connector.error(event, -1, "Bad Request")
         }
 
-        const levelController = new LevelController(event.context.drizzle)
+        const levelController = new LevelController(event.context?.drizzle)
 
         let questID = 0
         if (data.levelID < 0) {
-            const questsController = new QuestsController(event.context.drizzle)
+            const questsController = new QuestsController(event.context?.drizzle)
             const quest = await questsController.getOneQuest({
-                numericType: data.levelID
+                numericType: data?.levelID
             })
             if (!quest)
-                return await event.context.connector.error(-2, "Quest not found")
+                return await event.context.connector.error(event, -2, "Quest not found")
             questID = quest.id
-            data.levelID = quest.levelId
+            data.levelID = quest?.levelId
         }
 
-        const level = await levelController.getOneLevel(data.levelID, true)
+        const level = await levelController.getOneLevel(data?.levelID, true)
         if (!level)
-            return await event.context.connector.error(-2, "Level not found")
+            return await event.context.connector.error(event, -2, "Level not found")
 
         await level.onDownload(event.context.clientAddress!)
 
@@ -45,11 +64,11 @@ export default defineEventHandler({
         }
 
         // Auth for no password
-        const userController = new UserController(event.context.drizzle)
-        const user = await userController.performGJPAuth()
+        const userController = new UserController(event.context?.drizzle)
+        const user = await userController.performGJPAuth(event)
         if (user) {
             const role = await user.fetchRole()
-            if (role && role.privileges.cLvlAccess) {
+            if (role && role.privileges?.cLvlAccess) {
                 Buffer.from(
                     useGeometryDashTooling().doXOR("1", "26364"),
                     "utf-8"
@@ -94,10 +113,10 @@ export default defineEventHandler({
             ).toString("base64")
         }
 
-        await event.context.connector.levels.getFullLevel(level, password, hashablePassword, questID)
+        await event.context.connector?.levels.getFullLevel(level, password, hashablePassword, questID)
     }
-})
+)
 
 export const requestSchema = z.object({
-    levelID: z.coerce.number(),
+    levelID: z?.coerce.number(),
 })

@@ -1,3 +1,21 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
@@ -5,69 +23,72 @@ import {LevelController} from "~~/controller/LevelController";
 import {Level} from "~~/controller/Level";
 import {levelsTable} from "~~/drizzle";
 import {ActionController} from "~~/controller/ActionController";
+import {defineEventHandler, type H3Event} from 'nitro/h3';;
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authMiddleware],
-
-    handler: async (event) => {
+export default defineEventHandler(async (event) => {
+    // Apply middleware
+    await initMiddleware(event);
+    await authMiddleware(event);
+    
         const form = await withPreparsedForm(event)
         const post = usePostObject<z.infer<typeof requestSchema>>(form)
         const {data, success, error} = requestSchema.safeParse(post)
         if (!success) {
             useLogger().warn(JSON.stringify(z.treeifyError(error)))
-            return await event.context.connector.error(-1, "Bad Request")
+            return await event.context.connector.error(event, -1, "Bad Request")
         }
 
-        const levelController = new LevelController(event.context.drizzle)
-        const actionController = new ActionController(event.context.drizzle)
+        const levelController = new LevelController(event.context?.drizzle)
+        const actionController = new ActionController(event.context?.drizzle)
 
         const levelConfig = {
             ownerUid: event.context.user!.$.uid,
             versionGame: await useGeometryDashTooling().getGDVersionFromBody(form),
-            versionBinary: data.binaryVersion,
-            stringLevel: data.levelString,
-            name: data.levelName,
-            description: data.levelDesc,
-            version: data.levelVersion,
-            length: data.levelLength,
-            trackId: data.audioTrack,
-            songId: data.songID,
-            password: data.password.toString(),
-            originalId: data.original,
-            objects: data.objects,
-            userCoins: data.coins,
-            starsRequested: data.requestedStars,
+            versionBinary: data?.binaryVersion,
+            stringLevel: data?.levelString,
+            name: data?.levelName,
+            description: data?.levelDesc,
+            version: data?.levelVersion,
+            length: data?.levelLength,
+            trackId: data?.audioTrack,
+            songId: data?.songID,
+            password: data?.password.toString(),
+            originalId: data?.original,
+            objects: data?.objects,
+            userCoins: data?.coins,
+            starsRequested: data?.requestedStars,
             is2player: data.twoPlayer>0,
-            unlistedType: data.unlisted,
+            unlistedType: data?.unlisted,
             isLDM: data.ldm>0,
             expandableStore: {
-                extra_string: data.extraString,
-                ts: data.ts,
+                extra_string: data?.extraString,
+                ts: data?.ts,
             },
-            stringLevelInfo: data.levelInfo,
-            stringSettings: `${data.songIDs};${data.sfxIDs}`
+            stringLevelInfo: data?.levelInfo,
+            stringSettings: `${data?.songIDs};${data?.sfxIDs}`
         } as typeof levelsTable.$inferSelect
 
 
-        if (data.unlisted1)
+        if (data?.unlisted1)
             levelConfig.unlistedType = data.unlisted1
         levelConfig.unlistedType = levelConfig.unlistedType % 2 + data.unlisted2 % 2
 
-        if (data.levelID) {
+        if (data?.levelID) {
             // Update level
-            const level = await levelController.getOneLevel(data.levelID)
+            const level = await levelController.getOneLevel(data?.levelID)
             if (!level)
-                return await event.context.connector.error(-1, "Level not found")
+                return await event.context.connector.error(event, -1, "Level not found")
             if (!level.isOwnedBy(event.context.user!.$.uid))
-                return await event.context.connector.error(-1, "You are not the owner of this level")
+                return await event.context.connector.error(event, -1, "You are not the owner of this level")
             level.$ = {
                 ...level.$,
                 ...levelConfig
             }
             if (!level.validate())
-                return await event.context.connector.error(-1, "Invalid level data")
+                return await event.context.connector.error(event, -1, "Invalid level data")
             await level.commit()
             await actionController.registerAction(
+                event,
                 "level_update",
                 event.context.user!.$.uid,
                 level.$.id,
@@ -81,9 +102,10 @@ export default defineEventHandler({
         } else {
             const level = new Level(levelController, levelConfig)
             if (!level.validate())
-                return await event.context.connector.error(-1, "Invalid level data")
+                return await event.context.connector.error(event, -1, "Invalid level data")
             data.levelID = await level.create()
             await actionController.registerAction(
+                event,
                 "level_upload",
                 event.context.user!.$.uid,
                 level.$.id,
@@ -96,10 +118,11 @@ export default defineEventHandler({
             )
         }
 
-        await event.context.connector.numberedSuccess(data.levelID, "Level uploaded successfully")
+        await event.context.connector.numberedSuccess(event, data?.levelID, "Level uploaded successfully")
 
     }
-})
+)
+
 
 export const requestSchema = z.object({
     levelString: z.string().min(1).transform(
@@ -111,33 +134,33 @@ export const requestSchema = z.object({
     levelDesc: z.string().optional().default("").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
-    levelVersion: z.coerce.number().positive().optional().default(1),
-    levelLength: z.coerce.number().optional().default(0),
-    audioTrack: z.coerce.number().optional().default(0),
-    songID: z.coerce.number().optional().default(0),
-    password: z.coerce.number().optional().default(0),
-    original: z.coerce.number().optional().default(0),
-    objects: z.coerce.number().optional().default(0),
-    coins: z.coerce.number().optional().default(0),
-    requestedStars: z.coerce.number().optional().default(1),
-    twoPlayer: z.coerce.number().optional().default(0),
-    unlisted: z.coerce.number().optional().default(0),
-    unlisted1: z.coerce.number().optional().default(0),
-    unlisted2: z.coerce.number().optional().default(0),
-    ldm: z.coerce.number().optional().default(0),
+    levelVersion: z?.coerce.number().positive().optional().default(1),
+    levelLength: z?.coerce.number().optional().default(0),
+    audioTrack: z?.coerce.number().optional().default(0),
+    songID: z?.coerce.number().optional().default(0),
+    password: z?.coerce.number().optional().default(0),
+    original: z?.coerce.number().optional().default(0),
+    objects: z?.coerce.number().optional().default(0),
+    coins: z?.coerce.number().optional().default(0),
+    requestedStars: z?.coerce.number().optional().default(1),
+    twoPlayer: z?.coerce.number().optional().default(0),
+    unlisted: z?.coerce.number().optional().default(0),
+    unlisted1: z?.coerce.number().optional().default(0),
+    unlisted2: z?.coerce.number().optional().default(0),
+    ldm: z?.coerce.number().optional().default(0),
     extraString: z.string().optional().default("29_29_29_40_29_29_29_29_29_29_29_29_29_29_29_29").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
-    ts: z.coerce.number().optional().default(0),
+    ts: z?.coerce.number().optional().default(0),
     levelInfo: z.string().optional().default("").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
-    binaryVersion: z.coerce.number().optional().default(0),
-    levelID: z.coerce.number().optional(),
-    songIDs: z.coerce.string().optional().default("").transform(
+    binaryVersion: z?.coerce.number().optional().default(0),
+    levelID: z?.coerce.number().optional(),
+    songIDs: z?.coerce.string().optional().default("").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
-    sfxIDs: z.coerce.string().optional().default("").transform(
+    sfxIDs: z?.coerce.string().optional().default("").transform(
         value => useGeometryDashTooling().clearGDRequest(value)
     ),
 })

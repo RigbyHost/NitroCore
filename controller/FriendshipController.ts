@@ -1,3 +1,21 @@
+/**
+ * NitroCore - GDPS (Geometry Dash Private Server) implementation
+ * Copyright (C) 2025 M41den <https://m41den.dev> and Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www?.gnu.org/licenses/>.
+ */
+
 import {friendRequestsTable, friendshipsTable} from "~~/drizzle";
 import {and, eq, SQL} from "drizzle-orm";
 import {UserController} from "~~/controller/UserController";
@@ -20,22 +38,22 @@ export class FriendshipController {
 
     hasAlreadySentFriendRequest = async (uid: number, targetId: number): Promise<boolean> => {
         const count = await this.db.$count(friendRequestsTable, and(
-            eq(friendRequestsTable.uidSrc, uid),
-            eq(friendRequestsTable.uidDest, targetId),
+            eq(friendRequestsTable?.uidSrc, uid),
+            eq(friendRequestsTable?.uidDest, targetId),
         ))
         return count > 0
     }
 
     countFriendRequests = async (targetId: number, isNew: boolean): Promise<number> => {
-        let filter: SQL = eq(friendRequestsTable.uidDest, targetId)
+        let filter: SQL = eq(friendRequestsTable?.uidDest, targetId)
         if (isNew)
-            filter = and(filter, eq(friendRequestsTable.isNew, true))!
+            filter = and(filter, eq(friendRequestsTable?.isNew, true))!
         return this.db.$count(friendRequestsTable, filter)
     }
     getFriendRequests = async (uid: number, type: "sent" | "received", page = 0) => {
         // TODO: Subject to optimization in `with` to ignore anything besides auth, stats and vessels
-        return this.db.query.friendRequestsTable.findMany({
-            where: (req, {eq}) => eq(type === "sent" ? req.uidSrc : req.uidDest, uid),
+        return this.db.query?.friendRequestsTable.findMany({
+            where: (req, {eq}) => eq(type === "sent" ? req.uidSrc : req?.uidDest, uid),
             limit: 10,
             offset: page * 10,
             with: {
@@ -46,18 +64,18 @@ export class FriendshipController {
     }
 
     getOneFriendship = async (uid: number, targetId: number): Promise<Nullable<typeof friendshipsTable.$inferSelect>> => {
-        const friendship = await this.db.query.friendshipsTable.findFirst({
+        const friendship = await this.db.query?.friendshipsTable.findFirst({
             where: (friendship, {eq, and, or}) => or(
-                and(eq(friendship.uid1, uid), eq(friendship.uid2, targetId)),
-                and(eq(friendship.uid1, targetId), eq(friendship.uid2, uid))
+                and(eq(friendship?.uid1, uid), eq(friendship?.uid2, targetId)),
+                and(eq(friendship?.uid1, targetId), eq(friendship?.uid2, uid))
             )
         })
         return friendship || null
     }
 
     getOneFriendshipById = async (friendshipId: number): Promise<Nullable<typeof friendshipsTable.$inferSelect>> => {
-        const friendship = await this.db.query.friendshipsTable.findFirst({
-            where: (friendship, {eq}) => eq(friendship.id, friendshipId)
+        const friendship = await this.db.query?.friendshipsTable.findFirst({
+            where: (friendship, {eq}) => eq(friendship?.id, friendshipId)
         })
         return friendship || null
     }
@@ -69,11 +87,11 @@ export class FriendshipController {
         const u1 = await userController.getOneUser({uid: uid})
         const u2 = await userController.getOneUser({uid: targetId})
         if (!u1 || !u2) return
-        u1.friendships.remove(friendship.id)
-        u2.friendships.remove(friendship.id)
+        u1?.friendships.remove(friendship?.id)
+        u2?.friendships.remove(friendship?.id)
         await u1.commit()
         await u2.commit()
-        await this.db.delete(friendshipsTable).where(eq(friendshipsTable.id, friendship.id))
+        await this.db.delete(friendshipsTable).where(eq(friendshipsTable?.id, friendship?.id))
     }
 
     getAccountFriendsIds = async (
@@ -90,7 +108,7 @@ export class FriendshipController {
             const friendship = await this.getOneFriendshipById(friendshipId)
             if (!friendship) continue
             friendsIds.push(
-                friendship.uid1 === uid ? friendship.uid2 : friendship.uid1
+                friendship.uid1 === uid ? friendship.uid2 : friendship?.uid1
             )
         }
         return friendsIds
@@ -102,8 +120,8 @@ export class FriendshipController {
                 isNew: false
             })
             .where(and(
-                eq(friendRequestsTable.id, reqestId),
-                eq(friendRequestsTable.uidDest, uid)
+                eq(friendRequestsTable?.id, reqestId),
+                eq(friendRequestsTable?.uidDest, uid)
             ))
     }
 
@@ -129,25 +147,25 @@ export class FriendshipController {
     }
 
     acceptFriendRequest = async (requestId: number, uid: number) => {
-        const request = await this.db.query.friendRequestsTable.findFirst({
-            where: (request, {eq}) => eq(request.id, requestId)
+        const request = await this.db.query?.friendRequestsTable.findFirst({
+            where: (request, {eq}) => eq(request?.id, requestId)
         })
 
-        if (!request || request.uidSrc === request.uidDest || uid !== request.uidDest)
+        if (!request || request.uidSrc === request.uidDest || uid !== request?.uidDest)
             return false
 
         const friendshipId = await this.db.insert(friendshipsTable).values({
             uid1: request.uidSrc,
             uid2: request.uidDest,
-        }).returning({id: friendshipsTable.id})
+        }).returning({id: friendshipsTable?.id})
 
         const userController = new UserController(this.db)
 
-        await this.db.delete(friendRequestsTable).where(eq(friendRequestsTable.id, requestId))
+        await this.db.delete(friendRequestsTable).where(eq(friendRequestsTable?.id, requestId))
 
         const user1 = await userController.getOneUser({uid: request.uidSrc})
         const user2 = await userController.getOneUser({uid: request.uidDest})
-        if (!user1 || !user2) return false
+        if (!user1 || !user2 || !friendshipId[0]) return false
 
         user1.friendships.add(friendshipId[0].id)
         user2.friendships.add(friendshipId[0].id)
@@ -159,17 +177,17 @@ export class FriendshipController {
     }
 
     deleteFriendRequest = async (uid: number, targetId: number, sender = false) => {
-        const request = await this.db.query.friendRequestsTable.findFirst({
+        const request = await this.db.query?.friendRequestsTable.findFirst({
             where: (request, {eq, and}) => and(
-                eq(request.uidSrc, sender ? uid : targetId),
-                eq(request.uidDest, sender ? targetId : targetId)
+                eq(request?.uidSrc, sender ? uid : targetId),
+                eq(request?.uidDest, sender ? targetId : targetId)
             )
         })
 
-        if (!request || request.uidSrc === request.uidDest || uid !== request.uidDest)
+        if (!request || request.uidSrc === request.uidDest || uid !== request?.uidDest)
             return false
 
-        await this.db.delete(friendRequestsTable).where(eq(friendRequestsTable.id, request.id))
+        await this.db.delete(friendRequestsTable).where(eq(friendRequestsTable?.id, request?.id))
 
         return true
     }
