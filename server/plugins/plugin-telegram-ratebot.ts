@@ -16,13 +16,18 @@ type DifficultyDescriptor = {
     stars: number
 }
 
+const maskBotToken = (token: string) => {
+    if (!token || token.length <= 8) return "****"
+    return `${token.slice(0, 4)}...${token.slice(-4)}`
+}
+
 export default defineNitroPlugin(() => {
     useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
-        useLogger().info(`[TelegramRateBot] Received level_rate event for level ID ${targetId} by user ID ${uid}`)
+        useLogger().info(`[TelegramRateBot] Received level_rate event for level ID ${targetId} by user ID ${uid}. Action data: ${JSON.stringify(data)}`)
         try {
             await sendTelegramRateNotification(targetId, uid, data)
-        } catch (error) {
-            useLogger().warn(`[TelegramRateBot] ${(error as Error).message}`)
+        } catch (error: any) {
+            useLogger().warn(`[TelegramRateBot] Error during message dispatch: ${error?.stack || error?.message || error}`)
         }
     })
 })
@@ -74,16 +79,26 @@ const sendTelegramRateNotification = async (targetId: number, uid: number, data:
     if (moduleConfig.threadId)
         body.message_thread_id = moduleConfig.threadId
 
-    useLogger().info(`[TelegramRateBot] Sending rate notification for level ID ${targetId} ('${level.$.name}') to Telegram chat ${moduleConfig.chatId}`)
+    const safeToken = maskBotToken(moduleConfig.botToken)
+    useLogger().info(`[TelegramRateBot] Sending rate notification for level ID ${targetId} ('${level.$.name}') to Telegram chat ${moduleConfig.chatId} via bot token ${safeToken}`)
+    useLogger().info(`[TelegramRateBot] Request payload: ${JSON.stringify(body)}`)
 
     try {
-        await $fetch(`${telegramBase}/bot${moduleConfig.botToken}/sendMessage`, {
+        const response = await $fetch.raw(`${telegramBase}/bot${moduleConfig.botToken}/sendMessage`, {
             method: "POST" as any,
             body
         })
-        useLogger().info(`[TelegramRateBot] Successfully sent Telegram rate notification for level ID ${targetId}`)
-    } catch (error) {
-        useLogger().error(`[TelegramRateBot] Failed to send message: ${(error as Error).message}`)
+        useLogger().info(`[TelegramRateBot] Successfully sent Telegram rate notification for level ID ${targetId}. Response HTTP ${response.status} ${response.statusText}`)
+    } catch (error: any) {
+        useLogger().error(`[TelegramRateBot] Failed to send Telegram message for level ID ${targetId}: ${error.message}`)
+        if (error.response) {
+            useLogger().error(`[TelegramRateBot] HTTP Status: ${error.response.status} ${error.response.statusText}`)
+            const errData = error.response._data || error.response.data
+            useLogger().error(`[TelegramRateBot] Response body: ${typeof errData === 'object' ? JSON.stringify(errData) : errData}`)
+        }
+        if (error.cause) {
+            useLogger().error(`[TelegramRateBot] Cause: ${error.cause}`)
+        }
     }
 }
 

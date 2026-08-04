@@ -26,13 +26,17 @@ const difficultyPalette: Record<string, number> = {
     demon: 0x8c2eff
 }
 
+const maskWebhookUrl = (url: string) => {
+    return url.replace(/\/webhooks\/(\d+)\/([\w-]+)/, "/webhooks/$1/****")
+}
+
 export default defineNitroPlugin(() => {
     useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
-        useLogger().info(`[DiscordRateBot] Received level_rate event for level ID ${targetId} by user ID ${uid}`)
+        useLogger().info(`[DiscordRateBot] Received level_rate event for level ID ${targetId} by user ID ${uid}. Action data: ${JSON.stringify(data)}`)
         try {
             await dispatchDiscordRateWebhook(targetId, uid, data)
-        } catch (error) {
-            useLogger().warn(`[DiscordRateBot] ${(error as Error).message}`)
+        } catch (error: any) {
+            useLogger().warn(`[DiscordRateBot] Error during webhook dispatch: ${error?.stack || error?.message || error}`)
         }
     })
 })
@@ -83,16 +87,26 @@ const dispatchDiscordRateWebhook = async (targetId: number, uid: number, data: A
         }
     )
 
-    useLogger().info(`[DiscordRateBot] Dispatching rate webhook for level ID ${targetId} ('${level.$.name}')`)
+    const safeUrl = maskWebhookUrl(moduleConfig.webhookUrl)
+    useLogger().info(`[DiscordRateBot] Dispatching rate webhook for level ID ${targetId} ('${level.$.name}') to ${safeUrl}`)
+    useLogger().info(`[DiscordRateBot] Webhook payload: ${JSON.stringify(webhookBody)}`)
 
     try {
-        await $fetch(moduleConfig.webhookUrl, {
+        const response = await $fetch.raw(moduleConfig.webhookUrl, {
             method: "POST" as any,
             body: webhookBody
         })
-        useLogger().info(`[DiscordRateBot] Successfully sent webhook for level ID ${targetId}`)
-    } catch (error) {
-        useLogger().error(`[DiscordRateBot] Failed to send webhook: ${(error as Error).message}`)
+        useLogger().info(`[DiscordRateBot] Successfully sent webhook for level ID ${targetId}. Response HTTP ${response.status} ${response.statusText}`)
+    } catch (error: any) {
+        useLogger().error(`[DiscordRateBot] Failed to send webhook for level ID ${targetId}: ${error.message}`)
+        if (error.response) {
+            useLogger().error(`[DiscordRateBot] HTTP Status: ${error.response.status} ${error.response.statusText}`)
+            const errData = error.response._data || error.response.data
+            useLogger().error(`[DiscordRateBot] Response body: ${typeof errData === 'object' ? JSON.stringify(errData) : errData}`)
+        }
+        if (error.cause) {
+            useLogger().error(`[DiscordRateBot] Cause: ${error.cause}`)
+        }
     }
 }
 
