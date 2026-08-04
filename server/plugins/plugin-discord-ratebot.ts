@@ -28,6 +28,7 @@ const difficultyPalette: Record<string, number> = {
 
 export default defineNitroPlugin(() => {
     useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
+        useLogger().info(`[DiscordRateBot] Received level_rate event for level ID ${targetId} by user ID ${uid}`)
         try {
             await dispatchDiscordRateWebhook(targetId, uid, data)
         } catch (error) {
@@ -38,29 +39,39 @@ export default defineNitroPlugin(() => {
 
 const dispatchDiscordRateWebhook = async (targetId: number, uid: number, data: ActionData) => {
     const actionType = data.type || ""
-    if (!actionType.startsWith("Rate:"))
+    if (!actionType.startsWith("Rate:")) {
+        useLogger().info(`[DiscordRateBot] Ignored action type '${actionType}' (does not start with 'Rate:')`)
         return
+    }
 
     const actionSuffix = actionType.slice(5).toLowerCase()
-    if (!actionSuffix || actionSuffix === "reset")
+    if (!actionSuffix || actionSuffix === "reset") {
+        useLogger().info(`[DiscordRateBot] Ignored action suffix '${actionSuffix}'`)
         return
+    }
 
     const { config: serverConfig, drizzle } = useEventContext()
 
-    if (!serverConfig.ServerConfig.EnableModules?.["discord_ratebot"])
+    if (!serverConfig.ServerConfig.EnableModules?.["discord_ratebot"]) {
+        useLogger().info(`[DiscordRateBot] Module 'discord_ratebot' is disabled in server config`)
         return
+    }
 
     const moduleConfig = serverConfig.ServerConfig.ModuleConfig?.["discord_ratebot"] as MaybeUndefined<DiscordRateBotModuleConfig>
-    if (!moduleConfig?.webhookUrl)
+    if (!moduleConfig?.webhookUrl) {
+        useLogger().info(`[DiscordRateBot] Webhook URL is not configured`)
         return
+    }
 
     if (!moduleConfig.webhookUrl.startsWith("http"))
         throw new Error("Webhook URL must be absolute")
 
     const levelController = new LevelController(drizzle)
     const level = await levelController.getOneLevel(targetId)
-    if (!level)
+    if (!level) {
+        useLogger().info(`[DiscordRateBot] Level ID ${targetId} not found in database`)
         return
+    }
 
     const webhookBody = createWebhookBody(
         moduleConfig,
@@ -72,11 +83,14 @@ const dispatchDiscordRateWebhook = async (targetId: number, uid: number, data: A
         }
     )
 
+    useLogger().info(`[DiscordRateBot] Dispatching rate webhook for level ID ${targetId} ('${level.$.name}')`)
+
     try {
         await $fetch(moduleConfig.webhookUrl, {
             method: "POST" as any,
             body: webhookBody
         })
+        useLogger().info(`[DiscordRateBot] Successfully sent webhook for level ID ${targetId}`)
     } catch (error) {
         useLogger().error(`[DiscordRateBot] Failed to send webhook: ${(error as Error).message}`)
     }

@@ -18,6 +18,7 @@ type DifficultyDescriptor = {
 
 export default defineNitroPlugin(() => {
     useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
+        useLogger().info(`[TelegramRateBot] Received level_rate event for level ID ${targetId} by user ID ${uid}`)
         try {
             await sendTelegramRateNotification(targetId, uid, data)
         } catch (error) {
@@ -28,27 +29,37 @@ export default defineNitroPlugin(() => {
 
 const sendTelegramRateNotification = async (targetId: number, uid: number, data: ActionData) => {
     const actionType = data.type || ""
-    if (!actionType.startsWith("Rate:"))
+    if (!actionType.startsWith("Rate:")) {
+        useLogger().info(`[TelegramRateBot] Ignored action type '${actionType}' (does not start with 'Rate:')`)
         return
+    }
 
     const suffix = actionType.slice(5).toLowerCase()
-    if (!suffix || suffix === "reset")
+    if (!suffix || suffix === "reset") {
+        useLogger().info(`[TelegramRateBot] Ignored action suffix '${suffix}'`)
         return
+    }
 
     const { config: serverConfig, drizzle } = useEventContext()
 
-    if (!serverConfig.ServerConfig.EnableModules?.["telegram_ratebot"])
+    if (!serverConfig.ServerConfig.EnableModules?.["telegram_ratebot"]) {
+        useLogger().info(`[TelegramRateBot] Module 'telegram_ratebot' is disabled in server config`)
         return
+    }
 
     const moduleConfig = serverConfig.ServerConfig.ModuleConfig?.["telegram_ratebot"] as MaybeUndefined<TelegramRateBotConfig>
-    if (!moduleConfig?.botToken || !moduleConfig.chatId)
+    if (!moduleConfig?.botToken || !moduleConfig.chatId) {
+        useLogger().info(`[TelegramRateBot] botToken or chatId is not configured`)
         return
+    }
 
     const telegramBase = (moduleConfig.apiBaseUrl || "https://api.telegram.org").replace(/\/$/, "")
     const levelController = new LevelController(drizzle)
     const level = await levelController.getOneLevel(targetId)
-    if (!level)
+    if (!level) {
+        useLogger().info(`[TelegramRateBot] Level ID ${targetId} not found in database`)
         return
+    }
 
     const message = buildTelegramMessage(level.$, {
         moderator: data.uname || `Пользователь #${uid}`, // data.uname is in ActionData
@@ -63,11 +74,14 @@ const sendTelegramRateNotification = async (targetId: number, uid: number, data:
     if (moduleConfig.threadId)
         body.message_thread_id = moduleConfig.threadId
 
+    useLogger().info(`[TelegramRateBot] Sending rate notification for level ID ${targetId} ('${level.$.name}') to Telegram chat ${moduleConfig.chatId}`)
+
     try {
         await $fetch(`${telegramBase}/bot${moduleConfig.botToken}/sendMessage`, {
             method: "POST" as any,
             body
         })
+        useLogger().info(`[TelegramRateBot] Successfully sent Telegram rate notification for level ID ${targetId}`)
     } catch (error) {
         useLogger().error(`[TelegramRateBot] Failed to send message: ${(error as Error).message}`)
     }
