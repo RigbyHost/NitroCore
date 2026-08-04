@@ -83,14 +83,20 @@ const sendTelegramRateNotification = async (targetId: number, uid: number, data:
     useLogger().info(`[TelegramRateBot] Sending rate notification for level ID ${targetId} ('${level.$.name}') to Telegram chat ${moduleConfig.chatId} via bot token ${safeToken}`)
     useLogger().info(`[TelegramRateBot] Request payload: ${JSON.stringify(body)}`)
 
+    const startTime = Date.now()
     try {
+        useLogger().info(`[TelegramRateBot] Sending POST request (timeout 10s)...`)
         const response = await $fetch.raw(`${telegramBase}/bot${moduleConfig.botToken}/sendMessage`, {
             method: "POST" as any,
-            body
+            body,
+            timeout: 10000,
+            retry: 0
         })
-        useLogger().info(`[TelegramRateBot] Successfully sent Telegram rate notification for level ID ${targetId}. Response HTTP ${response.status} ${response.statusText}`)
+        const elapsed = Date.now() - startTime
+        useLogger().info(`[TelegramRateBot] Successfully sent Telegram rate notification for level ID ${targetId} in ${elapsed}ms. Response HTTP ${response.status} ${response.statusText}`)
     } catch (error: any) {
-        useLogger().error(`[TelegramRateBot] Failed to send Telegram message for level ID ${targetId}: ${error.message}`)
+        const elapsed = Date.now() - startTime
+        useLogger().error(`[TelegramRateBot] Failed to send Telegram message for level ID ${targetId} after ${elapsed}ms: ${error.message}`)
         if (error.response) {
             useLogger().error(`[TelegramRateBot] HTTP Status: ${error.response.status} ${error.response.statusText}`)
             const errData = error.response._data || error.response.data

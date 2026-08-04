@@ -91,14 +91,20 @@ const dispatchDiscordRateWebhook = async (targetId: number, uid: number, data: A
     useLogger().info(`[DiscordRateBot] Dispatching rate webhook for level ID ${targetId} ('${level.$.name}') to ${safeUrl}`)
     useLogger().info(`[DiscordRateBot] Webhook payload: ${JSON.stringify(webhookBody)}`)
 
+    const startTime = Date.now()
     try {
+        useLogger().info(`[DiscordRateBot] Sending POST request (timeout 10s)...`)
         const response = await $fetch.raw(moduleConfig.webhookUrl, {
             method: "POST" as any,
-            body: webhookBody
+            body: webhookBody,
+            timeout: 10000,
+            retry: 0
         })
-        useLogger().info(`[DiscordRateBot] Successfully sent webhook for level ID ${targetId}. Response HTTP ${response.status} ${response.statusText}`)
+        const elapsed = Date.now() - startTime
+        useLogger().info(`[DiscordRateBot] Successfully sent webhook for level ID ${targetId} in ${elapsed}ms. Response HTTP ${response.status} ${response.statusText}`)
     } catch (error: any) {
-        useLogger().error(`[DiscordRateBot] Failed to send webhook for level ID ${targetId}: ${error.message}`)
+        const elapsed = Date.now() - startTime
+        useLogger().error(`[DiscordRateBot] Failed to send webhook for level ID ${targetId} after ${elapsed}ms: ${error.message}`)
         if (error.response) {
             useLogger().error(`[DiscordRateBot] HTTP Status: ${error.response.status} ${error.response.statusText}`)
             const errData = error.response._data || error.response.data
