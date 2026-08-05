@@ -12,7 +12,8 @@ build:
   stage: build
   image: docker:24.0.5
   services:
-    - docker:24.0.5-dind
+    - name: docker:24.0.5-dind
+      command: ["--insecure-registry=100.80.234.21:30500"]
   variables:
     DOCKER_TLS_CERTDIR: ""
   script:
