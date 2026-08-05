@@ -19,10 +19,6 @@ export default defineNitroConfig({
             bucket: process.env.S3_BUCKET,
             region: process.env.S3_REGION || "us-east-1",
         },
-        config: {
-            driver: "redis",
-            url: process.env.REDIS_URL,
-            family: 4,
-        }
+        
     }
 });
