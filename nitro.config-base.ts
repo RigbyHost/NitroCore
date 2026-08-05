@@ -22,6 +22,7 @@ export default defineNitroConfig({
         config: {
             driver: "redis",
             url: process.env.REDIS_URL,
+            family: 4,
         }
     },
     devStorage: {

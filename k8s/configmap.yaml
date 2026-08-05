@@ -11,5 +11,7 @@ data:
   S3_ENDPOINT: "https://s3.eu-north-1.amazonaws.com"
   S3_BUCKET: "rigby-host-savedata"
   S3_REGION: "eu-north-1"
+  REDIS_HOST: "rigby-host-redis-master.rigby-host.svc.cluster.local"
+  REDIS_PORT: "6379"
   VERBOSE: "1"
   PORT: "3000"
