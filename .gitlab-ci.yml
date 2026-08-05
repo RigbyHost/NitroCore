@@ -4,6 +4,8 @@ stages:
 
 variables:
   REGISTRY_HOST: "100.80.234.21:30500"
+  REGISTRY_USER: "rigbyadmin"
+  REGISTRY_PASSWORD: "gKofUm6xLSHP1x5x1REZXFHl"
   IMAGE: "100.80.234.21:30500/rigbyhost/nitrocore"
 
 build:
@@ -14,10 +16,10 @@ build:
   variables:
     DOCKER_TLS_CERTDIR: ""
   script:
-    - echo "$REGISTRY_PASSWORD" | docker login $REGISTRY_HOST -u "$REGISTRY_USER" --password-stdin
-    - docker build -t $IMAGE:$CI_COMMIT_SHA -t $IMAGE:latest .
-    - docker push $IMAGE:$CI_COMMIT_SHA
-    - docker push $IMAGE:latest
+    - echo "${REGISTRY_PASSWORD}" | docker login ${REGISTRY_HOST} -u "${REGISTRY_USER}" --password-stdin
+    - docker build -t ${IMAGE}:${CI_COMMIT_SHA} -t ${IMAGE}:latest .
+    - docker push ${IMAGE}:${CI_COMMIT_SHA}
+    - docker push ${IMAGE}:latest
 
 deploy:
   stage: deploy
