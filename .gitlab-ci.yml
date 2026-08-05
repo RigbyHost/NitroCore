@@ -7,30 +7,20 @@ variables:
   REGISTRY_USER: "rigbyadmin"
   REGISTRY_PASSWORD: "gKofUm6xLSHP1x5x1REZXFHl"
   IMAGE: "100.80.234.21:30500/rigbyhost/nitrocore"
-  DOCKER_OPTS: "--insecure-registry 100.80.234.21:30500"
-
-default:
-  before_script:
-    - mkdir -p /etc/docker && echo "{\"insecure-registries\":[\"100.80.234.21:30500\"]}" > /etc/docker/daemon.json
 
 build:
   stage: build
-  image: docker:24.0.5
-  services:
-    - name: docker:24.0.5-dind
-      command: ["--insecure-registry=100.80.234.21:30500"]
-  variables:
-    DOCKER_TLS_CERTDIR: ""
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.0-debug
+    entrypoint: [""]
   script:
-    - echo "${REGISTRY_PASSWORD}" | docker login ${REGISTRY_HOST} -u "${REGISTRY_USER}" --password-stdin
-    - docker build -t ${IMAGE}:${CI_COMMIT_SHA} -t ${IMAGE}:latest .
-    - docker push ${IMAGE}:${CI_COMMIT_SHA}
-    - docker push ${IMAGE}:latest
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${REGISTRY_HOST}\":{\"username\":\"${REGISTRY_USER}\",\"password\":\"${REGISTRY_PASSWORD}\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context dir://. --dockerfile Dockerfile --destination ${IMAGE}:${CI_COMMIT_SHA} --destination ${IMAGE}:latest --insecure --insecure-registry ${REGISTRY_HOST}
 
 deploy:
   stage: deploy
   image: bitnami/kubectl:latest
-  before_script: []
   script:
     - kubectl apply -f k8s/
     - kubectl rollout restart deployment/nitrocore -n rigby-host
