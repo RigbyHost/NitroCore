@@ -9,3 +9,5 @@ dist
 .env.local
 coverage
 .DS_Store
+
+k8s/secret.yaml

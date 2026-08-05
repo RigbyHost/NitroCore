@@ -15,7 +15,7 @@ export default defineNitroConfig({
             driver: "s3",
             accessKeyId: process.env.S3_ACCESS_KEY,
             secretAccessKey: process.env.S3_SECRET,
-            endpoint: process.env.S3_URL,
+            endpoint: process.env.S3_URL || process.env.S3_ENDPOINT || "https://s3.eu-north-1.amazonaws.com",
             bucket: process.env.S3_BUCKET,
             region: process.env.S3_REGION || "us-east-1",
         },

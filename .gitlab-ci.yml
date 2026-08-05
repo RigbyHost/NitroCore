@@ -1,0 +1,30 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  REGISTRY_HOST: "100.80.234.21:30500"
+  IMAGE: "100.80.234.21:30500/rigbyhost/nitrocore"
+
+build:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - echo "$REGISTRY_PASSWORD" | docker login $REGISTRY_HOST -u "$REGISTRY_USER" --password-stdin
+    - docker build -t $IMAGE:$CI_COMMIT_SHA -t $IMAGE:latest .
+    - docker push $IMAGE:$CI_COMMIT_SHA
+    - docker push $IMAGE:latest
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - kubectl apply -f k8s/
+    - kubectl rollout restart deployment/nitrocore -n rigby-host
+  only:
+    - main
+    - master

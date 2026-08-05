@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nitrocore
+  namespace: rigby-host
+  labels:
+    app: nitrocore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nitrocore
+  template:
+    metadata:
+      labels:
+        app: nitrocore
+    spec:
+      imagePullSecrets:
+      - name: registry-secret
+      containers:
+      - name: nitrocore
+        image: 100.80.234.21:30500/rigbyhost/nitrocore:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: nitrocore-config
+        - secretRef:
+            name: nitrocore-secrets

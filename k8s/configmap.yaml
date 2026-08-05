@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nitrocore-config
+  namespace: rigby-host
+data:
+  POSTGRES_HOST: "rigby-host-db-postgresql.rigby-host.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "rigby"
+  S3_URL: "https://s3.eu-north-1.amazonaws.com"
+  S3_ENDPOINT: "https://s3.eu-north-1.amazonaws.com"
+  S3_BUCKET: "rigby-host-savedata"
+  S3_REGION: "eu-north-1"
+  VERBOSE: "1"
+  PORT: "3000"
