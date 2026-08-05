@@ -7,6 +7,11 @@ variables:
   REGISTRY_USER: "rigbyadmin"
   REGISTRY_PASSWORD: "gKofUm6xLSHP1x5x1REZXFHl"
   IMAGE: "100.80.234.21:30500/rigbyhost/nitrocore"
+  DOCKER_OPTS: "--insecure-registry 100.80.234.21:30500"
+
+default:
+  before_script:
+    - mkdir -p /etc/docker && echo "{\"insecure-registries\":[\"100.80.234.21:30500\"]}" > /etc/docker/daemon.json
 
 build:
   stage: build
@@ -25,6 +30,7 @@ build:
 deploy:
   stage: deploy
   image: bitnami/kubectl:latest
+  before_script: []
   script:
     - kubectl apply -f k8s/
     - kubectl rollout restart deployment/nitrocore -n rigby-host
