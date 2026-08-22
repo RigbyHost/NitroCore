@@ -10,6 +10,21 @@ build:
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'
+      changes:
+        - Dockerfile*
+        - package.json
+        - bun.lock
+        - tsconfig.json
+        - types.d.ts
+        - drizzle.config.ts
+        - nitro.config*.ts
+        - controller/**/*
+        - drizzle/**/*
+        - migrations/**/*
+        - sdk/**/*
+        - server/**/*
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"${REGISTRY_HOST}\":{\"username\":\"${REGISTRY_USER}\",\"password\":\"${REGISTRY_PASSWORD}\"}}}" > /kaniko/.docker/config.json
@@ -18,6 +33,11 @@ build:
 deploy:
   stage: deploy
   image: bitnami/kubectl:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'
+  needs:
+    - job: build
+      optional: true
   script:
     - kubectl apply -f k8s/configmap.yaml
     - >
@@ -31,6 +51,3 @@ deploy:
     - kubectl apply -f k8s/service.yaml
     - kubectl apply -f k8s/ingress.yaml
     - kubectl rollout restart deployment/nitrocore -n rigby-host
-  only:
-    - main
-    - master
