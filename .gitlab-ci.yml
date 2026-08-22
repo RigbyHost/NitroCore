@@ -3,10 +3,7 @@ stages:
   - deploy
 
 variables:
-  REGISTRY_HOST: "100.80.234.21:30500"
-  REGISTRY_USER: "rigbyadmin"
-  REGISTRY_PASSWORD: "gKofUm6xLSHP1x5x1REZXFHl"
-  IMAGE: "100.80.234.21:30500/rigbyhost/nitrocore"
+  IMAGE: "${REGISTRY_HOST}/rigbyhost/nitrocore"
 
 build:
   stage: build
@@ -22,7 +19,17 @@ deploy:
   stage: deploy
   image: bitnami/kubectl:latest
   script:
-    - kubectl apply -f k8s/
+    - kubectl apply -f k8s/configmap.yaml
+    - >
+        kubectl create secret generic nitrocore-secrets -n rigby-host
+        --from-literal=POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+        --from-literal=REDIS_URL="${REDIS_URL}"
+        --from-literal=S3_ACCESS_KEY="${S3_ACCESS_KEY}"
+        --from-literal=S3_SECRET="${S3_SECRET}"
+        --dry-run=client -o yaml | kubectl apply -f -
+    - kubectl apply -f k8s/deployment.yaml
+    - kubectl apply -f k8s/service.yaml
+    - kubectl apply -f k8s/ingress.yaml
     - kubectl rollout restart deployment/nitrocore -n rigby-host
   only:
     - main

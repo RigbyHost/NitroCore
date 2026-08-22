@@ -5,8 +5,7 @@ dist
 .nitro
 .cache
 .output
-.env
-.env.local
+.env*
 coverage
 .DS_Store
 
