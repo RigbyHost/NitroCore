@@ -11,10 +11,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - gdps.rigby.host
-    secretName: gdps-rigby-host-tls
+    - gdps.rigbyhost.com
+    secretName: gdps-rigbyhost-com-tls
   rules:
-  - host: gdps.rigby.host
+  - host: gdps.rigbyhost.com
     http:
       paths:
       - path: /

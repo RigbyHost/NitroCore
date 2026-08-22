@@ -21,7 +21,7 @@ export default defineNitroPlugin(nitro => {
                     }>
                     return {
                         motd: switcherc?.motd || "GDPS Server powered by NitroCore",
-                        icon: switcherc?.icon || "https://cdn.rigby.host/default_gdps.jpeg",
+                        icon: switcherc?.icon || "https://cdn.rigbyhost.com/default_gdps.jpeg",
                         version: 1
                     }
                 } else {

@@ -1,3 +1,3 @@
 export default defineEventHandler( event => {
-    return sendRedirect(event, "https://rigby.host", 301)
+    return sendRedirect(event, "https://rigbyhost.com", 301)
 })

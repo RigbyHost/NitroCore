@@ -15,7 +15,7 @@
 ## 🚀 Deploy now
 Pick one of providers below and follow the instructions:
 
-[![RigbyHost](https://img.shields.io/badge/RigbyHost-000000?style=for-the-badge&logo=rive&logoColor=orange)](https://rigby.host) — Free, easiest to deploy. Highly recommended
+[![RigbyHost](https://img.shields.io/badge/RigbyHost-000000?style=for-the-badge&logo=rive&logoColor=orange)](https://rigbyhost.com) — Free, easiest to deploy. Highly recommended
 
 [![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](./docs/deploy/vercel.md) — Free, easy to deploy
 
