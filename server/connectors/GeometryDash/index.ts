@@ -8,6 +8,7 @@ import {GDConnectorQuests} from "~/connectors/GeometryDash/quests";
 import {songsTable} from "~~/drizzle";
 import {GDConnectorProfile} from "~/connectors/GeometryDash/profile";
 import {HTTPResponse} from "nitro/h3";
+import {useDebug} from "~/utils/useDebug";
 
 const withMessage = (body: string, message: string) =>
     new HTTPResponse(body, {headers: {"X-Message": message}})
@@ -19,17 +20,17 @@ export class GDConnector implements IConnector {
     }
 
     success = async (message: string) => {
-        console.log(`↳ ${message}`)
+        useDebug().log(`↳ ${message}`)
         return withMessage("1", message)
     }
 
     numberedSuccess = async (code: number, message: string) => {
-        console.log(`↳ ${message} (code: ${code})`)
+        useDebug().log(`↳ ${message} (code: ${code})`)
         return withMessage(code.toString(), message)
     }
 
     error = async (code: number, message: string) => {
-        console.log(`↳ ${message} (code: ${code})`)
+        useDebug().log(`↳ ${message} (code: ${code})`)
         return withMessage("-1", message)
     }
 

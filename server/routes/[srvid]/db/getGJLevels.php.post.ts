@@ -10,6 +10,7 @@ import {defineHandler} from "nitro";
 import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
 import {useLogger} from "~/utils/useLogger";
 import {usePerformance} from "~/utils/usePerformance";
+import {useDebug} from "~/utils/useDebug";
 import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
 const metrics = usePerformance()
@@ -19,7 +20,7 @@ export default defineHandler({
         initMiddleware,
         async (_event, next) => {
             const response = await next()
-            console.warn(metrics.getSteps())
+            useDebug().log(metrics.getSteps())
             return response
         }
     ],
