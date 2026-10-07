@@ -14,6 +14,8 @@ export const seedRedis = async (container: StartedValkeyContainer) => {
         ChestConfig: {},
         ServerConfig: {
             SrvID: "0000",
+            EnableModules: {},
+            ModuleConfig: {},
         },
         SecurityConfig: {
             DisableProtection: false,

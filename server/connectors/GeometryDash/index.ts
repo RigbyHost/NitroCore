@@ -7,7 +7,7 @@ import {GDConnectorScores} from "~/connectors/GeometryDash/scores";
 import {GDConnectorQuests} from "~/connectors/GeometryDash/quests";
 import {songsTable} from "~~/drizzle";
 import {GDConnectorProfile} from "~/connectors/GeometryDash/profile";
-import {HTTPResponse} from "nitro";
+import {HTTPResponse} from "nitro/h3";
 
 const withMessage = (body: string, message: string) =>
     new HTTPResponse(body, {headers: {"X-Message": message}})

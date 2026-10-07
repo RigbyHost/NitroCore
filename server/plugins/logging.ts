@@ -10,7 +10,7 @@ export default definePlugin(nitro => {
         useLogger().info([
             c.bgGreen(` ${res.status} `),
             c.bgBlue(` ${event.req.method} `),
-            c.white(context.clientAddress!.padEnd(15)),
+            c.white((context.clientAddress || "unknown").padEnd(15)),
             " ", c.bold(url.pathname + url.search)
         ].join(""))
     })

@@ -4,6 +4,7 @@ import {z} from "zod";
 import {UserController} from "~~/controller/UserController";
 import {FriendshipController} from "~~/controller/FriendshipController";
 import {type Database} from "~/utils/useDrizzle";
+import type {IMessage} from "~/connectors/IConnector";
 
 
 export class MessageController {
@@ -30,7 +31,7 @@ export class MessageController {
 
     getManyMessages = async (uid: number, page: number, type: "sent" | "received"): Promise<{
         total: number,
-        messages: (typeof messagesTable.$inferSelect & {username: string})[]
+        messages: IMessage[]
     }> => {
         const filter = type === "sent" ? eq(messagesTable.uidSrc, uid) : eq(messagesTable.uidDest, uid)
 
@@ -54,12 +55,7 @@ export class MessageController {
 
         return {
             total: count,
-            messages: messages.map(m => ({
-                ...m,
-                username: (type === "sent" ? m.sender.username : m.receiver.username) || "[DELETED]",
-                sender: undefined,
-                receiver: undefined
-            }))
+            messages
         }
     }
 

@@ -10,7 +10,7 @@ import {Level, LevelWithUser} from "~~/controller/Level";
 import {User, UserWithRole} from "~~/controller/User";
 import {ScoresController} from "~~/controller/ScoresController";
 import {List, ListWithUser} from "~~/controller/List";
-import type {HTTPResponse} from "nitro";
+import type {HTTPResponse} from "nitro/h3";
 import {type MaybeUndefined} from "~/utils/types";
 
 /** Response body returned from route handlers, `HTTPResponse` is used when extra headers are needed */
