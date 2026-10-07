@@ -1,5 +1,6 @@
 // https://nitro.build/config
-export default defineNitroConfig({
+import {defineConfig} from "nitro";
+export default defineConfig({
     compatibilityDate: "2025-10-10",
     srcDir: "server",
     preset: "bun",

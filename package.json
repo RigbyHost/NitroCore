@@ -2,7 +2,6 @@
   "name": "nitro-app",
   "version": "0.7",
   "scripts": {
-    "prepare": "nitro prepare",
     "build": "nitro build",
     "build:base": "bun run switch:base && bun run build",
     "build:vercel": "bun run switch:vercel && bun run migrate && bun run build",
@@ -20,21 +19,20 @@
     "coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@testcontainers/postgresql": "^11.14.0",
-    "@testcontainers/valkey": "^11.14.0",
+    "@testcontainers/postgresql": "^12.2.0",
+    "@testcontainers/valkey": "^12.2.0",
     "@types/bcrypt": "^6.0.0",
     "@types/clamp": "^1.0.3",
     "@types/pg": "^8.23.1",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.3",
     "drizzle-kit": "^0.31.11",
-    "h3": "^1.15.5",
-    "nitro-test-utils": "^0.11.2",
-    "nitropack": "^2.13.4",
+    "h3": "^2.0.1",
+    "nitro-test-utils": "^3.0.2",
     "oxlint": "^1.87.0",
     "typescript": "^6.0.3",
     "unplugin-auto-import": "^21.1.0",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.3"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.1",
@@ -44,9 +42,10 @@
     "clamp": "^1.0.1",
     "deep-equal": "^2.2.3",
     "deep-object-diff": "^1.1.9",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.6",
     "drizzle-orm": "^0.45.3",
     "eventemitter3": "^5.0.4",
+    "nitro": "^3.0.260903-beta",
     "pg": "^8.23.1",
     "tinyrainbow": "^3.2.0",
     "unctx": "^3.0.1",
