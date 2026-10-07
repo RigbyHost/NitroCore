@@ -1,5 +1,7 @@
+import {defineHandler, html} from "nitro";
+import {useRuntimeConfig} from "nitro/runtime-config";
 
-export default defineEventHandler(async (event) => {
+export default defineHandler(async (event) => {
     const getBranding = () => {
         switch (useRuntimeConfig().platform) {
             case "vercel": return "▲ Vercel"
@@ -8,7 +10,7 @@ export default defineEventHandler(async (event) => {
             default: return "⚡ RigbyHost"
         }
     }
-    return `
+    return html`
 <!DOCTYPE html>
 <html lang="en">
     <head>

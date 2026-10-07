@@ -3,9 +3,13 @@ import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
 import {UserController} from "~~/controller/UserController";
 import {QuestsController} from "~~/controller/QuestsController";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware],
 
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
@@ -94,7 +98,7 @@ export default defineEventHandler({
             ).toString("base64")
         }
 
-        await event.context.connector.levels.getFullLevel(level, password, hashablePassword, questID)
+        return await event.context.connector.levels.getFullLevel(level, password, hashablePassword, questID)
     }
 })
 

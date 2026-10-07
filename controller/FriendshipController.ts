@@ -2,6 +2,8 @@ import {friendRequestsTable, friendshipsTable} from "~~/drizzle";
 import {and, eq, SQL} from "drizzle-orm";
 import {UserController} from "~~/controller/UserController";
 import {User} from "~~/controller/User";
+import {type Database} from "~/utils/useDrizzle";
+import {type Nullable} from "~/utils/types";
 
 
 export class FriendshipController {

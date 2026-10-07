@@ -1,7 +1,15 @@
 {
-  // https://nitro.build/guide/typescript
-  "extends": "./.nitro/types/tsconfig.json",
+  // https://nitro.build/docs/typescript
+  "extends": "nitro/tsconfig",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    // nitro/tsconfig enables these by default, but existing code mixes type and value imports
+    // and middleware intentionally returns nothing to continue the chain
+    "verbatimModuleSyntax": false,
+    "noImplicitReturns": false,
+    "paths": {
+      "~/*": ["./server/*"],
+      "~~/*": ["./*"]
+    }
   }
 }

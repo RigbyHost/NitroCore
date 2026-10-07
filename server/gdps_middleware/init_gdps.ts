@@ -3,8 +3,9 @@ import {getServerConfigMiddleware} from "~/gdps_middleware/helpers/get_servercon
 import {checkIPBansMiddleware} from "~/gdps_middleware/helpers/check_ip_bans";
 import {getDrizzleMiddleware} from "~/gdps_middleware/helpers/get_drizzle";
 import {initConnectorMiddleware} from "~/gdps_middleware/helpers/init_connector";
+import {defineHandler} from "nitro";
 
-export const initMiddleware = defineEventHandler({
-    onRequest: [validateSrvIdMiddleware, getServerConfigMiddleware, checkIPBansMiddleware, getDrizzleMiddleware, initConnectorMiddleware],
+export const initMiddleware = defineHandler({
+    middleware: [validateSrvIdMiddleware, getServerConfigMiddleware, checkIPBansMiddleware, getDrizzleMiddleware, initConnectorMiddleware],
     handler: () => {}
 })

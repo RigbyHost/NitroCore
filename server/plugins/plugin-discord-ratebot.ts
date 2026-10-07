@@ -2,6 +2,10 @@ import { LevelController } from "~~/controller/LevelController";
 import type { LevelWithUser } from "~~/controller/Level";
 import type { MaybeUndefined } from "~/utils/types";
 import { ActionData } from "~~/drizzle";
+import {$fetch} from "ofetch";
+import {definePlugin} from "nitro";
+import {useEventContext, useSDK} from "~/utils/useSDK";
+import {useLogger} from "~/utils/useLogger";
 
 type DiscordRateBotModuleConfig = {
     webhookUrl: string,
@@ -30,7 +34,7 @@ const maskWebhookUrl = (url: string) => {
     return url.replace(/\/webhooks\/(\d+)\/([\w-]+)/, "/webhooks/$1/****")
 }
 
-export default defineNitroPlugin(() => {
+export default definePlugin(() => {
     useSDK().events.onAction("level_rate", async (uid: number, targetId: number, data: ActionData) => {
         useLogger().info(`[DiscordRateBot] Received level_rate event for level ID ${targetId} by user ID ${uid}. Action data: ${JSON.stringify(data)}`)
         try {

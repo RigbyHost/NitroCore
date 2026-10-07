@@ -2,6 +2,9 @@ import {ActionData, actionsTable, ActionVariant} from "~~/drizzle";
 import {UserController} from "~~/controller/UserController";
 import {and, eq} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
+import {type Database} from "~/utils/useDrizzle";
+import {useEvent} from "~/utils/useEvent";
+import {useSDK} from "~/utils/useSDK";
 
 /**
  * Controller for action logging

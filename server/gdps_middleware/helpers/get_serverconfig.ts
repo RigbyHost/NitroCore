@@ -1,8 +1,11 @@
-export const getServerConfigMiddleware = defineEventHandler(async (event) => {
+import {HTTPError, defineHandler} from "nitro";
+import {useServerConfig} from "~/utils/useServerConfig";
+
+export const getServerConfigMiddleware = defineHandler(async (event) => {
     const c = await useServerConfig()
     if (!c.config || c.config.ServerConfig.Locked)
-        throw createError({
-            statusCode: 404,
+        throw new HTTPError({
+            status: 404,
             message: "Not found"
         })
 

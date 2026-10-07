@@ -1,8 +1,12 @@
 import {UserController} from "~~/controller/UserController";
 import {z} from "zod";
 import {User} from "~~/controller/User";
+import {type Nullable} from "~/utils/types";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export const authMiddleware = defineEventHandler(async event => {
+export const authMiddleware = defineHandler(async event => {
     const userCtx = new UserController(event.context.drizzle!)
     const user = await userCtx.performGJPAuth()
     if (!user)
@@ -10,7 +14,7 @@ export const authMiddleware = defineEventHandler(async event => {
     event.context.user = user
 })
 
-export const authHook = defineEventHandler(async event => {
+export const authHook = defineHandler(async event => {
     const userCtx = new UserController(event.context.drizzle!)
     const user = await userCtx.performGJPAuth()
     if (!user)
@@ -19,7 +23,7 @@ export const authHook = defineEventHandler(async event => {
     return true
 })
 
-export const authLoginMiddleware = defineEventHandler(async event => {
+export const authLoginMiddleware = defineHandler(async event => {
     const userController = new UserController(event.context.drizzle)
     const post = usePostObject<z.infer<typeof authRequestSchema>>(await withPreparsedForm(event))
     const {data, success, error} = authRequestSchema.safeParse(post)

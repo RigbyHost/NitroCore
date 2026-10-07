@@ -1,5 +1,6 @@
 import {ActionData} from "~~/drizzle";
 import {Context} from "~~/sdk/events/context";
+import {type ArgumentTypes} from "~/utils/types";
 
 export type ActionListener = (
     uid: number,

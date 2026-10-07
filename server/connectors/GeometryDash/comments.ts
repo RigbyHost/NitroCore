@@ -1,6 +1,8 @@
 import {accountCommentsTable, commentsTable, rolesTable, usersTable} from "~~/drizzle";
 import {ILevelComment} from "~/connectors/IConnector";
 import {User} from "~~/controller/User";
+import {type MaybeUndefined} from "~/utils/types";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
 
 export const GDConnectorComments = {
     getAccountComments: async (
@@ -9,11 +11,10 @@ export const GDConnectorComments = {
         page: number
     ) => {
         if (comments.length === 0)
-            return await send(useEvent(), "#0:0:0")
+            return "#0:0:0"
 
 
-        await send(
-            useEvent(),
+        return (
             comments.map(
                 comment => [
                     2, comment.comment,
@@ -37,10 +38,9 @@ export const GDConnectorComments = {
         page: number
     ) => {
         if (comments.length === 0)
-            return await send(useEvent(), "#0:0:0")
+            return "#0:0:0"
 
-        await send(
-            useEvent(),
+        return (
             comments.map(
                 comment => {
                     if (!comment.author)
@@ -87,10 +87,9 @@ export const GDConnectorComments = {
         page: number
     ) => {
         if (comments.length === 0)
-            return await send(useEvent(), "#0:0:0")
+            return "#0:0:0"
 
-        await send(
-            useEvent(),
+        return (
             comments.map(
                 comment => {
                     const author = new User({$db:null} as any, user)
@@ -127,6 +126,6 @@ export const GDConnectorComments = {
     },
 
     commentCommandResult: async (result: string) => {
-        await send(useEvent(), `temp_1_${result}`)
+        return `temp_1_${result}`
     },
 }

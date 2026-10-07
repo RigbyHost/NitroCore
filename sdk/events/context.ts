@@ -1,6 +1,8 @@
 import {createContext} from "unctx";
 import {AsyncLocalStorage} from "node:async_hooks";
 import {H3EventContext} from "h3";
+import {type Database} from "~/utils/useDrizzle";
+import {type ServerConfig} from "~/utils/useServerConfig";
 
 
 export const ctx = createContext<Context>({

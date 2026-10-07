@@ -4,6 +4,7 @@ import {z} from "zod";
 import {diff} from "deep-object-diff";
 import {eq, sql} from "drizzle-orm";
 import {ActionController} from "~~/controller/ActionController";
+import {type Database} from "~/utils/useDrizzle";
 
 export type ListType = typeof listsTable.$inferSelect
 export type ListWithUser = ListType & {

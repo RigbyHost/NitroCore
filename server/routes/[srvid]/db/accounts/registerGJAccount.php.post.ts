@@ -2,9 +2,12 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {UserController} from "~~/controller/UserController";
 import {ActionController} from "~~/controller/ActionController";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware],
     handler: async (event) => {
         const ip = event.context.clientAddress!
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
@@ -22,11 +25,12 @@ export default defineEventHandler({
         }, ip, event.context.config.config!.SecurityConfig.AutoActivate)
 
         if (code > 0) {
-            await event.context.connector.success("User registered successfully")
+            const response = await event.context.connector.success("User registered successfully")
             await new ActionController(event.context.drizzle)
                 .registerAction("register_user", 0, code, {uname: data.userName, email: data.email})
+            return response
         } else {
-            await event.context.connector.error(code, "Failed to register user")
+            return await event.context.connector.error(code, "Failed to register user")
         }
     }
 })

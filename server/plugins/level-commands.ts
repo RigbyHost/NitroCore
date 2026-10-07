@@ -2,8 +2,10 @@ import {ActionController} from "~~/controller/ActionController";
 import {questsTable} from "~~/drizzle";
 import {and, eq} from "drizzle-orm";
 import {LevelController} from "~~/controller/LevelController";
+import {definePlugin} from "nitro";
+import {useCommandContext, useSDK} from "~/utils/useSDK";
 
-export default defineNitroPlugin(() => {
+export default definePlugin(() => {
     const csdk = useSDK().commands
 
     csdk.register(

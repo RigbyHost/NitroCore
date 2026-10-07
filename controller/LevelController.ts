@@ -1,7 +1,7 @@
 import {Database} from "~/utils/useDrizzle";
 import {levelsTable, usersTable} from "~~/drizzle";
 import {eq, getTableColumns} from "drizzle-orm";
-import {MakeOptional} from "~/utils/types";
+import {MakeOptional, type Nullable} from "~/utils/types";
 import {Level, LevelWithUser} from "~~/controller/Level";
 import clamp from "clamp"
 import {LevelFilter} from "~~/controller/LevelFilter";

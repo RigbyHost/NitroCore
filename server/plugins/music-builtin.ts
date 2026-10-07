@@ -1,5 +1,7 @@
+import {type SDKMusicProvider, useMusicContext, useSDK} from "~/utils/useSDK";
+import {definePlugin} from "nitro";
 
-export default defineNitroPlugin(() => {
+export default definePlugin(() => {
     const msdk = useSDK().music
 
     msdk.registerProvider("http", new HTTPProvider())

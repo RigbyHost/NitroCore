@@ -10,48 +10,53 @@ import {Level, LevelWithUser} from "~~/controller/Level";
 import {User, UserWithRole} from "~~/controller/User";
 import {ScoresController} from "~~/controller/ScoresController";
 import {List, ListWithUser} from "~~/controller/List";
+import type {HTTPResponse} from "nitro/h3";
+import {type MaybeUndefined} from "~/utils/types";
+
+/** Response body returned from route handlers, `HTTPResponse` is used when extra headers are needed */
+export type ConnectorResponse = string | HTTPResponse
 
 export interface IConnector {
 
-    error: (code: number, message: string) => Promise<void>,
-    success: (message: string) => Promise<void>,
-    numberedSuccess: (code: number, message: string) => Promise<void>,
+    error: (code: number, message: string) => Promise<ConnectorResponse>,
+    success: (message: string) => Promise<ConnectorResponse>,
+    numberedSuccess: (code: number, message: string) => Promise<ConnectorResponse>,
     account: {
-        sync: (savedata: string) => Promise<void>,
-        login: (uid: number) => Promise<void>,
+        sync: (savedata: string) => Promise<ConnectorResponse>,
+        login: (uid: number) => Promise<ConnectorResponse>,
     },
     comments: {
         getAccountComments: (
             comments: typeof accountCommentsTable.$inferSelect[],
             count: number,
             page: number
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
         getLevelComments: (
             comments: ILevelComment[],
             count: number,
             page: number
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
         getCommentHistory: (
             comments: typeof commentsTable.$inferSelect[],
             user: typeof usersTable.$inferSelect,
             role: MaybeUndefined<typeof rolesTable.$inferSelect>,
             count: number,
             page: number
-        ) => Promise<void>,
-        commentCommandResult: (result: string) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
+        commentCommandResult: (result: string) => Promise<ConnectorResponse>,
     },
 
     messages: {
         getOneMessage: (
             message: typeof messagesTable.$inferSelect,
             user: typeof usersTable.$inferSelect,
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
         getAllMessages: (
             messages: IMessage[],
             mode: "sent" | "received",
             count: number,
             page: number
-        ) => Promise<void>
+        ) => Promise<ConnectorResponse>
     },
 
     profile: {
@@ -60,9 +65,9 @@ export interface IConnector {
             mode: "sent" | "received",
             count: number,
             page: number
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
 
-        getUserSearch: (users: Array<User>, page: number, total: number) => Promise<void>,
+        getUserSearch: (users: Array<User>, page: number, total: number) => Promise<ConnectorResponse>,
 
         getUserInfo: (
             user: User<UserWithRole>,
@@ -72,9 +77,9 @@ export interface IConnector {
                 friend_requests: number,
                 messages: number
             }
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
 
-        getUsersList: (users: Array<User>) => Promise<void>,
+        getUsersList: (users: Array<User>) => Promise<ConnectorResponse>,
     },
 
     levels: {
@@ -82,18 +87,18 @@ export interface IConnector {
             mappacks: typeof levelpacksTable.$inferSelect[],
             count: number,
             page: number
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
 
         getGauntlets: (
             gauntlets: typeof levelpacksTable.$inferSelect[],
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
 
         getFullLevel: (
             level: Level<LevelWithUser>,
             password: string,
             passwordHashable: string,
             questID?: number,
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
 
         getSearchedLevels: (
             levels: Array<Level<LevelWithUser>>,
@@ -101,13 +106,13 @@ export interface IConnector {
             count: number,
             page: number,
             gauntlet: boolean
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
 
         getSearchedLists: (
             lists: Array<List<ListWithUser>>,
             count: number,
             page: number,
-        ) => Promise<void>
+        ) => Promise<ConnectorResponse>
     },
 
     quests: {
@@ -116,7 +121,7 @@ export interface IConnector {
             uid: number,
             chk: string,
             udid: string
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
 
         getRewards: (
             user: User,
@@ -125,21 +130,21 @@ export interface IConnector {
             smallLeft: number,
             bigLeft: number,
             chestType: number
-        ) => Promise<void>,
+        ) => Promise<ConnectorResponse>,
 
-        getSpecialLevel: (id: number, left: number) => Promise<void>
+        getSpecialLevel: (id: number, left: number) => Promise<ConnectorResponse>
     },
 
     scores: {
-        getLeaderboard: (users: User[]) => Promise<void>,
+        getLeaderboard: (users: User[]) => Promise<ConnectorResponse>,
         getScoresForLevel: (
             scores: Awaited<ReturnType<ScoresController["getScoresForLevel"]>>,
             mode: "coins" | "attempts" | "default"
-        ) => Promise<void>
+        ) => Promise<ConnectorResponse>
     },
 
-    getSongInfo: (music: typeof songsTable.$inferSelect) => Promise<void>,
-    getTopArtists: (artists: string[], page: number, total: number) => Promise<void>
+    getSongInfo: (music: typeof songsTable.$inferSelect) => Promise<ConnectorResponse>,
+    getTopArtists: (artists: string[], page: number, total: number) => Promise<ConnectorResponse>
 }
 
 export type ILevelComment = typeof commentsTable.$inferSelect & {

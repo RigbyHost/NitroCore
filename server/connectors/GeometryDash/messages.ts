@@ -1,5 +1,6 @@
 import {messagesTable, usersTable} from "~~/drizzle";
 import {IMessage} from "~/connectors/IConnector";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
 
 export const GDConnectorMessages = {
     getOneMessage: async (
@@ -7,8 +8,7 @@ export const GDConnectorMessages = {
         user: typeof usersTable.$inferSelect,
     ) => {
         const uidx = message.uidDest === user.uid ? message.uidSrc : message.uidDest
-        await send(
-            useEvent(),
+        return (
             [
                 1, message.id,
                 2, uidx,
@@ -29,8 +29,7 @@ export const GDConnectorMessages = {
         count: number,
         page: number
     ) => {
-        await send(
-            useEvent(),
+        return (
             messages.map(
                 message => {
                     const uidx = mode === "sent" ? message.uidDest : message.uidSrc

@@ -1,5 +1,6 @@
 import {IFriendRequest} from "~/connectors/IConnector";
 import {User, UserWithRole} from "~~/controller/User";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
 
 export const GDConnectorProfile = {
     getFriendRequests: async (
@@ -8,8 +9,7 @@ export const GDConnectorProfile = {
         count: number,
         page: number
     ) => {
-        await send(
-            useEvent(),
+        return (
             requests.map(
                 request => {
                     const user = mode === "sent" ? request.receiver : request.sender
@@ -37,8 +37,7 @@ export const GDConnectorProfile = {
     },
 
     getUserSearch: async(users: Array<User>, page: number, total: number) => {
-        await send(
-            useEvent(),
+        return (
             users.map(
                 user => [
                     1, user.$.username,
@@ -106,8 +105,7 @@ export const GDConnectorProfile = {
             user.$.extraData?.platformer_stats.insane || 0,
         ].join(",")
 
-        await send(
-            useEvent(),
+        return (
             [
                 1, user.$.username,
                 2, user.$.uid,
@@ -161,8 +159,7 @@ export const GDConnectorProfile = {
     },
 
     getUsersList: async (users: Array<User>) => {
-        await send(
-            useEvent(),
+        return (
             users.map(
                 user => [
                     1, user.$.username,

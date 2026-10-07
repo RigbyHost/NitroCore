@@ -3,9 +3,12 @@ import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
 import {LevelController} from "~~/controller/LevelController";
 import {ActionController} from "~~/controller/ActionController";
+import {defineHandler} from "nitro";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware, authMiddleware],
 
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))

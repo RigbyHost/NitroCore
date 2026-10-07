@@ -2,9 +2,12 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {z} from "zod";
 import {UserController} from "~~/controller/UserController";
 import {ActionController} from "~~/controller/ActionController";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware],
     handler: async (event) => {
         const ip = event.context.clientAddress!
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
@@ -23,10 +26,10 @@ export default defineEventHandler({
             uid = await userController.logIn(data.userName, data.password!, ip).then(c=>c.code)
 
         if (uid > 0) {
-            await event.context.connector.account.login(uid)
+            const response = await event.context.connector.account.login(uid)
             await new ActionController(event.context.drizzle)
                 .registerAction("login_user", 0, uid, {uname: data.userName})
-
+            return response
         } else {
             return await event.context.connector.error(uid, "Invalid credentials")
         }

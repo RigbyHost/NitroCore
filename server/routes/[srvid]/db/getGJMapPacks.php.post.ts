@@ -1,9 +1,12 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {LevelPackController} from "~~/controller/LevelPackController";
 import {z} from "zod";
+import {defineHandler} from "nitro";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware],
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success, error} = requestSchema.safeParse(post)
