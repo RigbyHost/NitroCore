@@ -1,6 +1,8 @@
 import {User} from "~~/controller/User";
 import {IConnector} from "~/connectors/IConnector";
 import {mappingValues, questsTable} from "~~/drizzle";
+import {useEvent} from "~/utils/useEvent";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
 
 export const GDConnectorQuests: IConnector["quests"] = {
     getRewards: async (
@@ -42,8 +44,7 @@ export const GDConnectorQuests: IConnector["quests"] = {
             .toString("base64")
             .replaceAll("/", "_")
             .replaceAll("+", "-")
-        await send(
-            useEvent(),
+        return (
             useGeometryDashTooling().generateRandomString(5)
                 .concat(out, "|", useGeometryDashTooling().hashSolo4(out)
                 )
@@ -75,8 +76,7 @@ export const GDConnectorQuests: IConnector["quests"] = {
             .replaceAll("/", "_")
             .replaceAll("+", "-")
 
-        await send(
-            useEvent(),
+        return (
             useGeometryDashTooling().generateRandomString(5)
                 .concat(out, "|", useGeometryDashTooling().hashSolo3(out)
                 )
@@ -84,8 +84,7 @@ export const GDConnectorQuests: IConnector["quests"] = {
     },
 
     getSpecialLevel: async (id: number, left: number) => {
-        await send(
-            useEvent(),
+        return (
             `${id}|${left}`
         )
     }

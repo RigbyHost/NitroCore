@@ -4,9 +4,12 @@ import {z} from "zod";
 import {UserController} from "~~/controller/UserController";
 import {FriendshipController} from "~~/controller/FriendshipController";
 import {User} from "~~/controller/User";
+import {defineHandler} from "nitro";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware, authMiddleware],
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success, error} = requestSchema.safeParse(post)

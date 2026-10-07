@@ -2,6 +2,7 @@ import {and, eq, gte, inArray, SQL, sql} from "drizzle-orm";
 import {scoresTable} from "~~/drizzle";
 import {UserController} from "~~/controller/UserController";
 import {FriendshipController} from "~~/controller/FriendshipController";
+import {type Database} from "~/utils/useDrizzle";
 
 
 export class ScoresController {

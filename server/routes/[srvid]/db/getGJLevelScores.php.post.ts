@@ -3,9 +3,12 @@ import {ScoresController} from "~~/controller/ScoresController";
 import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
 import {scoresTable} from "~~/drizzle";
+import {defineHandler} from "nitro";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware, authMiddleware],
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success, error} = requestSchema.safeParse(post)

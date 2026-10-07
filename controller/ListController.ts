@@ -1,7 +1,8 @@
 import {List, ListWithUser} from "~~/controller/List";
-import {MakeOptional} from "~/utils/types";
+import {MakeOptional, type Nullable} from "~/utils/types";
 import {levelsTable, listsTable, usersTable} from "~~/drizzle";
 import {ListFilter} from "~~/controller/ListFilter";
+import {type Database} from "~/utils/useDrizzle";
 
 
 export class ListController {

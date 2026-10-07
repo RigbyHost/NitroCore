@@ -1,8 +1,10 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
+import {defineHandler} from "nitro";
+import {useStorage} from "nitro/storage";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authLoginMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware, authLoginMiddleware],
 
     handler: async (event) => {
         const user = event.context.user!

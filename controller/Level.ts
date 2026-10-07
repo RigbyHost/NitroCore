@@ -5,6 +5,7 @@ import {and, eq, sql} from "drizzle-orm";
 import {MakeOptional} from "~/utils/types";
 import {z} from "zod";
 import {ActionController} from "~~/controller/ActionController";
+import {type Database} from "~/utils/useDrizzle";
 export type LevelType = MakeOptional<typeof levelsTable.$inferSelect, "stringLevel">
 export type LevelWithUser = LevelType & {
     author?: Pick<typeof usersTable.$inferSelect, "uid" | "username">

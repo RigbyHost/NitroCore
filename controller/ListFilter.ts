@@ -4,6 +4,7 @@ import {inArray, gt, SQL, gte, eq, desc, sql, ilike, and} from "drizzle-orm";
 import {z} from "zod";
 import {listsTable} from "~~/drizzle";
 import {List, ListWithUser} from "~~/controller/List";
+import {type Database} from "~/utils/useDrizzle";
 
 export class ListFilter {
     private controller: ListController

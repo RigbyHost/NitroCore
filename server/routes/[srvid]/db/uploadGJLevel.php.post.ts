@@ -5,9 +5,13 @@ import {LevelController} from "~~/controller/LevelController";
 import {Level} from "~~/controller/Level";
 import {levelsTable} from "~~/drizzle";
 import {ActionController} from "~~/controller/ActionController";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware, authMiddleware],
 
     handler: async (event) => {
         const form = await withPreparsedForm(event)
@@ -96,7 +100,7 @@ export default defineEventHandler({
             )
         }
 
-        await event.context.connector.numberedSuccess(data.levelID, "Level uploaded successfully")
+        return await event.context.connector.numberedSuccess(data.levelID, "Level uploaded successfully")
 
     }
 })

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import {questsTable} from "~~/drizzle";
+import {type Database} from "~/utils/useDrizzle";
 
 export class QuestsController {
     private readonly db: Database

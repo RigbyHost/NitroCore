@@ -1,8 +1,9 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {UserController} from "~~/controller/UserController";
+import {defineHandler} from "nitro";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware],
     handler: async (event) => {
         const {config} = event.context.config
         const userController = new UserController(event.context.drizzle)

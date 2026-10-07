@@ -1,8 +1,9 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {LevelPackController} from "~~/controller/LevelPackController";
+import {defineHandler} from "nitro";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware],
 
     handler: async (event) => {
         const levelPackController = new LevelPackController(event.context.drizzle)

@@ -1,8 +1,10 @@
+import {defineHandler} from "nitro";
+import {getRequestIP} from "nitro/h3";
 
-export default defineEventHandler((event) => {
-    const h = (header: string) => getHeader(event, header);
+export default defineHandler((event) => {
+    const h = (header: string) => event.req.headers.get(header);
     event.context.clientAddress = h("cf-connecting-ip")
         || h("x-forwarded-for")
         || h("x-real-ip")
-        || event.node.req.socket.remoteAddress;
+        || getRequestIP(event);
 })

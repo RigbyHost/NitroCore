@@ -6,13 +6,22 @@ import {authHook} from "~/gdps_middleware/user_auth";
 import {ListController} from "~~/controller/ListController";
 import {MusicController} from "~~/controller/MusicController";
 import {Level, LevelWithUser} from "~~/controller/Level";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {useLogger} from "~/utils/useLogger";
+import {usePerformance} from "~/utils/usePerformance";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
 const metrics = usePerformance()
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
-    onBeforeResponse: [
-        () => console.warn(metrics.getSteps())
+export default defineHandler({
+    middleware: [
+        initMiddleware,
+        async (_event, next) => {
+            const response = await next()
+            console.warn(metrics.getSteps())
+            return response
+        }
     ],
 
     handler: async (event) => {

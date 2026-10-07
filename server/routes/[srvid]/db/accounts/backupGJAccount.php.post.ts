@@ -1,9 +1,15 @@
 import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {authLoginMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {useGzip} from "~/utils/useGzip";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
+import {useStorage} from "nitro/storage";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authLoginMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware, authLoginMiddleware],
 
     handler: async (event) => {
         const user = event.context.user!

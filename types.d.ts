@@ -1,5 +1,7 @@
 import type {User} from "~~/controller/User";
-import {IConnector} from "~/connectors/IConnector";
+import type {IConnector} from "~/connectors/IConnector";
+import type {Database} from "~/utils/useDrizzle";
+import type {useServerConfig} from "~/utils/useServerConfig";
 
 declare module 'h3' {
     interface H3EventContext {
@@ -11,7 +13,7 @@ declare module 'h3' {
     }
 }
 
-declare module 'nitropack' {
+declare module 'nitro/types' {
     interface NitroRuntimeConfig {
         platform?: string
     }

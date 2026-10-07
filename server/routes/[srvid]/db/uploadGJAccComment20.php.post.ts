@@ -2,10 +2,15 @@ import {initMiddleware} from "~/gdps_middleware/init_gdps";
 import {authMiddleware} from "~/gdps_middleware/user_auth";
 import {z} from "zod";
 import {CommentController} from "~~/controller/CommentController";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
+import {useSDK} from "~/utils/useSDK";
 
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware, authMiddleware],
 
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))

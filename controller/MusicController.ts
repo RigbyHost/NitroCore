@@ -1,5 +1,7 @@
 import {songsTable} from "~~/drizzle";
 import {desc, sum} from "drizzle-orm";
+import {type Database} from "~/utils/useDrizzle";
+import {useSDK} from "~/utils/useSDK";
 
 export class MusicController {
     private readonly db: Database

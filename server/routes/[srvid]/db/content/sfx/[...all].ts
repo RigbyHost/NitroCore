@@ -1,5 +1,7 @@
+import {defineHandler} from "nitro";
+import {getRouterParam, redirect} from "nitro/h3";
 
-export default defineEventHandler(async (event) => {
+export default defineHandler(async (event) => {
     const path = getRouterParam(event, "all")!
-    return sendRedirect(event, `https://geometrydashfiles.b-cdn.net/sfx/${path}`)
+    return redirect(`https://geometrydashfiles.b-cdn.net/sfx/${path}`)
 })

@@ -3,6 +3,7 @@ import {and, eq, or} from "drizzle-orm";
 import {z} from "zod";
 import {UserController} from "~~/controller/UserController";
 import {FriendshipController} from "~~/controller/FriendshipController";
+import {type Database} from "~/utils/useDrizzle";
 
 
 export class MessageController {

@@ -4,9 +4,14 @@ import {z} from "zod";
 import {CommentController} from "~~/controller/CommentController";
 import {LevelController} from "~~/controller/LevelController";
 import {ListController} from "~~/controller/ListController";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {useLogger} from "~/utils/useLogger";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
+import {useSDK} from "~/utils/useSDK";
 
-export default defineEventHandler({
-    onRequest: [initMiddleware, authMiddleware],
+export default defineHandler({
+    middleware: [initMiddleware, authMiddleware],
     handler: async (event) => {
         const post = usePostObject<z.infer<typeof requestSchema>>(await withPreparsedForm(event))
         const {data, success, error} = requestSchema.safeParse(post)

@@ -1,9 +1,11 @@
-export const checkIPBansMiddleware = defineEventHandler(async (event) => {
+import {HTTPError, defineHandler} from "nitro";
+
+export const checkIPBansMiddleware = defineHandler(async (event) => {
     const ip = event.context.clientAddress!
     const banned = event.context.config.config!.SecurityConfig.BannedIPs
     if (banned.includes(ip))
-        throw createError({
-            statusCode: 403,
+        throw new HTTPError({
+            status: 403,
             message: "You are banned"
         })
 })

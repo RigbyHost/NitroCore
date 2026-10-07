@@ -18,6 +18,7 @@ import {levelsTable, mappingValues} from "~~/drizzle";
 import {z} from "zod";
 import {requestSchema} from "~/routes/[srvid]/db/getGJLevels.php.post";
 import {Level, LevelWithUser} from "~~/controller/Level";
+import {type Database} from "~/utils/useDrizzle";
 
 
 export class LevelFilter {

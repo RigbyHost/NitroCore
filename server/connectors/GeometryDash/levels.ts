@@ -1,6 +1,7 @@
 import {levelpacksTable, songsTable} from "~~/drizzle";
 import {Level, LevelWithUser} from "~~/controller/Level";
 import {List, ListWithUser} from "~~/controller/List";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
 
 
 function hexToRgb(color: string): string {
@@ -36,8 +37,7 @@ export const GDConnectorLevels = {
                 ].join(":")
             }
         ).join("|")
-        await send(
-            useEvent(),
+        return (
             `${data}#${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2(hashstr)}`
         )
     },
@@ -56,8 +56,7 @@ export const GDConnectorLevels = {
             }
         ).join("|")
 
-        await send(
-            useEvent(),
+        return (
             `${data}#${useGeometryDashTooling().hashSolo2(hashstr)}`
         )
     },
@@ -130,8 +129,7 @@ export const GDConnectorLevels = {
             suffix = `#${level.$.ownerUid}:${level.$.author?.username || "[DELETED]"}:${level.$.ownerUid}`
         }
 
-        await send(
-            useEvent(),
+        return (
             data.join(":")
                 .concat(
                     "#", useGeometryDashTooling().hashSolo(level.$.stringLevel || ""),
@@ -209,8 +207,7 @@ export const GDConnectorLevels = {
             )
         })
 
-        await send(
-            useEvent(),
+        return (
             `${levelsOutput.join("|")}#` +
             `${userMeta.join("|")}#` +
             `${songMeta}#` +
@@ -254,8 +251,7 @@ export const GDConnectorLevels = {
             )
         })
 
-        await send(
-            useEvent(),
+        return (
             `${listOutput.join("|")}#` +
             `${userMeta.join("|")}#` +
             `${count}:${page * 10}:10#${useGeometryDashTooling().hashSolo2("All hackers gain epic")}`

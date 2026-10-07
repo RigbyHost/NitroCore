@@ -3,7 +3,7 @@ import {inject} from "vitest";
 import {defaultConfig} from "~/utils/useDrizzle";
 import {setup as setupNitro} from "nitro-test-utils";
 
-config.devStorage!.config = inject("config")
+config.devStorage!.config = {driver: "redis", ...inject("config")}
 
 process.env.STORAGE_HOST = inject("config").host
 process.env.STORAGE_PORT = inject("config").port.toString()

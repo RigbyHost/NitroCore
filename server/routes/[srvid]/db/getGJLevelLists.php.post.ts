@@ -4,13 +4,22 @@ import {ListController} from "~~/controller/ListController";
 import {List, ListWithUser} from "~~/controller/List";
 import {authHook} from "~/gdps_middleware/user_auth";
 import {FriendshipController} from "~~/controller/FriendshipController";
+import {defineHandler} from "nitro";
+import {useGeometryDashTooling} from "~/utils/useGeometryDashTooling";
+import {useLogger} from "~/utils/useLogger";
+import {usePerformance} from "~/utils/usePerformance";
+import {usePostObject, withPreparsedForm} from "~/utils/usePostObject";
 
 const metrics = usePerformance()
 
-export default defineEventHandler({
-    onRequest: [initMiddleware],
-    onBeforeResponse: [
-        () => console.warn(metrics.getSteps())
+export default defineHandler({
+    middleware: [
+        initMiddleware,
+        async (_event, next) => {
+            const response = await next()
+            console.warn(metrics.getSteps())
+            return response
+        }
     ],
     handler: async (event) => {
         metrics.reset()

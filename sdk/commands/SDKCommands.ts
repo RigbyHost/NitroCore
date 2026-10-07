@@ -1,6 +1,7 @@
 import {SDKCommandHandler, SDKCommandHandlerFunction, SDKCommandHandlerPermission} from "./types";
 import {z} from "zod";
 import {Context, ctx} from "./context";
+import {useEvent} from "~/utils/useEvent";
 
 export class SDKCommands {
     private handlers: Map<uuid, SDKCommandHandler> = new Map()

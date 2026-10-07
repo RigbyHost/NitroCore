@@ -1,15 +1,21 @@
-import {defineDriver, normalizeKey, joinKeys} from "unstorage";
+import {normalizeKey, joinKeys, type Driver} from "unstorage";
 import {EdgeConfigClient, createClient} from "@vercel/edge-config"
+import {definePlugin} from "nitro";
+import {useRuntimeConfig} from "nitro/runtime-config";
+import {useStorage} from "nitro/storage";
 
-export default defineNitroPlugin(() => {
+export default definePlugin(() => {
     if (useRuntimeConfig().platform === "vercel")
         useStorage().mount("config", storageDriver({}))
 })
 
-const storageDriver = defineDriver<{
+type EdgeConfigDriverOptions = {
     base?: string,
     url?: string
-}, EdgeConfigClient>((opts) => {
+}
+
+// unstorage v2 has no defineDriver(), a driver is a plain factory
+const storageDriver = (opts: EdgeConfigDriverOptions): Driver<EdgeConfigDriverOptions, EdgeConfigClient> => {
     const base = normalizeKey(opts?.base)
     const r = (...keys: string[]) => joinKeys(base, ...keys)
 
@@ -31,4 +37,4 @@ const storageDriver = defineDriver<{
         getItem: (key) => getClient().get(r(key)),
         getKeys: (_base) => getClient().getAll()
     }
-})
+}

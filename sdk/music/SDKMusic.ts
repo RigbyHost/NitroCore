@@ -1,6 +1,8 @@
 import {SDKMusicProvider, SDKMusicReturn} from "./types";
 import {songsTable} from "~~/drizzle";
 import {ctx} from "./context";
+import {type Nullable} from "~/utils/types";
+import {useEvent} from "~/utils/useEvent";
 
 export class SDKMusic {
     private providers: Map<string, SDKMusicProvider> = new Map()
